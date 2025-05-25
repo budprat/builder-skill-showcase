@@ -108,7 +108,7 @@ const Challenges = () => {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-    }).format(amount / 100);
+    }).format(amount);
   };
 
   const formatDeadline = (deadline: string) => {
