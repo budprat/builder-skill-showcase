@@ -189,9 +189,8 @@ async def process_submission(submission: dict, supabase: Client):
         submission = await generate_feedback_and_notify(submission, supabase)
 
     supabase.table("submissions").update(
-        {"status": submission["status"]},
-        {"id": submission["id"]}
-    ).execute()
+        {"status": submission["status"]}
+    ).eq("id", submission["id"]).execute()
 
 
 async def poll_submissions():
