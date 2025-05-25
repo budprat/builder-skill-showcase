@@ -10,7 +10,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { cleanupAuthState } from "@/utils/authCleanup";
 
 const authSchema = z.object({
@@ -30,7 +29,6 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const form = useForm<AuthFormData>({
     resolver: zodResolver(authSchema),
@@ -41,19 +39,29 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     },
   });
 
-  const onSubmit = async (data: AuthFormData) => {
+  const handleSubmit = async (data: AuthFormData, event?: React.FormEvent) => {
+    if (event) {
+      event.preventDefault();
+    }
+    
+    console.log("=== FORM SUBMIT TRIGGERED ===");
+    console.log("Button clicked, form data:", { email: data.email, mode });
+    
+    if (isLoading) {
+      console.log("Already loading, ignoring submit");
+      return;
+    }
+
     setIsLoading(true);
-    console.log("=== AUTH FORM SUBMIT START ===");
-    console.log("Mode:", mode);
-    console.log("Email:", data.email);
     
     try {
       // Clean up any existing auth state first
+      console.log("Cleaning up auth state...");
       cleanupAuthState();
       
       // Try to sign out any existing session
       try {
-        console.log("=== ATTEMPTING CLEANUP SIGNOUT ===");
+        console.log("Attempting cleanup signout...");
         await supabase.auth.signOut({ scope: 'global' });
       } catch (cleanupError) {
         console.log("Cleanup signout failed (this is normal):", cleanupError);
@@ -72,12 +80,10 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           },
         });
 
-        console.log("=== SIGNUP RESPONSE ===");
-        console.log("SignUp Data:", signUpData);
-        console.log("SignUp Error:", error);
+        console.log("Signup response:", { data: signUpData, error });
 
         if (error) {
-          console.error("Signup error details:", error);
+          console.error("Signup error:", error);
           
           if (error.message.includes("already registered")) {
             toast({
@@ -104,7 +110,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             description: "Please check your email for verification (if required).",
           });
           
-          // Try to sign in immediately after signup
+          // Try to redirect if we have a session
           if (signUpData.session) {
             console.log("User has session after signup, redirecting...");
             window.location.href = "/dashboard";
@@ -119,16 +125,10 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           password: data.password,
         });
 
-        console.log("=== SIGNIN RESPONSE ===");
-        console.log("SignIn Data:", signInData);
-        console.log("SignIn Error:", error);
-        console.log("User exists:", !!signInData?.user);
-        console.log("Session exists:", !!signInData?.session);
+        console.log("Signin response:", { data: signInData, error });
 
         if (error) {
-          console.error("=== SIGNIN ERROR ===");
-          console.error("Error message:", error.message);
-          console.error("Error details:", error);
+          console.error("Signin error:", error);
           
           let errorMessage = "Sign in failed. Please check your credentials.";
           
@@ -161,9 +161,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           window.location.href = "/dashboard";
           
         } else {
-          console.error("=== SIGNIN INCOMPLETE ===");
-          console.error("User:", signInData?.user);
-          console.error("Session:", signInData?.session);
+          console.error("Signin incomplete:", { user: signInData?.user, session: signInData?.session });
           
           toast({
             title: "Sign in incomplete",
@@ -173,10 +171,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
       }
     } catch (error: any) {
-      console.error("=== AUTH ERROR ===");
-      console.error("Error:", error);
-      console.error("Error message:", error?.message);
-      console.error("Error stack:", error?.stack);
+      console.error("Auth error:", error);
       
       toast({
         title: "Authentication error",
@@ -185,8 +180,16 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       });
     } finally {
       setIsLoading(false);
-      console.log("=== AUTH FORM SUBMIT END ===");
+      console.log("=== FORM SUBMIT COMPLETE ===");
     }
+  };
+
+  // Test button click handler
+  const handleTestClick = () => {
+    console.log("=== TEST BUTTON CLICKED ===");
+    console.log("Form is valid:", form.formState.isValid);
+    console.log("Form errors:", form.formState.errors);
+    console.log("Form values:", form.getValues());
   };
 
   return (
@@ -204,7 +207,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {mode === "signup" && (
               <FormField
                 control={form.control}
@@ -282,13 +285,25 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
               )}
             />
             
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
-            >
-              {isLoading ? "Processing..." : mode === "signin" ? "Sign In" : "Create Account"}
-            </Button>
+            <div className="space-y-2">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
+                onClick={handleTestClick}
+              >
+                {isLoading ? "Processing..." : mode === "signin" ? "Sign In" : "Create Account"}
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleTestClick}
+                className="w-full text-white border-white/20"
+              >
+                Test Button Click
+              </Button>
+            </div>
           </form>
         </Form>
         
