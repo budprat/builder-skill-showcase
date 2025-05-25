@@ -12,13 +12,31 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { cleanupAuthState } from "@/utils/authCleanup";
 
-const authSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().min(2, "Full name must be at least 2 characters").optional(),
-});
+// Create conditional schema based on mode
+const createAuthSchema = (mode: "signin" | "signup") => {
+  const baseSchema = {
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+  };
 
-type AuthFormData = z.infer<typeof authSchema>;
+  if (mode === "signup") {
+    return z.object({
+      ...baseSchema,
+      fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    });
+  }
+
+  return z.object({
+    ...baseSchema,
+    fullName: z.string().optional(),
+  });
+};
+
+type AuthFormData = {
+  email: string;
+  password: string;
+  fullName?: string;
+};
 
 interface AuthFormProps {
   mode: "signin" | "signup";
@@ -31,7 +49,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
   const { toast } = useToast();
 
   const form = useForm<AuthFormData>({
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(createAuthSchema(mode)),
     defaultValues: {
       email: "",
       password: "",
@@ -39,13 +57,18 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     },
   });
 
-  const handleSubmit = async (data: AuthFormData, event?: React.FormEvent) => {
-    if (event) {
-      event.preventDefault();
-    }
-    
+  // Reset form when mode changes
+  useState(() => {
+    form.reset({
+      email: "",
+      password: "",
+      fullName: "",
+    });
+  });
+
+  const handleSubmit = async (data: AuthFormData) => {
     console.log("=== FORM SUBMIT TRIGGERED ===");
-    console.log("Button clicked, form data:", { email: data.email, mode });
+    console.log("Form data:", { email: data.email, mode, fullName: data.fullName });
     
     if (isLoading) {
       console.log("Already loading, ignoring submit");
@@ -184,14 +207,6 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     }
   };
 
-  // Test button click handler
-  const handleTestClick = () => {
-    console.log("=== TEST BUTTON CLICKED ===");
-    console.log("Form is valid:", form.formState.isValid);
-    console.log("Form errors:", form.formState.errors);
-    console.log("Form values:", form.getValues());
-  };
-
   return (
     <Card className="w-full max-w-md mx-auto bg-white/10 border-white/20 backdrop-blur-sm">
       <CardHeader className="text-center">
@@ -285,25 +300,13 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
               )}
             />
             
-            <div className="space-y-2">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
-                onClick={handleTestClick}
-              >
-                {isLoading ? "Processing..." : mode === "signin" ? "Sign In" : "Create Account"}
-              </Button>
-              
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleTestClick}
-                className="w-full text-white border-white/20"
-              >
-                Test Button Click
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
+            >
+              {isLoading ? "Processing..." : mode === "signin" ? "Sign In" : "Create Account"}
+            </Button>
           </form>
         </Form>
         
