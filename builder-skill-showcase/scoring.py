@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import asyncio
 import time
 from github import Github, GithubException
+import uuid
 
 import dspy
 from google.adk.agents import LlmAgent
@@ -21,22 +22,12 @@ from sendgrid.helpers.mail import Mail
 load_dotenv()
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
-async def poll_submissions():
-    while True:
-        submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
-        for submission in submissions:
-            await process_submission(submission, supabase)
-        await asyncio.sleep(60)  # Poll every minute
-
-if __name__ == "__main__":
-    asyncio.run(poll_submissions())
-
 
 
 async def pre_screen_submission(submission: dict) -> dict:
     try:
         g = Github(os.getenv("GITHUB_TOKEN"))
-        repo = g.get_repo(submission["github_repo_url"].split("github.com/")[1])
+        repo = g.get_repo(submission["repository_url"].split("github.com/")[1])
         repo.get_contents("README.md")
         submission["pre_screening_score"] = 5.0
         submission["status"] = "prescreened"
@@ -81,8 +72,7 @@ evaluator_agent = LlmAgent(
     name="pitch_deck_evaluator",
     model="gemini-1.5-pro",
     instruction="Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}.",
-    description="Evaluates pitch decks against predefined criteria.",
-    api_key=os.getenv("GOOGLE_API_KEY")
+    description="Evaluates pitch decks against predefined criteria."
 )
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
@@ -109,14 +99,14 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     for criterion, weight in rubric.items():
         evaluator = dspy.Predict(RubricEvaluation)
         result = evaluator(
-        challenge_description=challenge_description,
-        pitch_deck_text=pitch_deck_text[:4000],
-        criterion=criterion
+            challenge_description=challenge_description,
+            pitch_deck_text=pitch_deck_text[:4000],
+            criterion=criterion
         )
         prompt = (
-        f"Evaluate the {criterion} criterion for the pitch           deck: {pitch_deck_text[:4000]} "
-        f"based on challenge: {challenge_description}. "
-        f"Return JSON: {{'score': int, 'explanation': str}}"
+            f"Evaluate the {criterion} criterion for the pitch deck: {pitch_deck_text[:4000]} "
+            f"based on challenge: {challenge_description}. "
+            f"Return JSON: {{'score': int, 'explanation': str}}"
         )
         agent_response = evaluator_agent.run(prompt=prompt)
         try:
@@ -127,14 +117,14 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
             score = float(result.score)
             explanation = result.explanation
 
-            llm_scores[criterion] = {
+        llm_scores[criterion] = {
             "score": score * weight,
             "explanation": explanation
-            }
+        }
 
-            submission["llm_scores"] = llm_scores
-            submission["status"] = "evaluated"
-        return submission
+    submission["llm_scores"] = llm_scores
+    submission["status"] = "evaluated"
+    return submission
 
 
 
@@ -162,31 +152,33 @@ feedback_agent = LlmAgent(
     name="feedback_formatter",
     model="gemini-1.5-pro",
     instruction="Format LLM evaluation results into concise, user-friendly feedback.",
-    description="Generates readable feedback.",
-    api_key=os.getenv("GOOGLE_API_KEY")
+    description="Generates readable feedback."
 )
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
     feedback_prompt = "Format the following rubric scores into a concise, user-friendly summary:\n"
     for criterion, score in submission["llm_scores"].items():
-        max_score = score["score"]/submission["llm_scores"]          [criterion]["score"] * 100
-        feedback_prompt += f"{criterion}:{score['score']:.1f}/{max_score:.1f} - {score['explanation']}\n"
-        feedback = feedback_agent.run(prompt=feedback_prompt)
-        supabase.table("scores").update(
-        {"feedback": feedback, "status": "notified"},
-        {"submission_id": submission["id"]}).execute()
-        user = supabase.table("users").select("email").eq("id", 
-                                                                    submission["user_id"]).single().execute().data
-        message = Mail()
-        from_email="no-reply@elitebuilders.com",
+        max_score = 100  # Each criterion is scored out of 100
+        feedback_prompt += f"{criterion}: {score['score']:.1f}/{max_score:.1f} - {score['explanation']}\n"
+    
+    feedback = feedback_agent.run(prompt=feedback_prompt)
+    supabase.table("scores").update(
+        {"feedback": feedback, "status": "notified"}
+    ).eq("submission_id", submission["id"]).execute()
+    
+    user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
+    
+    message = Mail(
+        from_email="p.budhwar@gmail.com",
         to_emails=user["email"],
         subject="Provisional Score Available",
         html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
-        sg= SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        sg.send(message)
-        submission["status"] = "notified"
+    )
+    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+    sg.send(message)
+    submission["status"] = "notified"
 
-        return submission
+    return submission
 
 
 async def process_submission(submission: dict, supabase: Client):
@@ -197,7 +189,17 @@ async def process_submission(submission: dict, supabase: Client):
         submission = await generate_feedback_and_notify(submission, supabase)
 
     supabase.table("submissions").update(
-        {"status": submission["status"]},
-        {"id": submission["id"]}
-    ).execute()
+        {"status": submission["status"]}
+    ).eq("id", submission["id"]).execute()
+
+
+async def poll_submissions():
+    while True:
+        submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
+        for submission in submissions:
+            await process_submission(submission, supabase)
+        await asyncio.sleep(60)  # Poll every minute
+
+if __name__ == "__main__":
+    asyncio.run(poll_submissions())
 
