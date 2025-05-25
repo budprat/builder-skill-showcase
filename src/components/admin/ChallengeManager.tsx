@@ -138,13 +138,31 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     setIsDialogOpen(true);
   };
 
+  const handleDeleteClick = (challengeId: string) => {
+    console.log('*** DELETE BUTTON CLICKED ***');
+    console.log('Challenge ID from click:', challengeId);
+    console.log('Current deletingId state:', deletingId);
+    
+    // Don't proceed if already deleting
+    if (deletingId === challengeId) {
+      console.log('Already deleting this challenge, ignoring click');
+      return;
+    }
+    
+    console.log('Proceeding with deletion...');
+    handleDelete(challengeId);
+  };
+
   const handleDelete = async (id: string) => {
     console.log('=== STARTING CHALLENGE DELETION ===');
     console.log('Challenge ID to delete:', id);
+    console.log('Supabase client exists:', !!supabase);
+    
     setDeletingId(id);
     
     try {
       // Step 1: Check current user session
+      console.log('Step 1: Checking authentication...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError || !user) {
         console.error('Authentication error:', authError);
@@ -153,7 +171,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       console.log('User authenticated:', user.id);
 
       // Step 2: Check if challenge exists
-      console.log('Checking if challenge exists...');
+      console.log('Step 2: Checking if challenge exists...');
       const { data: challengeCheck, error: challengeCheckError } = await supabase
         .from('challenges')
         .select('id, title')
@@ -167,7 +185,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       console.log('Challenge found:', challengeCheck);
 
       // Step 3: Check for related submissions
-      console.log('Checking for related submissions...');
+      console.log('Step 3: Checking for related submissions...');
       const { data: relatedSubmissions, error: submissionCheckError } = await supabase
         .from('submissions')
         .select('id, participant_id')
@@ -181,7 +199,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
       // Step 4: Delete related submissions if any exist
       if (relatedSubmissions && relatedSubmissions.length > 0) {
-        console.log('Deleting related submissions...');
+        console.log('Step 4: Deleting related submissions...');
         const { error: submissionDeleteError } = await supabase
           .from('submissions')
           .delete()
@@ -192,10 +210,12 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
           throw new Error('Failed to delete related submissions: ' + submissionDeleteError.message);
         }
         console.log('Successfully deleted', relatedSubmissions.length, 'submissions');
+      } else {
+        console.log('Step 4: No submissions to delete');
       }
 
       // Step 5: Delete the challenge
-      console.log('Deleting challenge...');
+      console.log('Step 5: Deleting challenge...');
       const { error: challengeDeleteError } = await supabase
         .from('challenges')
         .delete()
@@ -224,6 +244,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       });
     } finally {
       setDeletingId(null);
+      console.log('Delete operation completed, clearing deletingId state');
     }
   };
 
@@ -387,6 +408,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                         variant="outline" 
                         size="sm" 
                         disabled={deletingId === challenge.id}
+                        onClick={() => console.log('AlertDialog trigger clicked for challenge:', challenge.id)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -399,9 +421,11 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel onClick={() => console.log('Delete cancelled for challenge:', challenge.id)}>
+                          Cancel
+                        </AlertDialogCancel>
                         <AlertDialogAction
-                          onClick={() => handleDelete(challenge.id)}
+                          onClick={() => handleDeleteClick(challenge.id)}
                           className="bg-red-600 hover:bg-red-700"
                           disabled={deletingId === challenge.id}
                         >
