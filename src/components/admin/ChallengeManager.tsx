@@ -139,25 +139,63 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    console.log('Starting deletion process for challenge ID:', id);
+    console.log('=== STARTING CHALLENGE DELETION ===');
+    console.log('Challenge ID to delete:', id);
     setDeletingId(id);
     
     try {
-      // First, delete any related submissions
-      console.log('Checking and deleting related submissions...');
-      const { error: submissionDeleteError } = await supabase
+      // Step 1: Check current user session
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error:', authError);
+        throw new Error('You must be logged in to delete challenges');
+      }
+      console.log('User authenticated:', user.id);
+
+      // Step 2: Check if challenge exists
+      console.log('Checking if challenge exists...');
+      const { data: challengeCheck, error: challengeCheckError } = await supabase
+        .from('challenges')
+        .select('id, title')
+        .eq('id', id)
+        .single();
+
+      if (challengeCheckError) {
+        console.error('Error checking challenge existence:', challengeCheckError);
+        throw new Error('Challenge not found or access denied');
+      }
+      console.log('Challenge found:', challengeCheck);
+
+      // Step 3: Check for related submissions
+      console.log('Checking for related submissions...');
+      const { data: relatedSubmissions, error: submissionCheckError } = await supabase
         .from('submissions')
-        .delete()
+        .select('id, participant_id')
         .eq('challenge_id', id);
 
-      if (submissionDeleteError) {
-        console.error('Error deleting submissions:', submissionDeleteError);
-        throw new Error('Failed to delete related submissions: ' + submissionDeleteError.message);
+      if (submissionCheckError) {
+        console.error('Error checking submissions:', submissionCheckError);
+        throw new Error('Failed to check related submissions');
+      }
+      console.log('Found submissions:', relatedSubmissions?.length || 0);
+
+      // Step 4: Delete related submissions if any exist
+      if (relatedSubmissions && relatedSubmissions.length > 0) {
+        console.log('Deleting related submissions...');
+        const { error: submissionDeleteError } = await supabase
+          .from('submissions')
+          .delete()
+          .eq('challenge_id', id);
+
+        if (submissionDeleteError) {
+          console.error('Error deleting submissions:', submissionDeleteError);
+          throw new Error('Failed to delete related submissions: ' + submissionDeleteError.message);
+        }
+        console.log('Successfully deleted', relatedSubmissions.length, 'submissions');
       }
 
-      console.log('Successfully deleted related submissions, now deleting challenge...');
-      
-      // Now delete the challenge
+      // Step 5: Delete the challenge
+      console.log('Deleting challenge...');
       const { error: challengeDeleteError } = await supabase
         .from('challenges')
         .delete()
@@ -168,7 +206,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
         throw new Error('Failed to delete challenge: ' + challengeDeleteError.message);
       }
       
-      console.log('Challenge deleted successfully');
+      console.log('=== CHALLENGE DELETION SUCCESSFUL ===');
       toast({ 
         title: "Success", 
         description: "Challenge and related submissions deleted successfully" 
@@ -177,7 +215,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       await fetchChallenges();
       onStatsUpdate();
     } catch (error: any) {
-      console.error('Delete operation failed:', error);
+      console.error('=== CHALLENGE DELETION FAILED ===');
+      console.error('Error details:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete challenge. Please try again.",
