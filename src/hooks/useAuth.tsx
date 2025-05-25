@@ -49,19 +49,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle different auth events - but only redirect if not on auth page
+        // Handle different auth events - but only redirect if not already on target page
         if (event === 'SIGNED_IN' && session?.user) {
           console.log("=== USER SIGNED IN SUCCESSFULLY ===");
           
-          // Only redirect if we're not on the auth page (to avoid interfering with debugging)
-          if (window.location.pathname !== "/auth") {
+          // Only redirect if we're not on the auth page AND not already on dashboard
+          if (window.location.pathname !== "/auth" && window.location.pathname !== "/dashboard") {
             console.log("Redirecting to dashboard...");
             setTimeout(() => {
               console.log("Executing redirect to dashboard");
               window.location.href = "/dashboard";
             }, 100);
           } else {
-            console.log("On auth page - skipping automatic redirect");
+            console.log("Already on target page or auth page - skipping automatic redirect");
           }
         }
         
