@@ -27,7 +27,7 @@ supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_
 async def pre_screen_submission(submission: dict) -> dict:
     try:
         g = Github(os.getenv("GITHUB_TOKEN"))
-        repo = g.get_repo(submission["github_repo_url"].split("github.com/")[1])
+        repo = g.get_repo(submission["repository_url"].split("github.com/")[1])
         repo.get_contents("README.md")
         submission["pre_screening_score"] = 5.0
         submission["status"] = "prescreened"
