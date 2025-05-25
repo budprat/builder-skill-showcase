@@ -139,46 +139,39 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    console.log('Attempting to delete challenge with ID:', id);
+    console.log('Starting deletion process for challenge ID:', id);
     setDeletingId(id);
     
     try {
-      // First, check if there are any submissions for this challenge
-      const { data: submissions, error: submissionsError } = await supabase
+      // First, delete any related submissions
+      console.log('Checking and deleting related submissions...');
+      const { error: submissionDeleteError } = await supabase
         .from('submissions')
-        .select('id')
-        .eq('challenge_id', id)
-        .limit(1);
+        .delete()
+        .eq('challenge_id', id);
 
-      if (submissionsError) {
-        console.error('Error checking submissions:', submissionsError);
-        throw new Error('Failed to check challenge submissions');
+      if (submissionDeleteError) {
+        console.error('Error deleting submissions:', submissionDeleteError);
+        throw new Error('Failed to delete related submissions: ' + submissionDeleteError.message);
       }
 
-      if (submissions && submissions.length > 0) {
-        toast({
-          title: "Cannot Delete Challenge",
-          description: "This challenge has submissions and cannot be deleted. Consider changing its status to 'closed' instead.",
-          variant: "destructive",
-        });
-        setDeletingId(null);
-        return;
-      }
-
-      // Proceed with deletion if no submissions exist
-      const { error } = await supabase
+      console.log('Successfully deleted related submissions, now deleting challenge...');
+      
+      // Now delete the challenge
+      const { error: challengeDeleteError } = await supabase
         .from('challenges')
         .delete()
         .eq('id', id);
 
-      if (error) {
-        console.error('Error deleting challenge:', error);
-        throw error;
+      if (challengeDeleteError) {
+        console.error('Error deleting challenge:', challengeDeleteError);
+        throw new Error('Failed to delete challenge: ' + challengeDeleteError.message);
       }
       
+      console.log('Challenge deleted successfully');
       toast({ 
         title: "Success", 
-        description: "Challenge deleted successfully" 
+        description: "Challenge and related submissions deleted successfully" 
       });
       
       await fetchChallenges();
@@ -363,12 +356,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete Challenge</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Are you sure you want to delete "{challenge.title}"? This action cannot be undone.
-                          {challenge.status === 'active' && (
-                            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-                              <strong>Warning:</strong> This is an active challenge. Consider changing its status to 'closed' instead.
-                            </div>
-                          )}
+                          Are you sure you want to delete "{challenge.title}"? This will also delete all related submissions and cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -378,7 +366,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                           className="bg-red-600 hover:bg-red-700"
                           disabled={deletingId === challenge.id}
                         >
-                          {deletingId === challenge.id ? 'Deleting...' : 'Delete'}
+                          {deletingId === challenge.id ? 'Deleting...' : 'Delete Challenge'}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
