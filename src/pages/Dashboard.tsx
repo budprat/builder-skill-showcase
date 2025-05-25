@@ -313,15 +313,19 @@ const Dashboard = () => {
           <TabsContent value="files">
             <div className="space-y-6">
               <FileUpload
-                label="Upload CV"
-                acceptedTypes={['.pdf', '.doc', '.docx']}
-                onFileUploaded={handleFileUploaded}
+                fileType="cv"
+                title="Upload CV"
+                description="Upload your resume or CV (PDF, DOC, DOCX)"
+                acceptedTypes=".pdf,.doc,.docx"
+                onUploadComplete={handleFileUploaded}
               />
               
               <FileUpload
-                label="Upload Portfolio Documents"
-                acceptedTypes={['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png']}
-                onFileUploaded={handleFileUploaded}
+                fileType="document"
+                title="Upload Portfolio Documents"
+                description="Upload portfolio documents (PDF, DOC, DOCX, images)"
+                acceptedTypes=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onUploadComplete={handleFileUploaded}
               />
             </div>
           </TabsContent>

@@ -47,23 +47,16 @@ export const UserManager = () => {
 
       if (profilesError) throw profilesError;
 
-      // Then fetch user roles separately using direct query
-      const { data: userRoles, error: rolesError } = await supabase
-        .rpc('get_user_roles_data') as { data: any[], error: any };
+      // Fetch user roles directly without RPC
+      const { data: userRoles, error: rolesError } = await (supabase as any)
+        .from('user_roles')
+        .select('*');
 
-      // If the function doesn't exist, fall back to manual query
-      let roles: UserRole[] = [];
       if (rolesError) {
-        const { data, error } = await (supabase as any)
-          .from('user_roles')
-          .select('*');
-        
-        if (!error) {
-          roles = data || [];
-        }
-      } else {
-        roles = userRoles || [];
+        console.error('Error fetching user roles:', rolesError);
       }
+
+      const roles: UserRole[] = userRoles || [];
 
       // Combine profiles with their roles
       const usersWithRoles: UserWithRoles[] = profiles?.map(profile => ({
