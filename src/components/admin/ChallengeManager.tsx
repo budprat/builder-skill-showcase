@@ -35,7 +35,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     prize_amount: "",
     prize_description: "",
     submission_deadline: "",
-    status: "active",
+    status: "active" as "active" | "draft" | "judging" | "completed",
     company_name: "",
     domains: "",
   });
@@ -72,28 +72,42 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     e.preventDefault();
     
     try {
+      console.log('=== SUBMITTING CHALLENGE ===');
+      console.log('Form data status:', formData.status);
+      
       const challengeData = {
         ...formData,
         prize_amount: formData.prize_amount ? parseInt(formData.prize_amount) : null,
         domains: formData.domains.split(',').map(d => d.trim()).filter(Boolean),
         deliverables: {},
         evaluation_rubric: {},
+        status: formData.status, // Ensure status is explicitly set
       };
 
+      console.log('Challenge data being sent:', challengeData);
+
       if (editingChallenge) {
+        console.log('Updating challenge with ID:', editingChallenge.id);
         const { error } = await supabase
           .from('challenges')
           .update(challengeData)
           .eq('id', editingChallenge.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
         toast({ title: "Success", description: "Challenge updated successfully" });
       } else {
+        console.log('Creating new challenge');
         const { error } = await supabase
           .from('challenges')
           .insert([challengeData]);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
+        }
         toast({ title: "Success", description: "Challenge created successfully" });
       }
 
@@ -119,7 +133,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       prize_amount: "",
       prize_description: "",
       submission_deadline: "",
-      status: "active",
+      status: "active" as "active" | "draft" | "judging" | "completed",
       company_name: "",
       domains: "",
     });
@@ -135,7 +149,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       prize_amount: challenge.prize_amount?.toString() || "",
       prize_description: challenge.prize_description || "",
       submission_deadline: challenge.submission_deadline.split('T')[0],
-      status: challenge.status || "active",
+      status: (challenge.status || "active") as "active" | "draft" | "judging" | "completed",
       company_name: challenge.company_name || "",
       domains: challenge.domains?.join(', ') || "",
     });
@@ -361,7 +375,13 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
                 <div>
                   <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value: "active" | "draft" | "judging" | "completed") => {
+                      console.log('Status selected:', value);
+                      setFormData({...formData, status: value});
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
