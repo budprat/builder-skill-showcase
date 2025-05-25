@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Edit, Trash2, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +24,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   const [loading, setLoading] = useState(true);
   const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -138,25 +139,59 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this challenge?')) return;
-
+    console.log('Attempting to delete challenge with ID:', id);
+    setDeletingId(id);
+    
     try {
+      // First, check if there are any submissions for this challenge
+      const { data: submissions, error: submissionsError } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('challenge_id', id)
+        .limit(1);
+
+      if (submissionsError) {
+        console.error('Error checking submissions:', submissionsError);
+        throw new Error('Failed to check challenge submissions');
+      }
+
+      if (submissions && submissions.length > 0) {
+        toast({
+          title: "Cannot Delete Challenge",
+          description: "This challenge has submissions and cannot be deleted. Consider changing its status to 'closed' instead.",
+          variant: "destructive",
+        });
+        setDeletingId(null);
+        return;
+      }
+
+      // Proceed with deletion if no submissions exist
       const { error } = await supabase
         .from('challenges')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting challenge:', error);
+        throw error;
+      }
       
-      toast({ title: "Success", description: "Challenge deleted successfully" });
-      fetchChallenges();
+      toast({ 
+        title: "Success", 
+        description: "Challenge deleted successfully" 
+      });
+      
+      await fetchChallenges();
       onStatsUpdate();
     } catch (error: any) {
+      console.error('Delete operation failed:', error);
       toast({
         title: "Error",
-        description: "Failed to delete challenge",
+        description: error.message || "Failed to delete challenge. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -314,9 +349,40 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                   <Button variant="outline" size="sm" onClick={() => handleEdit(challenge)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(challenge.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        disabled={deletingId === challenge.id}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Challenge</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{challenge.title}"? This action cannot be undone.
+                          {challenge.status === 'active' && (
+                            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                              <strong>Warning:</strong> This is an active challenge. Consider changing its status to 'closed' instead.
+                            </div>
+                          )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(challenge.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                          disabled={deletingId === challenge.id}
+                        >
+                          {deletingId === challenge.id ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </div>
