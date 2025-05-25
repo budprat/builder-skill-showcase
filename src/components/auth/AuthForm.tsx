@@ -40,14 +40,15 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
-    console.log("=== AUTH FORM SUBMIT ===");
+    console.log("=== AUTH FORM SUBMIT START ===");
     console.log("Mode:", mode);
     console.log("Email:", data.email);
+    console.log("Password length:", data.password.length);
     console.log("Supabase client available:", !!supabase);
     
     try {
       if (mode === "signup") {
-        console.log("Attempting signup...");
+        console.log("=== ATTEMPTING SIGNUP ===");
         
         const { data: signUpData, error } = await supabase.auth.signUp({
           email: data.email,
@@ -59,10 +60,11 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           },
         });
 
-        console.log("Signup result:", { signUpData, error });
+        console.log("Signup response:", { signUpData, error });
 
         if (error) {
-          console.error("Signup error:", error);
+          console.error("Signup error details:", error);
+          
           if (error.message.includes("already registered")) {
             toast({
               title: "Account exists",
@@ -72,68 +74,97 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             onToggleMode();
             return;
           }
-          throw error;
+          
+          toast({
+            title: "Sign up failed",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
         }
 
-        toast({
-          title: "Account created successfully!",
-          description: "Welcome to EliteBuilders. You can now start participating in challenges.",
-        });
+        if (signUpData.user) {
+          console.log("Signup successful, user created:", signUpData.user.id);
+          toast({
+            title: "Account created!",
+            description: "Please check your email for verification (if required).",
+          });
+        }
 
-        console.log("Signup successful, user:", signUpData.user?.id);
       } else {
-        console.log("Attempting signin...");
+        console.log("=== ATTEMPTING SIGNIN ===");
+        
+        // Clear any existing sessions first
+        console.log("Clearing existing session before signin...");
+        await supabase.auth.signOut();
         
         const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
 
-        console.log("Signin result:", { signInData, error });
+        console.log("Signin response:", { signInData, error });
+        console.log("User from signin:", signInData?.user);
+        console.log("Session from signin:", signInData?.session);
 
         if (error) {
-          console.error("Signin error:", error);
+          console.error("Signin error details:", error);
+          
+          let errorMessage = "Sign in failed. Please check your credentials.";
           
           if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Sign in failed",
-              description: "Invalid email or password. Please check your credentials and try again.",
-              variant: "destructive",
-            });
-            return;
+            errorMessage = "Invalid email or password. Please check your credentials and try again.";
+          } else if (error.message.includes("Email not confirmed")) {
+            errorMessage = "Please check your email and click the confirmation link before signing in.";
+          } else if (error.message.includes("Too many requests")) {
+            errorMessage = "Too many sign in attempts. Please wait a moment and try again.";
           }
           
-          if (error.message.includes("Email not confirmed")) {
-            toast({
-              title: "Email not confirmed",
-              description: "Please check your email and click the confirmation link before signing in.",
-              variant: "destructive",
-            });
-            return;
-          }
-          
-          throw error;
+          toast({
+            title: "Sign in failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          return;
         }
 
-        if (signInData?.user) {
-          console.log("Signin successful, user:", signInData.user.id);
-          console.log("Session:", signInData.session);
+        if (signInData?.user && signInData?.session) {
+          console.log("Signin successful!");
+          console.log("User ID:", signInData.user.id);
+          console.log("Session access token:", signInData.session.access_token ? "Present" : "Missing");
+          console.log("Session refresh token:", signInData.session.refresh_token ? "Present" : "Missing");
           
           toast({
             title: "Welcome back!",
-            description: "Successfully signed in to EliteBuilders.",
+            description: "Successfully signed in.",
+          });
+
+          // The onAuthStateChange listener will handle the redirect
+          console.log("Waiting for auth state change to trigger redirect...");
+        } else {
+          console.error("Signin returned no user or session:", { user: signInData?.user, session: signInData?.session });
+          toast({
+            title: "Sign in incomplete",
+            description: "Authentication was not completed properly. Please try again.",
+            variant: "destructive",
           });
         }
       }
     } catch (error: any) {
-      console.error("Auth error details:", error);
+      console.error("=== AUTH ERROR CAUGHT ===");
+      console.error("Error type:", typeof error);
+      console.error("Error message:", error?.message);
+      console.error("Error details:", error);
+      console.error("Error stack:", error?.stack);
+      
       toast({
-        title: "Authentication failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title: "Authentication error",
+        description: error?.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
+      console.log("=== AUTH FORM SUBMIT END ===");
     }
   };
 
@@ -235,7 +266,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
             >
-              {isLoading ? "Loading..." : mode === "signin" ? "Sign In" : "Create Account"}
+              {isLoading ? "Processing..." : mode === "signin" ? "Sign In" : "Create Account"}
             </Button>
           </form>
         </Form>

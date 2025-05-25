@@ -32,33 +32,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     console.log("=== AUTH PROVIDER INIT ===");
-    console.log("Setting up auth state listener...");
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("=== AUTH STATE CHANGE ===");
+        console.log("=== AUTH STATE CHANGE EVENT ===");
         console.log("Event:", event);
-        console.log("Session:", session);
+        console.log("Session exists:", !!session);
+        console.log("User exists:", !!session?.user);
         console.log("User ID:", session?.user?.id);
+        console.log("Access token exists:", !!session?.access_token);
         
+        // Update state immediately
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle navigation based on auth state
+        // Handle different auth events
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log("User signed in successfully, redirecting to dashboard...");
-          // Small delay to ensure state is updated
+          console.log("=== USER SIGNED IN SUCCESSFULLY ===");
+          console.log("Redirecting to dashboard...");
+          
+          // Use setTimeout to ensure state updates are processed
           setTimeout(() => {
+            console.log("Executing redirect to dashboard");
             window.location.href = "/dashboard";
           }, 100);
         }
         
         if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
+          console.log("=== USER SIGNED OUT ===");
           setSession(null);
           setUser(null);
+        }
+        
+        if (event === 'TOKEN_REFRESHED') {
+          console.log("=== TOKEN REFRESHED ===");
+        }
+        
+        if (event === 'USER_UPDATED') {
+          console.log("=== USER UPDATED ===");
         }
       }
     );
@@ -68,7 +81,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         console.log("=== GETTING INITIAL SESSION ===");
         const { data: { session }, error } = await supabase.auth.getSession();
-        console.log("Initial session result:", { session, error });
+        
+        console.log("Initial session check:");
+        console.log("- Session exists:", !!session);
+        console.log("- User exists:", !!session?.user);
+        console.log("- User ID:", session?.user?.id);
+        console.log("- Error:", error);
         
         if (error) {
           console.error("Error getting initial session:", error);
@@ -77,12 +95,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        console.log("Initial session set:", {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          loading: false
-        });
       } catch (error) {
         console.error("Error in getInitialSession:", error);
         setLoading(false);
@@ -119,7 +131,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   console.log("=== AUTH PROVIDER RENDER ===");
-  console.log("Current state:", { user: !!user, session: !!session, loading });
+  console.log("Current state:", { 
+    hasUser: !!user, 
+    hasSession: !!session, 
+    loading,
+    userId: user?.id 
+  });
 
   return (
     <AuthContext.Provider value={{ user, session, loading, signOut }}>
