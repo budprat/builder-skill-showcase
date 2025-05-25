@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -104,6 +103,7 @@ const Challenges = () => {
   };
 
   const formatPrize = (amount: number) => {
+    if (!amount) return 'TBD';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -216,7 +216,7 @@ const Challenges = () => {
                     </Badge>
                     <div className="text-right">
                       <div className="text-2xl font-bold text-white">
-                        {challenge.prize_amount ? formatPrize(challenge.prize_amount) : 'TBD'}
+                        {formatPrize(challenge.prize_amount)}
                       </div>
                       {challenge.prize_description && (
                         <div className="text-white/60 text-sm">{challenge.prize_description}</div>
