@@ -11,6 +11,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { cleanupAuthState } from "@/utils/authCleanup";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -47,6 +48,17 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     console.log("Email:", data.email);
     
     try {
+      // Clean up any existing auth state first
+      cleanupAuthState();
+      
+      // Try to sign out any existing session
+      try {
+        console.log("=== ATTEMPTING CLEANUP SIGNOUT ===");
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (cleanupError) {
+        console.log("Cleanup signout failed (this is normal):", cleanupError);
+      }
+
       if (mode === "signup") {
         console.log("=== ATTEMPTING SIGNUP ===");
         
@@ -60,7 +72,9 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           },
         });
 
-        console.log("Signup response:", { signUpData, error });
+        console.log("=== SIGNUP RESPONSE ===");
+        console.log("SignUp Data:", signUpData);
+        console.log("SignUp Error:", error);
 
         if (error) {
           console.error("Signup error details:", error);
@@ -89,6 +103,12 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             title: "Account created!",
             description: "Please check your email for verification (if required).",
           });
+          
+          // Try to sign in immediately after signup
+          if (signUpData.session) {
+            console.log("User has session after signup, redirecting...");
+            window.location.href = "/dashboard";
+          }
         }
 
       } else {
@@ -100,13 +120,15 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         });
 
         console.log("=== SIGNIN RESPONSE ===");
-        console.log("Error:", error);
+        console.log("SignIn Data:", signInData);
+        console.log("SignIn Error:", error);
         console.log("User exists:", !!signInData?.user);
         console.log("Session exists:", !!signInData?.session);
 
         if (error) {
           console.error("=== SIGNIN ERROR ===");
           console.error("Error message:", error.message);
+          console.error("Error details:", error);
           
           let errorMessage = "Sign in failed. Please check your credentials.";
           
@@ -114,6 +136,8 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             errorMessage = "Invalid email or password. Please check your credentials and try again.";
           } else if (error.message.includes("Email not confirmed")) {
             errorMessage = "Please check your email and click the confirmation link before signing in.";
+          } else if (error.message.includes("too many requests")) {
+            errorMessage = "Too many login attempts. Please wait a moment and try again.";
           }
           
           toast({
@@ -126,17 +150,20 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
         if (signInData?.user && signInData?.session) {
           console.log("=== SIGNIN SUCCESS ===");
+          console.log("Redirecting to dashboard...");
           
           toast({
             title: "Welcome back!",
             description: "Successfully signed in.",
           });
 
-          // Simple redirect - the auth state change will handle the navigation
-          navigate("/dashboard");
+          // Force a full page reload to ensure clean state
+          window.location.href = "/dashboard";
           
         } else {
           console.error("=== SIGNIN INCOMPLETE ===");
+          console.error("User:", signInData?.user);
+          console.error("Session:", signInData?.session);
           
           toast({
             title: "Sign in incomplete",
@@ -148,6 +175,8 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     } catch (error: any) {
       console.error("=== AUTH ERROR ===");
       console.error("Error:", error);
+      console.error("Error message:", error?.message);
+      console.error("Error stack:", error?.stack);
       
       toast({
         title: "Authentication error",
