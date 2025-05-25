@@ -19,7 +19,10 @@ const Auth = () => {
     // If user is already authenticated and not loading, redirect to dashboard
     if (!loading && user) {
       console.log("User already authenticated, redirecting to dashboard...");
-      navigate("/dashboard", { replace: true });
+      // Use setTimeout to ensure the redirect happens after the render cycle
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
       return;
     }
 
@@ -32,7 +35,10 @@ const Auth = () => {
       
       if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         console.log("User authenticated in auth page, navigating to dashboard...");
-        navigate("/dashboard", { replace: true });
+        // Use setTimeout to ensure redirect happens after state updates
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 100);
       }
     });
 
@@ -51,9 +57,13 @@ const Auth = () => {
     );
   }
 
-  // If user is authenticated, don't render the auth form (should redirect)
+  // If user is authenticated, show loading while redirecting
   if (user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-white">Redirecting to dashboard...</div>
+      </div>
+    );
   }
 
   const toggleMode = () => {
