@@ -11,8 +11,16 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      console.log("Checking existing auth session...");
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error("Error checking session:", error);
+        return;
+      }
+      
+      if (session?.user) {
+        console.log("User already authenticated, redirecting to dashboard...");
         navigate("/dashboard");
       }
     };
@@ -21,7 +29,10 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
+      console.log("Auth page - auth state changed:", event, session?.user?.id);
+      
+      if (session?.user && event === 'SIGNED_IN') {
+        console.log("User signed in, navigating to dashboard...");
         navigate("/dashboard");
       }
     });

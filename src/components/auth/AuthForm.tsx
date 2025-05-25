@@ -24,20 +24,6 @@ interface AuthFormProps {
   onToggleMode: () => void;
 }
 
-// Cleanup auth state to prevent limbo states
-const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
-
 export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -54,19 +40,13 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
+    console.log("Form submitted with mode:", mode, "email:", data.email);
     
     try {
       if (mode === "signup") {
-        // Clean up any existing auth state before signing up
-        cleanupAuthState();
+        console.log("Attempting to sign up...");
         
-        try {
-          await supabase.auth.signOut({ scope: 'global' });
-        } catch (err) {
-          // Continue even if this fails
-        }
-
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
           options: {
@@ -76,7 +56,10 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           },
         });
 
+        console.log("Sign up response:", { signUpData, error });
+
         if (error) {
+          console.error("Sign up error:", error);
           if (error.message.includes("already registered")) {
             toast({
               title: "Account exists",
@@ -94,19 +77,10 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           description: "Welcome to EliteBuilders. You can now start participating in challenges.",
         });
 
-        // Force page reload for clean state
-        window.location.href = "/dashboard";
+        // Don't force reload, let the auth state change handle navigation
+        console.log("Sign up successful, waiting for auth state change...");
       } else {
-        // Clean up any existing auth state before signing in
-        cleanupAuthState();
-        
-        try {
-          await supabase.auth.signOut({ scope: 'global' });
-        } catch (err) {
-          // Continue even if this fails
-        }
-
-        console.log("Attempting to sign in with:", data.email);
+        console.log("Attempting to sign in...");
         
         const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
@@ -118,14 +92,24 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         if (error) {
           console.error("Sign in error:", error);
           
-          if (error.message.includes("Invalid login credentials") || error.message.includes("Email not confirmed")) {
+          if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Sign in failed",
-              description: "Please check your email and password. If you just signed up, please check your email for confirmation.",
+              description: "Invalid email or password. Please check your credentials and try again.",
               variant: "destructive",
             });
             return;
           }
+          
+          if (error.message.includes("Email not confirmed")) {
+            toast({
+              title: "Email not confirmed",
+              description: "Please check your email and click the confirmation link before signing in.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           throw error;
         }
 
@@ -136,10 +120,11 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             description: "Successfully signed in to EliteBuilders.",
           });
           
-          // Force page reload for clean state
-          window.location.href = "/dashboard";
+          // Don't force reload, let the auth state change handle navigation
+          console.log("Sign in successful, waiting for auth state change...");
         } else {
-          throw new Error("No user data returned from sign in");
+          console.error("No user data returned from sign in");
+          throw new Error("Sign in failed - no user data returned");
         }
       }
     } catch (error: any) {
