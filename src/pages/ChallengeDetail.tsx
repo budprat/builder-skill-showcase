@@ -239,7 +239,7 @@ const ChallengeDetail = () => {
               <CardHeader>
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <Badge className={getStatusColor(challenge.status)} className="mb-2">
+                    <Badge className={getStatusColor(challenge.status)}>
                       {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                     <CardTitle className="text-white text-3xl mb-2">{challenge.title}</CardTitle>
