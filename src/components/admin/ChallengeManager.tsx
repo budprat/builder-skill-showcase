@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,12 +46,15 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
   const fetchChallenges = async () => {
     try {
+      console.log('=== FETCHING CHALLENGES ===');
       const { data, error } = await supabase
         .from('challenges')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched challenges count:', data?.length || 0);
+      console.log('Challenge IDs:', data?.map(c => c.id) || []);
       setChallenges(data || []);
     } catch (error) {
       console.error('Error fetching challenges:', error);
@@ -232,7 +236,9 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
         description: "Challenge and related submissions deleted successfully" 
       });
       
+      console.log('=== REFRESHING UI ===');
       await fetchChallenges();
+      console.log('=== CALLING STATS UPDATE ===');
       onStatsUpdate();
     } catch (error: any) {
       console.error('=== CHALLENGE DELETION FAILED ===');
