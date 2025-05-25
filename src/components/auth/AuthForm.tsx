@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { cleanupAuthState } from "@/utils/authCleanup";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -38,13 +39,38 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     },
   });
 
+  const testConnection = async () => {
+    console.log("=== TESTING SUPABASE CONNECTION ===");
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      console.log("Connection test result:", { data, error });
+      console.log("Supabase URL:", supabase.supabaseUrl);
+      console.log("Supabase Key exists:", !!supabase.supabaseKey);
+      return !error;
+    } catch (error) {
+      console.error("Connection test failed:", error);
+      return false;
+    }
+  };
+
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
     console.log("=== AUTH FORM SUBMIT START ===");
     console.log("Mode:", mode);
     console.log("Email:", data.email);
     console.log("Password length:", data.password.length);
-    console.log("Supabase client available:", !!supabase);
+    
+    // Test connection first
+    const connectionOk = await testConnection();
+    if (!connectionOk) {
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to authentication service. Please try again.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
     
     try {
       if (mode === "signup") {
@@ -94,21 +120,45 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       } else {
         console.log("=== ATTEMPTING SIGNIN ===");
         
-        // Clear any existing sessions first
-        console.log("Clearing existing session before signin...");
-        await supabase.auth.signOut();
+        // Clean up any existing auth state first
+        cleanupAuthState();
         
+        // Wait a moment for cleanup to complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log("Attempting global sign out before signin...");
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+          console.log("Global sign out completed");
+        } catch (signOutError) {
+          console.log("Sign out error (continuing anyway):", signOutError);
+        }
+        
+        // Wait a moment after sign out
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log("Now attempting sign in...");
         const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
 
-        console.log("Signin response:", { signInData, error });
-        console.log("User from signin:", signInData?.user);
-        console.log("Session from signin:", signInData?.session);
+        console.log("=== SIGNIN RESPONSE DETAILS ===");
+        console.log("Error:", error);
+        console.log("Data:", signInData);
+        console.log("User exists:", !!signInData?.user);
+        console.log("Session exists:", !!signInData?.session);
+        console.log("User ID:", signInData?.user?.id);
+        console.log("User email:", signInData?.user?.email);
+        console.log("Access token exists:", !!signInData?.session?.access_token);
+        console.log("Refresh token exists:", !!signInData?.session?.refresh_token);
+        console.log("Session expires at:", signInData?.session?.expires_at);
 
         if (error) {
-          console.error("Signin error details:", error);
+          console.error("=== SIGNIN ERROR DETAILS ===");
+          console.error("Error code:", error.status);
+          console.error("Error message:", error.message);
+          console.error("Full error:", error);
           
           let errorMessage = "Sign in failed. Please check your credentials.";
           
@@ -129,20 +179,28 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
 
         if (signInData?.user && signInData?.session) {
-          console.log("Signin successful!");
-          console.log("User ID:", signInData.user.id);
-          console.log("Session access token:", signInData.session.access_token ? "Present" : "Missing");
-          console.log("Session refresh token:", signInData.session.refresh_token ? "Present" : "Missing");
+          console.log("=== SIGNIN SUCCESS ===");
+          console.log("✓ User authenticated successfully");
+          console.log("✓ Session created successfully");
+          console.log("✓ Tokens received");
           
           toast({
             title: "Welcome back!",
-            description: "Successfully signed in.",
+            description: "Successfully signed in. Redirecting...",
           });
 
-          // The onAuthStateChange listener will handle the redirect
-          console.log("Waiting for auth state change to trigger redirect...");
+          // Force immediate redirect
+          console.log("Forcing immediate redirect to dashboard...");
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 500);
+          
         } else {
-          console.error("Signin returned no user or session:", { user: signInData?.user, session: signInData?.session });
+          console.error("=== SIGNIN INCOMPLETE ===");
+          console.error("Missing user or session in response");
+          console.error("User:", signInData?.user);
+          console.error("Session:", signInData?.session);
+          
           toast({
             title: "Sign in incomplete",
             description: "Authentication was not completed properly. Please try again.",
@@ -151,11 +209,11 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
       }
     } catch (error: any) {
-      console.error("=== AUTH ERROR CAUGHT ===");
+      console.error("=== CATCH BLOCK ERROR ===");
       console.error("Error type:", typeof error);
       console.error("Error message:", error?.message);
-      console.error("Error details:", error);
       console.error("Error stack:", error?.stack);
+      console.error("Full error object:", error);
       
       toast({
         title: "Authentication error",
