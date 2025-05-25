@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,8 +43,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     try {
       const { data, error } = await supabase.auth.getSession();
       console.log("Connection test result:", { data, error });
-      console.log("Supabase URL:", supabase.supabaseUrl);
-      console.log("Supabase Key exists:", !!supabase.supabaseKey);
+      console.log("Supabase client exists:", !!supabase);
       return !error;
     } catch (error) {
       console.error("Connection test failed:", error);
@@ -124,7 +122,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         cleanupAuthState();
         
         // Wait a moment for cleanup to complete
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         console.log("Attempting global sign out before signin...");
         try {
@@ -135,7 +133,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
         
         // Wait a moment after sign out
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         console.log("Now attempting sign in...");
         const { data: signInData, error } = await supabase.auth.signInWithPassword({
@@ -189,11 +187,14 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             description: "Successfully signed in. Redirecting...",
           });
 
-          // Force immediate redirect
-          console.log("Forcing immediate redirect to dashboard...");
+          // Try multiple redirect approaches
+          console.log("Attempting redirect to dashboard...");
+          
+          // First try with setTimeout
           setTimeout(() => {
+            console.log("Attempting window.location redirect");
             window.location.href = "/dashboard";
-          }, 500);
+          }, 1000);
           
         } else {
           console.error("=== SIGNIN INCOMPLETE ===");
