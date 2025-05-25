@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Users, Trophy, FileText } from "lucide-react";
+import { Settings, Users, Trophy, FileText, Home, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { ChallengeManager } from "./ChallengeManager";
 import { UserManager } from "./UserManager";
 import { SubmissionManager } from "./SubmissionManager";
@@ -21,6 +22,7 @@ export const AdminPanel = () => {
   });
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchStats();
@@ -57,6 +59,43 @@ export const AdminPanel = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-4">
       <div className="container mx-auto">
+        {/* Navigation Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              className="text-white hover:text-white/80"
+              onClick={() => navigate("/")}
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-white hover:text-white/80"
+              onClick={() => navigate("/challenges")}
+            >
+              Challenges
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-white hover:text-white/80"
+              onClick={() => navigate("/dashboard")}
+            >
+              Dashboard
+            </Button>
+          </div>
+          
+          <Button
+            variant="outline"
+            className="text-white border-white/20 hover:bg-white/10"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
           <p className="text-white/80">Manage challenges, users, and platform settings</p>
