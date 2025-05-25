@@ -9,19 +9,27 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("=== AUTH PAGE INIT ===");
+    
     // Check if user is already logged in
     const checkUser = async () => {
       console.log("Checking existing auth session...");
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Error checking session:", error);
-        return;
-      }
-      
-      if (session?.user) {
-        console.log("User already authenticated, redirecting to dashboard...");
-        navigate("/dashboard");
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        console.log("Auth page session check:", { session, error });
+        
+        if (error) {
+          console.error("Error checking session:", error);
+          return;
+        }
+        
+        if (session?.user) {
+          console.log("User already authenticated, redirecting to dashboard...");
+          navigate("/dashboard");
+        }
+      } catch (error) {
+        console.error("Error in checkUser:", error);
       }
     };
 
@@ -29,18 +37,25 @@ const Auth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth page - auth state changed:", event, session?.user?.id);
+      console.log("=== AUTH PAGE - AUTH STATE CHANGE ===");
+      console.log("Event:", event);
+      console.log("Session:", session);
+      console.log("User ID:", session?.user?.id);
       
-      if (session?.user && event === 'SIGNED_IN') {
-        console.log("User signed in, navigating to dashboard...");
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        console.log("User authenticated in auth page, navigating to dashboard...");
         navigate("/dashboard");
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log("Cleaning up auth page subscription");
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const toggleMode = () => {
+    console.log("Toggling auth mode from", mode, "to", mode === "signin" ? "signup" : "signin");
     setMode(mode === "signin" ? "signup" : "signin");
   };
 

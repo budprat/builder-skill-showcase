@@ -40,11 +40,14 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
   const onSubmit = async (data: AuthFormData) => {
     setIsLoading(true);
-    console.log("Form submitted with mode:", mode, "email:", data.email);
+    console.log("=== AUTH FORM SUBMIT ===");
+    console.log("Mode:", mode);
+    console.log("Email:", data.email);
+    console.log("Supabase client available:", !!supabase);
     
     try {
       if (mode === "signup") {
-        console.log("Attempting to sign up...");
+        console.log("Attempting signup...");
         
         const { data: signUpData, error } = await supabase.auth.signUp({
           email: data.email,
@@ -56,10 +59,10 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           },
         });
 
-        console.log("Sign up response:", { signUpData, error });
+        console.log("Signup result:", { signUpData, error });
 
         if (error) {
-          console.error("Sign up error:", error);
+          console.error("Signup error:", error);
           if (error.message.includes("already registered")) {
             toast({
               title: "Account exists",
@@ -77,20 +80,19 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           description: "Welcome to EliteBuilders. You can now start participating in challenges.",
         });
 
-        // Don't force reload, let the auth state change handle navigation
-        console.log("Sign up successful, waiting for auth state change...");
+        console.log("Signup successful, user:", signUpData.user?.id);
       } else {
-        console.log("Attempting to sign in...");
+        console.log("Attempting signin...");
         
         const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
 
-        console.log("Sign in response:", { signInData, error });
+        console.log("Signin result:", { signInData, error });
 
         if (error) {
-          console.error("Sign in error:", error);
+          console.error("Signin error:", error);
           
           if (error.message.includes("Invalid login credentials")) {
             toast({
@@ -114,21 +116,17 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
 
         if (signInData?.user) {
-          console.log("Sign in successful, user:", signInData.user.id);
+          console.log("Signin successful, user:", signInData.user.id);
+          console.log("Session:", signInData.session);
+          
           toast({
             title: "Welcome back!",
             description: "Successfully signed in to EliteBuilders.",
           });
-          
-          // Don't force reload, let the auth state change handle navigation
-          console.log("Sign in successful, waiting for auth state change...");
-        } else {
-          console.error("No user data returned from sign in");
-          throw new Error("Sign in failed - no user data returned");
         }
       }
     } catch (error: any) {
-      console.error("Auth error:", error);
+      console.error("Auth error details:", error);
       toast({
         title: "Authentication failed",
         description: error.message || "An unexpected error occurred. Please try again.",

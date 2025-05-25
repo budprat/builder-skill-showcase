@@ -31,12 +31,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("=== AUTH PROVIDER INIT ===");
     console.log("Setting up auth state listener...");
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.id);
+        console.log("=== AUTH STATE CHANGE ===");
+        console.log("Event:", event);
+        console.log("Session:", session);
+        console.log("User ID:", session?.user?.id);
         
         setSession(session);
         setUser(session?.user ?? null);
@@ -44,8 +48,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Handle navigation based on auth state
         if (event === 'SIGNED_IN' && session?.user) {
-          console.log("User signed in, redirecting to dashboard...");
-          // Use setTimeout to avoid potential conflicts
+          console.log("User signed in successfully, redirecting to dashboard...");
+          // Small delay to ensure state is updated
           setTimeout(() => {
             window.location.href = "/dashboard";
           }, 100);
@@ -60,15 +64,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log("Initial session check:", session?.user?.id, error);
-      if (error) {
-        console.error("Error getting initial session:", error);
+    const getInitialSession = async () => {
+      try {
+        console.log("=== GETTING INITIAL SESSION ===");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log("Initial session result:", { session, error });
+        
+        if (error) {
+          console.error("Error getting initial session:", error);
+        }
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+        
+        console.log("Initial session set:", {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          loading: false
+        });
+      } catch (error) {
+        console.error("Error in getInitialSession:", error);
+        setLoading(false);
       }
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    };
+
+    getInitialSession();
 
     return () => {
       console.log("Cleaning up auth subscription");
@@ -78,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log("Signing out...");
+      console.log("=== SIGNING OUT ===");
       setLoading(true);
       
       const { error } = await supabase.auth.signOut();
@@ -88,16 +109,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
       
       console.log("Sign out successful");
-      // Force redirect to home page
       window.location.href = "/";
     } catch (error) {
       console.error("Sign out error:", error);
-      // Force redirect even if there's an error
       window.location.href = "/";
     } finally {
       setLoading(false);
     }
   };
+
+  console.log("=== AUTH PROVIDER RENDER ===");
+  console.log("Current state:", { user: !!user, session: !!session, loading });
 
   return (
     <AuthContext.Provider value={{ user, session, loading, signOut }}>
