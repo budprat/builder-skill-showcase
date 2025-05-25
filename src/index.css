@@ -1,92 +1,102 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Primary Colors - Foundation & Trust */
+    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
+    --foreground: 215 25% 27%; /* Graphite #334155 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card backgrounds */
+    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
+    --card-foreground: 215 25% 27%; /* Graphite */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%; /* Titanium White */
+    --popover-foreground: 215 25% 27%; /* Graphite */
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary Brand - Deep Space Blue */
+    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
+    --primary-foreground: 0 0% 100%; /* Titanium White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary - Subtle greys */
+    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
+    --secondary-foreground: 215 25% 27%; /* Graphite */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 216 33% 97%; /* Light Lunar Grey */
+    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent - Cyber Teal */
+    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
+    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Error Red */
+    --destructive: 0 84% 60%; /* Error Red #EF4444 */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Borders and inputs */
+    --border: 215 20% 82%; /* Light Stardust Silver */
+    --input: 215 20% 82%;
+    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Sidebar colors */
+    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
+    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Additional semantic colors */
+    --success: 142 71% 45%; /* Success Green #10B981 */
+    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
+    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
+    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark theme with Deep Space Blue as primary background */
+    --background: 215 100% 12%; /* Deep Space Blue */
+    --foreground: 0 0% 100%; /* Titanium White */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 95% 15%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 177 100% 48%; /* Cyber Teal */
+    --primary-foreground: 215 100% 12%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 215 90% 18%;
+    --secondary-foreground: 215 20% 75%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 215 90% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 177 100% 48%; /* Cyber Teal */
+    --accent-foreground: 215 100% 12%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 215 90% 18%;
+    --input: 215 90% 18%;
+    --ring: 177 100% 48%;
+
+    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 177 100% 48%;
+    --sidebar-primary-foreground: 215 100% 12%;
+    --sidebar-accent: 215 95% 15%;
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
   }
 }
 
@@ -96,6 +106,192 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Typography hierarchy following the design system */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl lg:text-2xl;
+  }
+
+  h5 {
+    @apply text-lg lg:text-xl;
+  }
+
+  h6 {
+    @apply text-base lg:text-lg;
+  }
+
+  /* Custom utility classes for the design system */
+  .text-cyber-teal {
+    color: hsl(var(--accent));
+  }
+
+  .bg-cyber-teal {
+    background-color: hsl(var(--accent));
+  }
+
+  .text-nebula-purple {
+    color: hsl(var(--nebula-purple));
+  }
+
+  .bg-nebula-purple {
+    background-color: hsl(var(--nebula-purple));
+  }
+
+  .text-deep-space {
+    color: hsl(var(--primary));
+  }
+
+  .bg-deep-space {
+    background-color: hsl(var(--primary));
+  }
+
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .bg-warning {
+    background-color: hsl(var(--warning));
+  }
+
+  .text-solar-flare {
+    color: hsl(var(--solar-flare));
+  }
+
+  .bg-solar-flare {
+    background-color: hsl(var(--solar-flare));
+  }
+
+  /* Geometric patterns and tech-inspired backgrounds */
+  .circuit-pattern {
+    background-image: 
+      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
+    background-size: 20px 20px;
+    opacity: 0.05;
+  }
+
+  .data-grid {
+    background-image: 
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.1;
+  }
+
+  /* Sophisticated card styling */
+  .elite-card {
+    @apply bg-card border border-border/50 rounded-lg shadow-sm;
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
+  }
+
+  .elite-card-hover {
+    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
+  }
+
+  /* Premium badge styling */
+  .elite-badge {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+    color: hsl(var(--primary));
+  }
+
+  .elite-badge-secondary {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
+    color: white;
+  }
+
+  /* Futuristic button styles */
+  .cta-primary {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
+    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
+  }
+
+  .cta-primary:hover {
+    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Progress and status indicators */
+  .progress-cyber {
+    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+  }
+
+  /* Focus states with cyber teal */
+  .focus-cyber:focus {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
+  }
+
+  /* Subtle animations for micro-interactions */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  }
+
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
+  }
+
+  /* Grid system for structured layouts */
+  .elite-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .elite-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* Professional spacing system */
+  .section-spacing {
+    @apply py-16 lg:py-24;
+  }
+
+  .content-spacing {
+    @apply space-y-8 lg:space-y-12;
+  }
+}
+
+/* Scrollbar styling for a polished look */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent)/0.8);
 }
