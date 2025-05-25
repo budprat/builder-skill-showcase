@@ -33,51 +33,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log("=== AUTH PROVIDER INIT ===");
     
-    // Set up auth state listener first
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("=== AUTH STATE CHANGE EVENT ===");
+      (event, session) => {
+        console.log("=== AUTH STATE CHANGE ===");
         console.log("Event:", event);
         console.log("Session exists:", !!session);
         console.log("User exists:", !!session?.user);
-        console.log("User ID:", session?.user?.id);
-        console.log("Access token exists:", !!session?.access_token);
-        console.log("Current path:", window.location.pathname);
         
-        // Update state immediately
+        // Update state
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Handle different auth events - but only redirect if not already on target page
-        if (event === 'SIGNED_IN' && session?.user) {
-          console.log("=== USER SIGNED IN SUCCESSFULLY ===");
-          
-          // Only redirect if we're not on the auth page AND not already on dashboard
-          if (window.location.pathname !== "/auth" && window.location.pathname !== "/dashboard") {
-            console.log("Redirecting to dashboard...");
-            setTimeout(() => {
-              console.log("Executing redirect to dashboard");
-              window.location.href = "/dashboard";
-            }, 100);
-          } else {
-            console.log("Already on target page or auth page - skipping automatic redirect");
-          }
-        }
-        
-        if (event === 'SIGNED_OUT') {
-          console.log("=== USER SIGNED OUT ===");
-          setSession(null);
-          setUser(null);
-        }
-        
-        if (event === 'TOKEN_REFRESHED') {
-          console.log("=== TOKEN REFRESHED ===");
-        }
-        
-        if (event === 'USER_UPDATED') {
-          console.log("=== USER UPDATED ===");
-        }
       }
     );
 
@@ -87,11 +54,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("=== GETTING INITIAL SESSION ===");
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        console.log("Initial session check:");
-        console.log("- Session exists:", !!session);
-        console.log("- User exists:", !!session?.user);
-        console.log("- User ID:", session?.user?.id);
-        console.log("- Error:", error);
+        console.log("Initial session exists:", !!session);
+        console.log("Initial user exists:", !!session?.user);
         
         if (error) {
           console.error("Error getting initial session:", error);
@@ -99,9 +63,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
       } catch (error) {
         console.error("Error in getInitialSession:", error);
+      } finally {
         setLoading(false);
       }
     };

@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { DebugAuth } from "@/components/auth/DebugAuth";
@@ -12,41 +11,16 @@ const Auth = () => {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    console.log("=== AUTH PAGE INIT ===");
+    console.log("=== AUTH PAGE EFFECT ===");
     console.log("User exists:", !!user);
     console.log("Loading:", loading);
     
     // If user is already authenticated and not loading, redirect to dashboard
     if (!loading && user) {
       console.log("User already authenticated, redirecting to dashboard...");
-      // Use setTimeout to ensure the redirect happens after the render cycle
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 100);
-      return;
+      navigate("/dashboard", { replace: true });
     }
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("=== AUTH PAGE - AUTH STATE CHANGE ===");
-      console.log("Event:", event);
-      console.log("Session:", session);
-      console.log("User ID:", session?.user?.id);
-      
-      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-        console.log("User authenticated in auth page, navigating to dashboard...");
-        // Use setTimeout to ensure redirect happens after state updates
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 100);
-      }
-    });
-
-    return () => {
-      console.log("Cleaning up auth page subscription");
-      subscription.unsubscribe();
-    };
-  }, [navigate, user, loading]);
+  }, [user, loading, navigate]);
 
   // Show loading state while checking authentication
   if (loading) {
