@@ -1,8 +1,9 @@
-modules = ["nodejs-20", "web"]
+modules = ["nodejs-20", "python-3.11", "web"]
 run = "npm run dev"
 
 [nix]
 channel = "stable-24_05"
+packages = ["nix-output-monitor"]
 
 [deployment]
 run = ["sh", "-c", "npm run dev"]
@@ -18,3 +19,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd builder-skill-showcase && npm run dev"
+
+[[ports]]
+localPort = 8080
+externalPort = 80

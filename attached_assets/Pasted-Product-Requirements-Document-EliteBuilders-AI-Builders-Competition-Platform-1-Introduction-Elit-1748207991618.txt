@@ -1,0 +1,490 @@
+Product Requirements Document: EliteBuilders - AI Builders Competition Platform
+1. Introduction
+EliteBuilders is a web-based competitive arena designed to bridge the gap between AI talent and industry demand. Current hiring practices often rely on algorithmic challenges that don't fully assess a candidate's ability to develop and deploy real-world, product-ready AI solutions. This platform will enable AI-centric companies and non-tech enterprises to identify top-tier talent by evaluating their end-to-end applied-AI product thinking. For AI builders, particularly those who are self-taught or have non-traditional backgrounds, EliteBuilders offers a unique opportunity to showcase their skills through tangible projects, gain recognition, and connect with potential employers or clients. Participants will rapidly craft and submit AI-powered Minimum Viable Products (MVPs)—complete with a prototype, pitch deck, and demo video—in response to company-authored or sponsored challenges. A hybrid scoring system, combining automated LLM-driven evaluations and human judge reviews, will surface top talent on dynamic leaderboards, fostering a competitive and rewarding environment.
+2. Goals
+ * For Companies/Sponsors:
+   * Identify and recruit top AI talent with proven product-building capabilities.
+   * Reduce hiring cycle times and improve the quality of hires.
+   * Gain access to innovative AI solutions for real-world business problems.
+   * Enhance employer branding within the AI community.
+ * For AI Builders/Participants:
+   * Provide a platform to showcase practical, end-to-end AI project development skills.
+   * Gain visibility and connect with potential employers and clients.
+   * Earn industry-recognized badges, prizes, and build a strong portfolio.
+   * Receive constructive feedback on their AI solutions and product thinking.
+ * For the Platform (EliteBuilders):
+   * Become the leading platform for applied AI talent assessment and discovery.
+   * Foster a vibrant community of AI builders and innovative companies.
+   * Generate revenue through company sponsorships and premium features.
+3. Target Users
+ * AI Builders/Participants:
+   * Software developers, data scientists, machine learning engineers, AI enthusiasts (students, professionals, career changers).
+   * Individuals (initially solo, potentially teams in the future) seeking to demonstrate practical AI skills.
+   * Self-taught learners and those from non-traditional educational backgrounds.
+   * Freelancers looking for project opportunities.
+ * Companies/Sponsors (Hiring Partners):
+   * Tech companies (AI-focused or with AI departments).
+   * Non-tech enterprises looking to integrate AI solutions.
+   * Recruitment agencies specializing in tech talent.
+   * Venture capitalists and incubators looking for promising AI startups/talent.
+ * Judges/Reviewers:
+   * Experienced AI professionals, product managers, and industry experts.
+   * Representatives from sponsoring companies.
+4. User Stories
+ * As an AI Builder, I want to:
+   * Easily browse and filter available challenges to find ones that match my skills and interests.
+   * Clearly understand the requirements, evaluation criteria, deadlines, and potential prizes for each challenge.
+   * Quickly sign up and create a profile, linking my existing professional accounts (GitHub, portfolio, CV).
+   * Receive suggestions for suitable challenges based on my profile.
+   * Securely submit my project deliverables (repository link, pitch deck, demo video).
+   * Track the status of my submission and receive timely notifications about evaluations.
+   * Understand how my submission was scored, including feedback from automated systems and human judges.
+   * See my ranking on real-time leaderboards for specific challenges and an overall career score.
+   * Automatically receive badges for my achievements (e.g., Top 10%, Category Winner).
+   * Be contacted by hiring partners interested in my profile and submissions.
+ * As a Company/Sponsor, I want to:
+   * Create and publish challenges that address our specific business needs or research areas.
+   * Define clear problem statements, provide necessary data packs, and set evaluation rubrics.
+   * Manage my active challenges and view participant submissions.
+   * Fund prizes to attract top talent to my challenges.
+   * Access a ranked list of submissions with comprehensive candidate packets (profile, submission, scores).
+   * Directly contact high-potential candidates through the platform.
+   * Gain insights into emerging AI talent and innovative solutions.
+ * As a Platform Administrator, I want to:
+   * Manage user accounts and support requests.
+   * Oversee the challenge creation and submission process.
+   * Monitor the automated scoring system and coordinate human judge reviews.
+   * Ensure the integrity and fairness of the competitions and leaderboards.
+   * Manage content on the platform, including challenges, user profiles, and company pages.
+   * Track platform usage and key performance metrics.
+5. Product Features (Scope Details)
+5.1. Solo Challenges Catalogue
+* FC-001: Display a list of active and upcoming challenges.
+* FC-002: Each challenge listing to show: Title, Sponsoring Company (if any), Brief Description, Key Domains/Skills (e.g., NLP, CV, GenAI, Prompt Engineering), Prize Information, Submission Deadline.
+* FC-003: Ability to filter challenges by: Domain/Skill, Sponsoring Company, Prize Value, Deadline.
+* FC-004: Detailed challenge page: Comprehensive problem statement, context, goals, expected deliverables (prototype specs, pitch deck guidelines, demo video requirements), data packs (downloadable or API access), detailed evaluation rubric (weights for different criteria like innovation, technical execution, UX flow, business viability, presentation quality).
+* FC-005: Indication of "Company-Authored" vs. "Sponsored" challenges.
+5.2. User Onboarding
+* FC-006: OAuth sign-in/sign-up options (e.g., Google, GitHub, LinkedIn).
+* FC-007: Profile creation:
+* Connect GitHub repository.
+* Link to external portfolio/website.
+* Upload CV/resume (PDF).
+* Fields for skills, experience summary, areas of interest.
+* FC-008: Algorithm to suggest relevant first challenges based on profile information (skills, interests).
+5.3. Submission Pipeline
+* FC-009: Deliverable uploader:
+* Input field for public/private code repository link (e.g., GitHub, GitLab).
+* Uploader for pitch deck (e.g., PDF, PPT).
+* Uploader or link field for demo video (e.g., YouTube, Vimeo, or direct upload).
+* FC-010: Automated pre-screening/tests (sandboxed environment):
+* Basic code execution checks (e.g., does the main script run without critical errors?).
+* Dependency checks (e.g., presence of a requirements.txt or similar).
+* (Future Iteration) Basic security scans.
+* FC-011: LLM-driven rubric evaluation:
+* Automated scoring of submitted pitch decks and potentially code READMEs/documentation against predefined rubric criteria (e.g., clarity of problem statement, solution explanation, market understanding – configurable per challenge).
+* LLM to provide initial qualitative feedback based on the rubric.
+* FC-012: Provisional score generation based on automated tests and LLM evaluation.
+* FC-013: Submission status tracking for participants (e.g., Submitted, Under Automated Review, Awaiting Human Review, Provisional Score Available, Final Score Published).
+5.4. Hybrid Leaderboards
+* FC-014: Real-time event leaderboards:
+* Separate leaderboard for each active challenge.
+* Displays participant rankings based on provisional scores (updated as LLM evaluations complete) and then final scores (after human review).
+* Show rank, participant name/alias, provisional/final score.
+* FC-015: Season-based cumulative 'Career Score':
+* Aggregated score based on performance across multiple challenges over a defined "season" (e.g., quarterly, annually).
+* Algorithm to weigh scores based on challenge difficulty, number of participants, and final ranking.
+* Overall platform leaderboard.
+5.5. Badging & Recognition
+* FC-016: Automated badge awarding system triggered post-human review and score finalization.
+* FC-017: Predefined badge types:
+* "Top X%" (e.g., Top 10%, Top 25% for a challenge).
+* "Category Winner" (if a challenge has specific sub-categories of excellence).
+* "Sponsor Favorite" (selected by the sponsoring company, can be subjective).
+* "Challenge Completer."
+* "First Submission."
+* FC-018: Badges displayed on participant profiles.
+* FC-019: Option for participants to share badges on social media (e.g., LinkedIn).
+5.6. Sponsor Dashboard
+* FC-020: Secure login for sponsor representatives.
+* FC-021: Challenge creation interface:
+* Form to input challenge details (title, description, problem, data, rubric, prize info, deadlines).
+* Ability to define specific LLM evaluation prompts/criteria.
+* FC-022: Challenge management: View/edit active challenges, extend deadlines (with admin approval), close challenges.
+* FC-023: Prize funding mechanism (integration with payment gateway or manual confirmation process).
+* FC-024: View ranked submissions for their sponsored challenges (access to participant profiles, submitted deliverables, scores, LLM feedback, human judge feedback).
+* FC-025: Downloadable candidate packets (consolidated view of participant profile, CV, and submission details).
+* FC-026: Interface to mark "Sponsor Favorite" submissions.
+* FC-027: Direct messaging capability to engage with specific participants/winners (post-competition or with explicit consent).
+5.7. Notification System
+* FC-028: Email notifications to participants for:
+* Successful submission confirmation.
+* Submission status updates (e.g., automated review complete, provisional score ready, human review initiated/completed).
+* Final score publication.
+* Badge awarded.
+* New challenge matching profile interests (opt-in).
+* Direct messages from sponsors.
+* FC-029: Email notifications to sponsors for:
+* New submission to their challenge.
+* Challenge deadline approaching.
+* Summary of top performers post-evaluation.
+* FC-030: In-app notifications mirroring critical email alerts.
+5.8. Human Judge Review Module (Implied Scope)
+* FC-031: Interface for assigned human judges to access submissions (code, deck, video).
+* FC-032: Digital rubric for judges to score submissions based on defined criteria.
+* FC-033: Section for judges to provide qualitative feedback.
+* FC-034: System to aggregate scores from multiple judges (if applicable) and calculate a final human review score.
+* FC-035: Workflow for assigning submissions to judges.
+6. Design Considerations
+ * User Interface (UI):
+   * Modern, clean, and intuitive design.
+   * Professional and trustworthy aesthetic.
+   * Responsive design for accessibility across devices (desktop primary, mobile-friendly).
+ * User Experience (UX):
+   * Seamless onboarding process.
+   * Easy navigation for finding and submitting challenges.
+   * Clear presentation of complex information (rubrics, scores, leaderboards).
+   * Gamified elements (badges, leaderboards) to encourage engagement.
+   * Clear calls to action.
+ * Branding:
+   * Logo and visual identity that convey innovation, expertise, and opportunity.
+7. Technical Considerations
+ * Technology Stack: To be determined, but likely to include:
+   * Frontend: Modern JavaScript framework (e.g., React, Vue, Angular).
+   * Backend: Robust language/framework (e.g., Python/Django/Flask, Node.js/Express, Ruby on Rails).
+   * Database: Scalable SQL or NoSQL database (e.g., PostgreSQL, MongoDB).
+   * Cloud Hosting: AWS, Google Cloud, or Azure for scalability and reliability.
+ * LLM Integration:
+   * Secure API integration with one or more leading LLM providers (e.g., OpenAI, Anthropic, Google Gemini).
+   * Robust prompt engineering and management for consistent and fair automated evaluations.
+   * Mechanisms to handle LLM rate limits, errors, and versioning.
+ * Sandboxed Environment:
+   * Secure execution environment for automated code tests (e.g., Docker containers).
+   * Resource limits to prevent abuse.
+ * Scalability: Architect the platform to handle a growing number of users, challenges, and submissions.
+ * Security:
+   * Secure handling of user data (PII, CVs, code).
+   * Protection against common web vulnerabilities (OWASP Top 10).
+   * Secure API key management.
+   * Consideration for intellectual property protection of submitted solutions (clear T&Cs).
+ * Integrations:
+   * OAuth providers.
+   * Version control systems (GitHub API).
+   * Payment gateways (for sponsor prize funding).
+   * Email service provider.
+8. Release Criteria (MVP - Minimum Viable Product)
+ * Core functionality of User Onboarding (OAuth, basic profile).
+ * Solo Challenges Catalogue (view, filter, detailed view).
+ * Basic Submission Pipeline (uploader for repo link, deck, video; initial LLM rubric evaluation for pitch decks; provisional score).
+ * Real-time event leaderboards (based on provisional scores).
+ * Sponsor Dashboard (create/manage challenges, view ranked submissions - basic view).
+ * Notification System (email for key actions: submission confirmation, provisional score).
+ * Manual process for human judge review and final score input (full module can be a fast follow).
+ * Basic badging (e.g., "Challenge Completer" - manually awarded or simple automation).
+ * Terms of Service and Privacy Policy in place.
+9. Success Metrics
+ * User Acquisition & Engagement:
+   * Number of registered AI Builders.
+   * Number of registered Companies/Sponsors.
+   * Number of active challenges.
+   * Average number of submissions per challenge.
+   * Monthly Active Users (MAU) for both builders and sponsors.
+   * Participant retention rate (percentage of users submitting to more than one challenge).
+ * Platform Effectiveness:
+   * Average time for companies to identify potential hires.
+   * Number of direct engagements/interviews initiated through the platform.
+   * Reported hires/freelance contracts resulting from platform participation (survey-based).
+   * User satisfaction scores (NPS or surveys) for both builders and sponsors.
+   * Diversity of participants (e.g., geographic, background - where ethically collectible).
+ * Business Metrics (Post-MVP/Growth):
+   * Revenue from challenge sponsorships.
+   * Conversion rate of sponsors from free/trial to paid tiers (if applicable in the future).
+10. Future Considerations (Post-MVP)
+ * Team Challenges: Allow teams of builders to collaborate and submit projects.
+ * Advanced Automated Scoring:
+   * LLM-based code quality analysis (beyond basic execution).
+   * Automated UX flow testing for web prototypes.
+   * More sophisticated plagiarism detection.
+ * Advanced Sponsor Features:
+   * Private, invitation-only challenges.
+   * Deeper analytics on participant demographics and skill trends.
+   * Tools for collaborative review of submissions within a sponsor organization.
+ * Community Features:
+   * Forums for discussion among builders.
+   * Q&A sections for challenges.
+   * Mentorship programs connecting experienced professionals with new builders.
+ * Skill Endorsement & Verification: More granular skill tagging and validation based on challenge performance.
+ * Integration with HR Tech Platforms: APIs for companies to pull candidate data into their ATS.
+ * Mobile Application: Native mobile apps for builders and sponsors.
+ * Educational Content: Resources and tutorials to help builders improve their applied AI skills.
+ * Algorithmic Fairness and Bias Mitigation: Ongoing review and refinement of LLM prompts and human judging guidelines to ensure fairness and minimize bias in evaluations.
+11. Assumptions
+ * Companies are actively seeking better ways to identify applied AI talent beyond traditional methods.
+ * AI builders are eager for platforms to showcase their end-to-end project skills.
+ * LLMs can provide a meaningful and scalable first-pass evaluation of certain aspects of AI projects (like documentation and pitch decks).
+ * Human judges are willing to participate in reviewing top submissions.
+ * Sufficiently interesting and well-defined challenges can be sourced from companies or created by the platform.
+12. Risks
+ * Challenge Quality & Quantity: Difficulty in attracting enough high-quality, engaging challenges from companies.
+ * Evaluation Subjectivity/Bias: Ensuring fairness and consistency in both LLM and human evaluations. LLMs can inherit biases, and human judgment can be subjective.
+ * Intellectual Property Concerns: Participants may be hesitant to submit innovative ideas without clear IP protection guidelines.
+ * User Adoption: Attracting a critical mass of both builders and hiring companies.
+ * Scalability of Human Review: Managing the workload for human judges as the platform grows.
+ * Technical Complexity: Building and maintaining a robust platform with LLM integration and sandboxed testing environments.
+ * Cheating/Plagiarism: Ensuring the authenticity of submissions.
+13. Sign-off
+ * [Product Manager Name/Lead]
+ * [Engineering Lead Name]
+ * [Design Lead Name]
+ * [Key Stakeholder Name(s)]
+This PRD provides a foundational blueprint for EliteBuilders. It will be a living document, subject to review and updates as the project progresses and more insights are gathered.
+Product Requirements Document: EliteBuilders - AI Builders Competition Platform
+1. Introduction
+EliteBuilders is a web-based competitive arena designed to bridge the critical gap between AI talent and industry demand for practical, product-ready skills. Traditional technical assessments often focus on algorithmic knowledge, failing to capture a candidate's ability to conceptualize, develop, and present holistic AI solutions. This platform addresses the challenge faced by AI-centric companies—and increasingly, non-tech enterprises—in verifying if candidates can truly "ship" AI products. Simultaneously, it empowers self-taught builders and those with non-traditional backgrounds to showcase tangible AI projects, gain recognition, and connect directly with hiring opportunities.
+EliteBuilders will host company-authored or sponsored challenges where solo participants rapidly develop and submit AI-powered Minimum Viable Products (MVPs). Submissions will include not just code, but a functional prototype, a compelling pitch deck, and a demonstration video. A pioneering hybrid scoring system, combining automated LLM-driven evaluations for speed and scale with expert human judge reviews for depth and nuance, will identify top performers. Ranked leaderboards, skill-based badges, and valuable prizes will incentivize participation, while hiring partners gain privileged access to a curated pool of proven AI product builders, shortening hiring cycles and improving talent-job fit.
+2. Goals
+2.1. For Companies/Sponsors (Hiring Partners):
+ * Identify Top-Tier Applied AI Talent: Discover candidates who can demonstrably build and pitch end-to-end AI solutions, not just solve theoretical problems.
+ * Reduce Time-to-Hire & Mis-hires: Streamline the screening process with pre-vetted candidates who have proven product-building capabilities relevant to real-world business challenges.
+ * Access Innovative Solutions: Gain insights from diverse approaches to company-relevant problems presented through challenge submissions.
+ * Enhance Employer Brand: Position their organization as an attractive destination for skilled AI professionals by engaging with the AI builder community.
+ * Flexible Talent Sourcing: Find candidates for full-time roles, freelance projects, or internships.
+2.2. For AI Builders/Participants:
+ * Showcase Holistic AI Skills: Provide a platform to demonstrate practical abilities in prompt design, UX flow, data handling, business framing, and product presentation, beyond just algorithmic coding.
+ * Gain Industry Visibility & Credibility: Earn verifiable badges, build a strong portfolio of applied AI projects, and achieve recognition from potential employers.
+ * Access Job & Freelance Opportunities: Directly connect with companies actively seeking their demonstrated skill set.
+ * Develop and Refine Skills: Receive feedback through scoring rubrics and (potentially) judge comments, helping them understand industry expectations.
+ * Win Prizes & Recognition: Compete for tangible rewards and the prestige of ranking high on leaderboards.
+2.3. For the EliteBuilders Platform:
+ * Become the Premier Platform for Applied AI Competitions: Establish EliteBuilders as the go-to destination for companies seeking proven AI product builders and for talent looking to showcase practical AI expertise.
+ * Foster a Thriving AI Ecosystem: Cultivate a vibrant community of AI innovators, learners, and industry professionals.
+ * Achieve Sustainable Growth: Develop a viable business model through company sponsorships, premium features, and potential partnerships.
+3. Target Users
+3.1. AI Builders (Participants):
+ * Personas:
+   * The Aspiring AI Professional: Students, recent graduates, or career switchers with foundational AI/ML knowledge seeking to build a portfolio and land their first AI role.
+   * The Self-Taught Innovator: Individuals with strong practical skills developed through online courses and personal projects, lacking traditional credentials but possessing demonstrable talent.
+   * The Experienced Developer Upskilling in AI: Software engineers or data scientists looking to transition into more AI-focused product roles and prove their applied capabilities.
+   * The Freelance AI Specialist: Skilled AI practitioners seeking project-based work and a platform to connect with clients needing specific AI solutions.
+ * Needs: Opportunity, recognition, skill validation, career advancement, learning.
+3.2. Companies/Sponsors (Hiring Partners):
+ * Personas:
+   * The AI-Native Startup Recruiter: HR or hiring manager in a fast-growing AI company needing to rapidly scale their team with product-aware engineers.
+   * The Enterprise Innovation Lead: Manager in a larger, non-tech company tasked with building an internal AI team or finding talent for specific AI projects.
+   * The Tech Recruiter (Agency): Specialist recruiter looking for high-quality, pre-vetted AI candidates for their clients.
+ * Needs: Qualified talent, efficient screening, reduced hiring risk, innovative ideas, employer branding.
+3.3. Judges (Human Reviewers - Internal & External):
+ * Personas:
+   * Senior AI Practitioners/Product Managers: Experienced professionals from industry or academia capable of evaluating the technical and product aspects of submissions.
+   * Sponsor Representatives: Individuals from sponsoring companies who can assess submissions based on specific business needs and "Sponsor Favorite" criteria.
+ * Needs: Clear evaluation guidelines, efficient review interface, recognition for their expertise (if applicable).
+4. User Stories
+4.1. As an AI Builder, I want to:
+ * ...easily browse and filter challenges by AI domain (NLP, CV, etc.), industry, prize value, and deadline so I can find relevant opportunities.
+ * ...clearly understand the problem statement, deliverables, evaluation criteria, and data provided for a challenge so I can effectively plan my project.
+ * ...quickly sign up using my existing accounts (Google, GitHub, LinkedIn) and build a profile showcasing my skills, resume, and portfolio so I can present myself professionally.
+ * ...receive personalized challenge recommendations based on my profile and interests so I don't miss out on suitable competitions.
+ * ...securely submit my code repository link, pitch deck PDF, and demo video URL through a simple interface so I can meet the submission requirements.
+ * ...track the status of my submission (e.g., received, under automated review, under human review, scored) so I know what's happening.
+ * ...receive a provisional score with feedback from the automated LLM evaluation quickly after submission so I get initial insights.
+ * ...see my final score and ranking on the challenge leaderboard after human review is complete so I know how I performed.
+ * ...earn digital badges for achievements like "Top 10%," "Category Winner," or "Sponsor Favorite" that I can display on my profile and share externally so I can build my credibility.
+ * ...be discoverable by hiring partners and receive messages about job or freelance opportunities based on my performance and profile so I can advance my career.
+ * ...view my cumulative "Career Score" to track my overall progress and standing on the platform.
+4.2. As a Company/Sponsor, I want to:
+ * ...easily create a new challenge by providing a clear problem description, defining deliverables, specifying evaluation rubrics, and offering data packs so I can attract relevant talent to solve my specific problems.
+ * ...set prize amounts and manage the funding for my sponsored challenges to incentivize participation.
+ * ...access a dashboard to view and manage my active challenges and see the number of participants and submissions.
+ * ...efficiently review a ranked list of submissions for my challenge, with access to each participant's prototype, pitch deck, demo video, and profile (including CV/portfolio).
+ * ...see the automated LLM scores and human judge reviews/comments for each submission so I can make informed decisions.
+ * ...download a consolidated candidate packet for promising individuals so I can easily share their information internally.
+ * ...directly contact top-ranked participants or "Sponsor Favorites" through the platform to discuss potential job or project opportunities.
+ * ...have my company logo and branding prominently displayed on challenges I sponsor to increase our visibility in the AI community.
+4.3. As a Platform Administrator, I want to:
+ * ...manage user accounts (builders, sponsors, judges) and handle support queries.
+ * ...oversee the challenge creation process, ensuring quality and clarity.
+ * ...configure and monitor the LLM-driven automated scoring system for different challenge types.
+ * ...manage the pool of human judges and assign submissions for review.
+ * ...ensure the integrity of leaderboards and the badging system.
+ * ...generate reports on platform usage, user engagement, and challenge performance to inform business decisions.
+5. Product Features (Elaborating on Scope)
+5.1. Solo Challenges Catalogue
+* 5.1.1. List View: Filterable and sortable list of challenges (by status: active, upcoming, past; by sponsor; by AI domain; by prize; by deadline). Each card to show: title, sponsor logo, brief snippet, key tags (e.g., NLP, GenAI, Healthcare), prize, deadline, number of participants.
+* 5.1.2. Detailed Challenge Page:
+* Overview: Comprehensive problem statement, background, importance, what success looks like.
+* Deliverables:
+* Prototype: Specifications (e.g., link to a functional web app, GitHub repo with clear setup instructions for a local demo). Emphasis on MVP.
+* Pitch Deck: Template/guidelines (e.g., problem, solution, AI approach, UX flow, data usage, business framing/potential impact, team (solo in this case)). Max 10-12 slides.
+* Demo Video: Max 3-5 minutes, guidelines (e.g., showcase prototype functionality, explain key AI components, articulate value proposition).
+* Data Packs: Secure download link or clear instructions for accessing provided datasets/APIs. Data usage terms.
+* Evaluation Rubric: Detailed breakdown of scoring criteria and their weights (e.g., Innovation/Creativity: 20%, Technical Implementation of AI: 30%, UX/Product Thinking: 20%, Business Viability/Pitch: 20%, Demo Clarity: 10%). Clearly differentiate aspects scored by LLM vs. Human Judges.
+* Prizes: Breakdown of prizes (cash, sponsored tech, interviews, etc.).
+* Sponsor Information: Profile of the sponsoring company with a link to their career page.
+* Timeline: Registration deadline, submission deadline, judging period, winner announcement date.
+* Rules & Eligibility: Standard competition rules, IP guidelines.
+* Discussion/Clarification Tab (Optional Phase 2): Forum for participants to ask clarifying questions about the challenge.
+5.2. User Onboarding
+* 5.2.1. Sign-up/Login: OAuth (Google, GitHub, LinkedIn mandatory). Email/password option.
+* 5.2.2. Profile Creation (Guided Flow):
+* Basic Info: Name, Profile Picture, Headline, Location (optional).
+* Links: GitHub (required, public profile), LinkedIn (required), Personal Portfolio/Website, CV (PDF upload).
+* Skills & Interests: Tag-based selection of AI skills (e.g., Prompt Engineering, NLP, Computer Vision, Reinforcement Learning, MLOps), domains of interest (e.g., Healthcare AI, FinTech AI).
+* Experience Summary: Brief bio.
+* 5.2.3. Suggested First Challenge: Algorithm to match profile skills/interests to active challenges. Option to skip.
+* 5.2.4. User Dashboard: Central hub for participants to see their active challenges, submissions, badges, notifications, and profile summary.
+5.3. Submission Pipeline
+* 5.3.1. Deliverable Uploader:
+* Code Repository: Input for a public GitHub repository link. (Future: allow private repos with platform access).
+* Pitch Deck: PDF upload.
+* Demo Video: Link to video hosted on platforms like YouTube/Vimeo (unlisted or public) or direct upload (with size/format limits).
+* Readme/Instructions: Text area for brief instructions on running the prototype or key things to note.
+* 5.3.2. Pre-Submission Checklist & Confirmation: Ensure all parts are uploaded.
+* 5.3.3. Sandboxed Automated Tests (Phase 1 - Basic; Phase 2 - Advanced):
+* Phase 1: Verify repository accessibility, presence of specified files (e.g., requirements.txt, main script). Basic linting or dependency checks.
+* Phase 2: Containerized execution for basic "does it run" checks for specified entry points.
+* 5.3.4. LLM Rubric Evaluation:
+* Automated analysis of pitch deck content against rubric criteria (e.g., clarity of problem/solution, business framing, completeness based on guidelines).
+* (Potential Phase 2) Analysis of README/code comments for clarity and documentation quality.
+* Generation of scores for specific rubric items and potentially short, templated qualitative feedback snippets.
+* 5.3.5. Provisional Score & Feedback: Displayed to the participant on their dashboard. Clearly marked as "provisional."
+* 5.3.6. Submission Locking: Once submitted and automated review starts, submissions are locked to prevent changes unless an explicit re-submission window is opened by an admin for exceptional cases.
+5.4. Hybrid Leaderboards
+* 5.4.1. Event (Challenge-Specific) Leaderboards:
+* Displays: Rank, Participant (Username/Alias), Provisional Score (initially, then Final Score), Links to (public parts of) winning submissions after the challenge ends (with participant consent).
+* Real-time updates as provisional scores are generated. Final scores updated after human review.
+* 5.4.2. Season-Based Cumulative 'Career Score':
+* Algorithm factoring in: Rank in challenges, difficulty/prestige of challenges (e.g., based on number of participants, prize value), number of challenges participated in.
+* "Seasons" defined (e.g., quarterly, annually).
+* Overall platform leaderboard for Career Score.
+* 5.4.3. Filters: Ability to filter leaderboards by season.
+5.5. Badging & Recognition
+* 5.5.1. Badge Engine: Auto-awards badges based on triggers (e.g., final rank in a challenge, specific human judge commendation).
+* 5.5.2. Badge Types:
+* Participation: "Challenge Entrant," "First MVP Submitted."
+* Performance: "Top 25%," "Top 10%," "Runner-Up," "Challenge Winner."
+* Special Recognition: "Category Winner" (e.g., Best UX, Most Innovative AI), "Sponsor Favorite," "Community Choice" (if voting implemented later).
+* Skill Badges (Phase 2): e.g., "Proficient in NLP" based on performance in multiple NLP challenges.
+* 5.5.3. Badge Display: On user profiles, shareable to LinkedIn.
+* 5.5.4. Certificates (Phase 2): Printable/downloadable certificates for significant achievements.
+5.6. Sponsor Dashboard
+* 5.6.1. Challenge Creation Wizard:
+* Step-by-step form: Title, Description, Problem Details, Company Info, Branding (Logo), Deliverable Specs, Data Pack Upload/Link, Rubric Customization (ability to weigh predefined criteria or suggest new ones for LLM/Human review), Prize Details, Deadlines.
+* Option to save drafts, submit for platform review/approval.
+* 5.6.2. Challenge Management: View active/past challenges, number of registrants/submissions, key dates.
+* 5.6.3. Prize Funding/Management: Interface to specify prize details. (Payment integration can be manual/invoice-based initially, then automated).
+* 5.6.4. Submission Review Portal:
+* Ranked list of submissions for their challenge (sortable by provisional/final score).
+* Access to full submission package: repo link, deck, video, participant profile (CV, GitHub, LinkedIn).
+* View LLM-generated scores/feedback and human judge scores/comments.
+* Ability to mark "Sponsor Favorite."
+* 5.6.5. Candidate Packet Download: Generate a PDF summary of selected candidates.
+* 5.6.6. Direct Engagement (Post-Challenge): Button to initiate contact (sends a templated notification to the participant, who can then respond). Requires participant consent.
+5.7. Notification System
+* 5.7.1. Email & In-App Alerts (User configurable preferences):
+* For Builders:
+* Account confirmation, Profile updates.
+* New challenge posted matching interests (opt-in).
+* Challenge registration confirmation.
+* Submission deadline reminders.
+* Submission received confirmation.
+* Provisional score available.
+* Human review started/completed.
+* Final score & rank published.
+* Badge awarded.
+* Message from a sponsor.
+* For Sponsors:
+* Challenge published confirmation.
+* New participant registration for their challenge (summary digests).
+* New submission received for their challenge.
+* Submission period ended.
+* Judging period started/ended.
+* Notification of top performers ready for review.
+5.8. Human Judging Module (Internal)
+* 5.8.1. Judge Assignment: Admins assign submissions to available human judges (can be internal or invited experts/sponsors).
+* 5.8.2. Judging Interface:
+* Access to all submission materials (repo, deck, video).
+* Display of pre-filled LLM scores/feedback for reference.
+* Structured digital rubric for scoring each criterion.
+* Text boxes for qualitative comments per criterion and overall feedback.
+* Ability to save progress and submit final review.
+* 5.8.3. Calibration & Guidelines: Clear instructions and potential calibration exercises for judges to ensure consistency.
+* 5.8.4. Aggregation: System to average scores if multiple judges review one submission or manage conflict resolution.
+6. Non-Functional Requirements
+ * 6.1. Performance:
+   * Platform loads within 3 seconds.
+   * Handles X concurrent users submitting/Browse without degradation (define X based on expected launch scale).
+   * Automated scoring (LLM part) for a pitch deck completed within Y minutes (define Y).
+ * 6.2. Scalability:
+   * Architecture supports horizontal scaling to accommodate growth in users, challenges, and submissions.
+   * Database designed for growth.
+ * 6.3. Availability:
+   * 99.9% uptime target.
+ * 6.4. Security:
+   * OWASP Top 10 vulnerabilities addressed.
+   * Secure handling of PII and uploaded data (CVs, potentially private code in future).
+   * Role-based access control for sponsors, judges, admins.
+   * Protection against submission spam/abuse.
+ * 6.5. Usability:
+   * Intuitive navigation for all user types.
+   * WCAG 2.1 AA accessibility compliance (long-term goal, prioritize key aspects for MVP).
+   * Responsive design for desktop, tablet, and mobile browsers.
+ * 6.6. Maintainability:
+   * Well-documented code.
+   * Modular architecture.
+ * 6.7. Data Privacy:
+   * GDPR/relevant data privacy compliance. Clear privacy policy.
+   * User control over data sharing (e.g., consent for sponsors to view CV).
+7. Release Criteria (MVP)
+ * Core Functionality:
+   * User Onboarding (OAuth with GitHub/LinkedIn, basic profile with CV upload).
+   * Solo Challenges Catalogue (list, filter by domain, detailed view with rubric).
+   * Submission Pipeline (repo link, deck PDF, video link uploader; basic LLM evaluation of pitch deck; provisional score).
+   * Real-time Event Leaderboards (based on provisional, then manually updated final scores).
+   * Sponsor Dashboard (create challenges - admin assisted initially, view ranked submissions for their challenge).
+   * Basic Notification System (email for submission status, score updates).
+   * Rudimentary Human Judging Module (admins can input human scores and feedback).
+   * Manual Badging for "Challenge Winner" and "Sponsor Favorite."
+ * Essential Pages: Homepage, About Us, Contact, Terms of Service, Privacy Policy.
+ * Testing: Key user flows tested and functional. Major bugs resolved.
+ * Security: Basic security measures implemented.
+8. Success Metrics
+8.1. Adoption & Engagement (Builders):
+ * of Registered AI Builders
+ * of Profile Completions (CV, GitHub linked)
+ * of Submissions per Challenge (Average & Total)
+ * Monthly Active Builders
+ * Builder Retention Rate (participating in >1 challenge within X months)
+ * Average time spent on platform per session
+8.2. Adoption & Value (Sponsors):
+ * of Registered Companies/Sponsors
+ * of Challenges Posted (Sponsored vs. Platform-authored)
+ * of Participants per Sponsored Challenge
+ * Sponsor satisfaction (NPS/Survey) with candidate quality & platform ease of use
+ * of Candidate Packets Downloaded / Direct Engagements Initiated
+8.3. Platform Health & Growth:
+ * Overall Monthly Active Users (MAU)
+ * Conversion rate from builder registration to first submission
+ * Time to fill X judge slots for a challenge
+ * Traffic sources & growth rate
+ * (Later) Revenue from sponsorships
+8.4. Hiring Impact (Lagging Indicator - via Surveys):
+ * of Interviews secured through the platform
+ * of Job/Freelance offers made/accepted
+9. Future Considerations (Post-MVP)
+ * Team Challenges: Support for team participation and submission.
+ * Advanced Automated Scoring: LLM for code summarization/quality feedback, automated UX heuristics for web prototypes.
+ * Direct Code Execution & Testing: More robust sandboxed environments for running and auto-testing parts of the AI solution.
+ * Skill-Specific Leaderboards & Badges: Deeper granularity in recognizing specific AI skill mastery.
+ * Community Features: Challenge-specific discussion forums, Q&A with sponsors, builder-to-builder interactions.
+ * Personalized Learning Paths: Suggest resources or easier challenges based on performance.
+ * Sponsor Tiers & Premium Features: Advanced analytics, private challenges, direct ATS integration.
+ * Integration with Educational Platforms: Partnerships to attract emerging talent.
+ * AI Ethics & Bias Audits: Regular review of LLM prompts and judging processes to mitigate bias.
+ * Mobile App: For on-the-go notifications and Browse.
+10. Open Questions
+ * Initial strategy for sourcing human judges? (Internal, volunteer experts, paid?)
+ * Specifics of IP handling for submitted solutions – default to participant ownership unless sponsor terms state otherwise?
+ * Monetization strategy beyond challenge sponsorship for long-term sustainability?
+ * How to initially populate the platform with compelling challenges before sponsor traction is high? (Platform-authored challenges?)
+ * Detailed LLM prompt engineering strategies for various rubric components.
+This PRD is a living document and will be updated as EliteBuilders evolves through development, testing, and user feedback.
