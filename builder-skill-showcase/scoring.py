@@ -169,7 +169,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
     user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
     
     message = Mail(
-        from_email="no-reply@elitebuilders.com",
+        from_email="p.budhwar@gmail.com",
         to_emails=user["email"],
         subject="Provisional Score Available",
         html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
