@@ -257,8 +257,9 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active': return 'bg-green-500';
-      case 'closed': return 'bg-red-500';
+      case 'completed': return 'bg-red-500';
       case 'draft': return 'bg-yellow-500';
+      case 'judging': return 'bg-blue-500';
       default: return 'bg-gray-500';
     }
   };
@@ -367,7 +368,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                     <SelectContent>
                       <SelectItem value="active">Active</SelectItem>
                       <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="judging">Judging</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
