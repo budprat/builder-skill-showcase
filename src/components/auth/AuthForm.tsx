@@ -24,6 +24,20 @@ interface AuthFormProps {
   onToggleMode: () => void;
 }
 
+// Cleanup auth state to prevent limbo states
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -43,6 +57,15 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     
     try {
       if (mode === "signup") {
+        // Clean up any existing auth state before signing up
+        cleanupAuthState();
+        
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (err) {
+          // Continue even if this fails
+        }
+
         const { error } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
@@ -70,17 +93,35 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           title: "Account created successfully!",
           description: "Welcome to EliteBuilders. You can now start participating in challenges.",
         });
+
+        // Force page reload for clean state
+        window.location.href = "/dashboard";
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        // Clean up any existing auth state before signing in
+        cleanupAuthState();
+        
+        try {
+          await supabase.auth.signOut({ scope: 'global' });
+        } catch (err) {
+          // Continue even if this fails
+        }
+
+        console.log("Attempting to sign in with:", data.email);
+        
+        const { data: signInData, error } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
         });
 
+        console.log("Sign in response:", { signInData, error });
+
         if (error) {
-          if (error.message.includes("Invalid login credentials")) {
+          console.error("Sign in error:", error);
+          
+          if (error.message.includes("Invalid login credentials") || error.message.includes("Email not confirmed")) {
             toast({
-              title: "Invalid credentials",
-              description: "Please check your email and password and try again.",
+              title: "Sign in failed",
+              description: "Please check your email and password. If you just signed up, please check your email for confirmation.",
               variant: "destructive",
             });
             return;
@@ -88,13 +129,18 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           throw error;
         }
 
-        toast({
-          title: "Welcome back!",
-          description: "Successfully signed in to EliteBuilders.",
-        });
-        
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
+        if (signInData?.user) {
+          console.log("Sign in successful, user:", signInData.user.id);
+          toast({
+            title: "Welcome back!",
+            description: "Successfully signed in to EliteBuilders.",
+          });
+          
+          // Force page reload for clean state
+          window.location.href = "/dashboard";
+        } else {
+          throw new Error("No user data returned from sign in");
+        }
       }
     } catch (error: any) {
       console.error("Auth error:", error);
@@ -136,6 +182,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                         {...field}
                         placeholder="Enter your full name"
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -156,6 +203,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                       type="email"
                       placeholder="Enter your email"
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -176,6 +224,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         className="bg-white/10 border-white/20 text-white placeholder:text-white/60 pr-10"
+                        disabled={isLoading}
                       />
                       <Button
                         type="button"
@@ -183,6 +232,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4 text-white/60" />
@@ -200,7 +250,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50"
             >
               {isLoading ? "Loading..." : mode === "signin" ? "Sign In" : "Create Account"}
             </Button>
@@ -215,6 +265,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             variant="link"
             onClick={onToggleMode}
             className="text-blue-400 hover:text-blue-300 p-0"
+            disabled={isLoading}
           >
             {mode === "signin" ? "Sign up here" : "Sign in here"}
           </Button>

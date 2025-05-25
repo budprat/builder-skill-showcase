@@ -25,24 +25,41 @@ export const useAuth = () => {
   return context;
 };
 
+// Cleanup auth state to prevent limbo states
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        
+        if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        } else {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -52,10 +69,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error signing out:", error);
-    } else {
+    try {
+      console.log("Signing out...");
+      
+      // Clean up auth state first
+      cleanupAuthState();
+      
+      // Attempt global sign out
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
+      if (error) {
+        console.error("Error signing out:", error);
+      }
+      
+      // Force page reload for clean state
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Force redirect even if there's an error
       window.location.href = "/";
     }
   };
