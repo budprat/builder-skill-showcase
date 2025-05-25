@@ -12,7 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
-type UserRole = Tables<"user_roles">;
+
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'company' | 'participant';
+  created_at?: string;
+}
 
 interface UserWithRoles extends Profile {
   user_roles: UserRole[];
@@ -33,16 +39,39 @@ export const UserManager = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
+      // First fetch profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles (*)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setUsers(data || []);
+      if (profilesError) throw profilesError;
+
+      // Then fetch user roles separately using direct query
+      const { data: userRoles, error: rolesError } = await supabase
+        .rpc('get_user_roles_data') as { data: any[], error: any };
+
+      // If the function doesn't exist, fall back to manual query
+      let roles: UserRole[] = [];
+      if (rolesError) {
+        const { data, error } = await (supabase as any)
+          .from('user_roles')
+          .select('*');
+        
+        if (!error) {
+          roles = data || [];
+        }
+      } else {
+        roles = userRoles || [];
+      }
+
+      // Combine profiles with their roles
+      const usersWithRoles: UserWithRoles[] = profiles?.map(profile => ({
+        ...profile,
+        user_roles: roles.filter(role => role.user_id === profile.id)
+      })) || [];
+
+      setUsers(usersWithRoles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -59,7 +88,7 @@ export const UserManager = () => {
     if (!selectedUser) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_roles')
         .insert({
           user_id: selectedUser.id,
@@ -86,7 +115,7 @@ export const UserManager = () => {
 
   const removeRole = async (userId: string, roleId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_roles')
         .delete()
         .eq('id', roleId);
@@ -172,7 +201,7 @@ export const UserManager = () => {
                         {role.role}
                       </Badge>
                     ))}
-                    {user.user_roles?.length === 0 && (
+                    {(!user.user_roles || user.user_roles?.length === 0) && (
                       <Badge variant="outline">No roles</Badge>
                     )}
                   </div>

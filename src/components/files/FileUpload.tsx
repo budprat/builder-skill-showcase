@@ -10,77 +10,88 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
-  onFileUploaded?: (fileData: any) => void;
-  acceptedTypes?: string[];
-  maxSize?: number;
-  label?: string;
+  fileType: 'cv' | 'document';
+  title: string;
+  description: string;
+  acceptedTypes?: string;
+  onUploadComplete?: (url: string) => void;
 }
 
 export const FileUpload = ({ 
-  onFileUploaded, 
-  acceptedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'],
-  maxSize = 50 * 1024 * 1024, // 50MB
-  label = "Upload File"
+  fileType, 
+  title, 
+  description, 
+  acceptedTypes = ".pdf,.doc,.docx",
+  onUploadComplete 
 }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !user) return;
-
-    if (file.size > maxSize) {
-      toast({
-        title: "File too large",
-        description: `File size must be less than ${maxSize / (1024 * 1024)}MB`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUploading(true);
-
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      setUploading(true);
+      
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
 
-      // Upload file to storage
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to upload files",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${fileType}_${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('user-files')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw uploadError;
+      }
 
-      // Save file metadata to database
-      const { data: fileRecord, error: dbError } = await supabase
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('user-files')
+        .getPublicUrl(fileName);
+
+      // Save file record to database
+      const { error: dbError } = await supabase
         .from('user_files')
         .insert({
           user_id: user.id,
           file_name: file.name,
-          file_path: uploadData.path,
-          file_type: fileExt || 'unknown',
+          file_path: fileName,
+          file_type: fileType,
           file_size: file.size,
           mime_type: file.type,
-        })
-        .select()
-        .single();
+        });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        throw dbError;
+      }
 
-      setUploadedFiles(prev => [...prev, fileRecord]);
-      onFileUploaded?.(fileRecord);
-
+      setUploadedFile(publicUrl);
+      
       toast({
         title: "Success",
         description: "File uploaded successfully",
       });
 
+      onUploadComplete?.(publicUrl);
+
     } catch (error: any) {
-      console.error('Upload error:', error);
       toast({
-        title: "Upload failed",
+        title: "Error",
         description: error.message || "Failed to upload file",
         variant: "destructive",
       });
@@ -89,27 +100,8 @@ export const FileUpload = ({
     }
   };
 
-  const removeFile = async (fileId: string, filePath: string) => {
-    try {
-      // Delete from storage
-      await supabase.storage.from('user-files').remove([filePath]);
-      
-      // Delete from database
-      await supabase.from('user_files').delete().eq('id', fileId);
-      
-      setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
-      
-      toast({
-        title: "Success",
-        description: "File removed successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to remove file",
-        variant: "destructive",
-      });
-    }
+  const removeFile = () => {
+    setUploadedFile(null);
   };
 
   return (
@@ -117,54 +109,43 @@ export const FileUpload = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Upload className="h-5 w-5" />
-          {label}
+          {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <Label htmlFor="file-upload">Choose file</Label>
-          <Input
-            id="file-upload"
-            type="file"
-            accept={acceptedTypes.join(',')}
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="mt-1"
-          />
-          <p className="text-sm text-muted-foreground mt-1">
-            Accepted formats: {acceptedTypes.join(', ')}. Max size: {maxSize / (1024 * 1024)}MB
-          </p>
-        </div>
-
-        {uploadedFiles.length > 0 && (
-          <div className="space-y-2">
-            <Label>Uploaded Files</Label>
-            {uploadedFiles.map((file) => (
-              <div key={file.id} className="flex items-center justify-between p-2 border rounded">
-                <div className="flex items-center gap-2">
-                  <File className="h-4 w-4" />
-                  <span className="text-sm">{file.file_name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    ({(file.file_size / 1024).toFixed(1)} KB)
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeFile(file.id, file.file_path)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      <CardContent>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{description}</p>
+          
+          {!uploadedFile ? (
+            <div className="space-y-2">
+              <Label htmlFor={`file-${fileType}`}>Choose file</Label>
+              <Input
+                id={`file-${fileType}`}
+                type="file"
+                accept={acceptedTypes}
+                onChange={handleFileUpload}
+                disabled={uploading}
+              />
+              {uploading && (
+                <p className="text-sm text-muted-foreground">Uploading...</p>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center gap-2">
+                <File className="h-4 w-4" />
+                <span className="text-sm">File uploaded successfully</span>
               </div>
-            ))}
-          </div>
-        )}
-
-        {uploading && (
-          <div className="text-center text-sm text-muted-foreground">
-            Uploading...
-          </div>
-        )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={removeFile}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
