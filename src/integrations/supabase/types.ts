@@ -9,6 +9,104 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      badges: {
+        Row: {
+          badge_type: string
+          criteria: Json
+          description: string
+          icon_url: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          badge_type: string
+          criteria?: Json
+          description: string
+          icon_url?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          badge_type?: string
+          criteria?: Json
+          description?: string
+          icon_url?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      challenges: {
+        Row: {
+          company_id: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          created_at: string | null
+          data_pack_description: string | null
+          data_pack_url: string | null
+          deliverables: Json
+          description: string
+          domains: string[]
+          evaluation_rubric: Json
+          id: string
+          prize_amount: number | null
+          prize_description: string | null
+          problem_statement: string
+          status: string | null
+          submission_deadline: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          data_pack_description?: string | null
+          data_pack_url?: string | null
+          deliverables?: Json
+          description: string
+          domains: string[]
+          evaluation_rubric?: Json
+          id?: string
+          prize_amount?: number | null
+          prize_description?: string | null
+          problem_statement: string
+          status?: string | null
+          submission_deadline: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          created_at?: string | null
+          data_pack_description?: string | null
+          data_pack_url?: string | null
+          deliverables?: Json
+          description?: string
+          domains?: string[]
+          evaluation_rubric?: Json
+          id?: string
+          prize_amount?: number | null
+          prize_description?: string | null
+          problem_statement?: string
+          status?: string | null
+          submission_deadline?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           content: string | null
@@ -29,6 +127,172 @@ export type Database = {
           metadata?: Json | null
         }
         Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          cv_url: string | null
+          experience_level: string | null
+          full_name: string | null
+          github_url: string | null
+          id: string
+          linkedin_url: string | null
+          location: string | null
+          portfolio_url: string | null
+          skills: string[] | null
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          cv_url?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          github_url?: string | null
+          id: string
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          cv_url?: string | null
+          experience_level?: string | null
+          full_name?: string | null
+          github_url?: string | null
+          id?: string
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          challenge_id: string
+          created_at: string | null
+          demo_video_url: string
+          final_score: number | null
+          human_feedback: Json | null
+          id: string
+          llm_feedback: Json | null
+          participant_id: string
+          pitch_deck_url: string
+          provisional_score: number | null
+          rank: number | null
+          readme_notes: string | null
+          repository_url: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string | null
+          demo_video_url: string
+          final_score?: number | null
+          human_feedback?: Json | null
+          id?: string
+          llm_feedback?: Json | null
+          participant_id: string
+          pitch_deck_url: string
+          provisional_score?: number | null
+          rank?: number | null
+          readme_notes?: string | null
+          repository_url: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string | null
+          demo_video_url?: string
+          final_score?: number | null
+          human_feedback?: Json | null
+          id?: string
+          llm_feedback?: Json | null
+          participant_id?: string
+          pitch_deck_url?: string
+          provisional_score?: number | null
+          rank?: number | null
+          readme_notes?: string | null
+          repository_url?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          challenge_id: string | null
+          earned_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          challenge_id?: string | null
+          earned_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          challenge_id?: string | null
+          earned_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

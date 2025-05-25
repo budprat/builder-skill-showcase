@@ -1,13 +1,15 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Github, Search, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedFilter, setSelectedFilter] = useState("all");
 
   const challenges = [
@@ -62,32 +64,17 @@ const Index = () => {
     { value: "fintech", label: "FinTech AI" }
   ];
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/challenges");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-white/5 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-              E
-            </div>
-            <span className="text-2xl font-bold text-white">EliteBuilders</span>
-          </div>
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#challenges" className="text-white/80 hover:text-white transition-colors">Challenges</a>
-            <a href="#leaderboard" className="text-white/80 hover:text-white transition-colors">Leaderboard</a>
-            <a href="#for-companies" className="text-white/80 hover:text-white transition-colors">For Companies</a>
-          </nav>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" className="text-white hover:bg-white/10">
-              Sign In
-            </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-              Join as Builder
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-20 px-4">
@@ -104,7 +91,11 @@ const Index = () => {
             Get discovered by top companies and earn recognition for your practical AI expertise.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg px-8 py-4">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-lg px-8 py-4"
+              onClick={handleGetStarted}
+            >
               Start Building <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 text-lg px-8 py-4">
@@ -188,7 +179,11 @@ const Index = () => {
           </div>
 
           <div className="text-center mt-8">
-            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className="border-white/20 text-white hover:bg-white/10"
+              onClick={() => navigate("/challenges")}
+            >
               View All Challenges
             </Button>
           </div>
