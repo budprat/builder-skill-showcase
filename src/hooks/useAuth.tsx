@@ -42,22 +42,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("User exists:", !!session?.user);
         console.log("User ID:", session?.user?.id);
         console.log("Access token exists:", !!session?.access_token);
+        console.log("Current path:", window.location.pathname);
         
         // Update state immediately
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
         
-        // Handle different auth events
+        // Handle different auth events - but only redirect if not on auth page
         if (event === 'SIGNED_IN' && session?.user) {
           console.log("=== USER SIGNED IN SUCCESSFULLY ===");
-          console.log("Redirecting to dashboard...");
           
-          // Use setTimeout to ensure state updates are processed
-          setTimeout(() => {
-            console.log("Executing redirect to dashboard");
-            window.location.href = "/dashboard";
-          }, 100);
+          // Only redirect if we're not on the auth page (to avoid interfering with debugging)
+          if (window.location.pathname !== "/auth") {
+            console.log("Redirecting to dashboard...");
+            setTimeout(() => {
+              console.log("Executing redirect to dashboard");
+              window.location.href = "/dashboard";
+            }, 100);
+          } else {
+            console.log("On auth page - skipping automatic redirect");
+          }
         }
         
         if (event === 'SIGNED_OUT') {
