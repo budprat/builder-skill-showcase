@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +31,7 @@ export const FileUpload = ({
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
-      
+
       if (!event.target.files || event.target.files.length === 0) {
         return;
       }
@@ -59,39 +58,37 @@ export const FileUpload = ({
         throw uploadError;
       }
 
+      if (!uploadData) {
+        throw new Error('Upload failed - no data returned');
+      }
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('user-files')
         .getPublicUrl(fileName);
 
-      // Save file record to database
-      const { error: dbError } = await supabase
-        .from('user_files')
-        .insert({
-          user_id: user.id,
-          file_name: file.name,
-          file_path: fileName,
-          file_type: fileType,
-          file_size: file.size,
-          mime_type: file.type,
-        });
-
-      if (dbError) {
-        throw dbError;
-      }
+      console.log('File uploaded successfully:', {
+        fileName,
+        uploadPath: uploadData.path,
+        publicUrl
+      });
 
       setUploadedFile(publicUrl);
-      
+
       toast({
         title: "Success",
         description: "File uploaded successfully",
       });
 
-      onUploadComplete?.(publicUrl);
+      // Call the callback with the file URL
+      if (onUploadComplete) {
+        onUploadComplete(publicUrl);
+      }
 
     } catch (error: any) {
+      console.error('Upload error:', error);
       toast({
-        title: "Error",
+        title: "Upload failed",
         description: error.message || "Failed to upload file",
         variant: "destructive",
       });
@@ -115,7 +112,7 @@ export const FileUpload = ({
       <CardContent>
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">{description}</p>
-          
+
           {!uploadedFile ? (
             <div className="space-y-2">
               <Label htmlFor={`file-${fileType}`}>Choose file</Label>

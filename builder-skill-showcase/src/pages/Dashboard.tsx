@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, FileText, Trophy, Upload } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { User, FileText, Trophy, Upload, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
@@ -24,6 +25,15 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [updating, setUpdating] = useState(false);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
+  const [editingSubmissionId, setEditingSubmissionId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    repository_url: "",
+    pitch_deck_url: "",
+    demo_video_url: "",
+    readme_notes: "",
+  });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const [profileData, setProfileData] = useState({
     full_name: "",
@@ -132,6 +142,127 @@ const Dashboard = () => {
       title: "File uploaded",
       description: `${fileData.file_name} has been uploaded successfully`,
     });
+  };
+
+  const deleteSubmission = async (submissionId: string) => {
+    if (!user) return;
+
+    // Add confirmation dialog
+    const confirmed = window.confirm("Are you sure you want to delete this submission? This action cannot be undone.");
+    if (!confirmed) return;
+
+    setDeletingSubmissionId(submissionId);
+    try {
+      console.log('Attempting to delete submission:', submissionId);
+      console.log('User ID:', user.id);
+
+      // First check if the submission exists and belongs to the user
+      const { data: submissionCheck, error: checkError } = await supabase
+        .from('submissions')
+        .select('id, participant_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking submission:', checkError);
+        throw new Error('Submission not found or access denied');
+      }
+
+      if (submissionCheck.participant_id !== user.id) {
+        throw new Error('You can only delete your own submissions');
+      }
+
+      // Delete any related scores first
+      const { error: scoresError } = await supabase
+        .from('scores')
+        .delete()
+        .eq('submission_id', submissionId);
+
+      if (scoresError) {
+        console.warn('Error deleting related scores:', scoresError);
+        // Continue with submission deletion even if scores deletion fails
+      }
+
+      // Delete the submission
+      const { error: deleteError } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', submissionId)
+        .eq('participant_id', user.id);
+
+      if (deleteError) {
+        console.error('Error deleting submission:', deleteError);
+        throw deleteError;
+      }
+
+      console.log('Submission deleted successfully');
+
+      toast({
+        title: "Success",
+        description: "Submission deleted successfully",
+      });
+
+      // Refresh submissions list
+      await fetchSubmissions();
+    } catch (error: any) {
+      console.error('Delete submission error:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete submission",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingSubmissionId(null);
+    }
+  };
+
+  const openEditDialog = (submission: Submission) => {
+    setEditingSubmissionId(submission.id);
+    setEditFormData({
+      repository_url: submission.repository_url || "",
+      pitch_deck_url: submission.pitch_deck_url || "",
+      demo_video_url: submission.demo_video_url || "",
+      readme_notes: submission.readme_notes || "",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const updateSubmission = async () => {
+    if (!user || !editingSubmissionId) return;
+
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .update({
+          repository_url: editFormData.repository_url,
+          pitch_deck_url: editFormData.pitch_deck_url,
+          demo_video_url: editFormData.demo_video_url,
+          readme_notes: editFormData.readme_notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingSubmissionId)
+        .eq('participant_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Submission updated successfully",
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingSubmissionId(null);
+      await fetchSubmissions();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update submission",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   if (loading) {
@@ -286,7 +417,7 @@ const Dashboard = () => {
                     {submissions.map((submission: any) => (
                       <div key={submission.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="flex-1">
                             <h3 className="font-semibold">{submission.challenges?.title}</h3>
                             <p className="text-sm text-muted-foreground">
                               Company: {submission.challenges?.company_name || 'N/A'}
@@ -297,17 +428,161 @@ const Dashboard = () => {
                                 <Badge>Score: {submission.final_score}/100</Badge>
                               )}
                             </div>
+                            
+                            {/* Show submission links */}
+                            <div className="flex items-center gap-2 mt-3">
+                              {submission.repository_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.repository_url, '_blank')}
+                                >
+                                  Repository
+                                </Button>
+                              )}
+                              {submission.pitch_deck_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.pitch_deck_url, '_blank')}
+                                >
+                                  Pitch Deck
+                                </Button>
+                              )}
+                              {submission.demo_video_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.demo_video_url, '_blank')}
+                                >
+                                  Demo Video
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(submission.created_at).toLocaleDateString()}
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(submission.created_at).toLocaleDateString()}
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditDialog(submission)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteSubmission(submission.id)}
+                              disabled={deletingSubmissionId === submission.id}
+                            >
+                              {deletingSubmissionId === submission.id ? (
+                                "Deleting..."
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </>
+                              )}
+                            </Button>
                           </div>
                         </div>
+                        
+                        {submission.readme_notes && (
+                          <div className="mt-3 p-2 bg-muted rounded text-sm">
+                            <strong>Notes:</strong> {submission.readme_notes}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 )}
               </CardContent>
             </Card>
+
+            {/* Edit Submission Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Edit Submission</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit_repository_url">Repository URL</Label>
+                    <Input
+                      id="edit_repository_url"
+                      value={editFormData.repository_url}
+                      onChange={(e) => setEditFormData({...editFormData, repository_url: e.target.value})}
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_pitch_deck_url">Pitch Deck URL</Label>
+                    <Input
+                      id="edit_pitch_deck_url"
+                      value={editFormData.pitch_deck_url}
+                      onChange={(e) => setEditFormData({...editFormData, pitch_deck_url: e.target.value})}
+                      placeholder="https://drive.google.com/file/d/... or upload PDF below"
+                    />
+                  </div>
+
+                  {/* PDF Upload Section */}
+                  <div className="border rounded-lg p-4 bg-muted/50">
+                    <Label className="text-sm font-medium mb-2 block">Upload Pitch Deck PDF</Label>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Upload a PDF file directly to replace or set the pitch deck URL
+                    </p>
+                    <FileUpload
+                      fileType="document"
+                      title="Pitch Deck PDF"
+                      description="Upload your pitch deck as a PDF file"
+                      acceptedTypes=".pdf"
+                      onUploadComplete={(url) => {
+                        setEditFormData({...editFormData, pitch_deck_url: url});
+                        toast({
+                          title: "Success",
+                          description: "PDF uploaded and pitch deck URL updated",
+                        });
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_demo_video_url">Demo Video URL</Label>
+                    <Input
+                      id="edit_demo_video_url"
+                      value={editFormData.demo_video_url}
+                      onChange={(e) => setEditFormData({...editFormData, demo_video_url: e.target.value})}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_readme_notes">Additional Notes</Label>
+                    <Textarea
+                      id="edit_readme_notes"
+                      value={editFormData.readme_notes}
+                      onChange={(e) => setEditFormData({...editFormData, readme_notes: e.target.value})}
+                      placeholder="Any additional information about your solution..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={updateSubmission} disabled={updating}>
+                      {updating ? "Updating..." : "Update Submission"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="files">
