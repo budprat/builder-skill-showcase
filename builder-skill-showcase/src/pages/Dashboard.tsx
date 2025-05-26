@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, FileText, Trophy, Upload } from "lucide-react";
+import { User, FileText, Trophy, Upload, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [updating, setUpdating] = useState(false);
+  const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
 
   const [profileData, setProfileData] = useState({
     full_name: "",
@@ -132,6 +133,38 @@ const Dashboard = () => {
       title: "File uploaded",
       description: `${fileData.file_name} has been uploaded successfully`,
     });
+  };
+
+  const deleteSubmission = async (submissionId: string) => {
+    if (!user) return;
+
+    setDeletingSubmissionId(submissionId);
+    try {
+      // Delete from submissions table
+      const { error } = await supabase
+        .from('submissions')
+        .delete()
+        .eq('id', submissionId)
+        .eq('participant_id', user.id); // Ensure user can only delete their own submissions
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Submission deleted successfully",
+      });
+
+      // Refresh submissions list
+      fetchSubmissions();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete submission",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingSubmissionId(null);
+    }
   };
 
   if (loading) {
@@ -286,7 +319,7 @@ const Dashboard = () => {
                     {submissions.map((submission: any) => (
                       <div key={submission.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between">
-                          <div>
+                          <div className="flex-1">
                             <h3 className="font-semibold">{submission.challenges?.title}</h3>
                             <p className="text-sm text-muted-foreground">
                               Company: {submission.challenges?.company_name || 'N/A'}
@@ -297,11 +330,66 @@ const Dashboard = () => {
                                 <Badge>Score: {submission.final_score}/100</Badge>
                               )}
                             </div>
+                            
+                            {/* Show submission links */}
+                            <div className="flex items-center gap-2 mt-3">
+                              {submission.repository_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.repository_url, '_blank')}
+                                >
+                                  Repository
+                                </Button>
+                              )}
+                              {submission.pitch_deck_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.pitch_deck_url, '_blank')}
+                                >
+                                  Pitch Deck
+                                </Button>
+                              )}
+                              {submission.demo_video_url && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => window.open(submission.demo_video_url, '_blank')}
+                                >
+                                  Demo Video
+                                </Button>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground">
-                            {new Date(submission.created_at).toLocaleDateString()}
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(submission.created_at).toLocaleDateString()}
+                            </div>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => deleteSubmission(submission.id)}
+                              disabled={deletingSubmissionId === submission.id}
+                            >
+                              {deletingSubmissionId === submission.id ? (
+                                "Deleting..."
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4 mr-1" />
+                                  Delete
+                                </>
+                              )}
+                            </Button>
                           </div>
                         </div>
+                        
+                        {submission.readme_notes && (
+                          <div className="mt-3 p-2 bg-muted rounded text-sm">
+                            <strong>Notes:</strong> {submission.readme_notes}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
