@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, User, Trophy, Clock, ChevronDown } from "lucide-react";
+import { Search, Calendar, User, Trophy, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -28,26 +27,29 @@ const Challenges = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedDomain, setSelectedDomain] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const statusFilters = [
-    { value: "all", label: "All Challenges" },
-    { value: "active", label: "Active" }
-  ];
-
-  const domainTabs = [
-    { value: "upcoming", label: "Upcoming" },
-    { value: "all", label: "All Skills" },
-    { value: "healthcare", label: "Healthcare AI" },
-    { value: "deeplearning", label: "Deeplearning" },
-    { value: "nlp", label: "NLP" },
+  const domains = [
+    { value: "all", label: "All Domains" },
+    { value: "nlp", label: "Natural Language Processing" },
     { value: "cv", label: "Computer Vision" },
     { value: "ml", label: "Machine Learning" },
-    { value: "data", label: "Data Science" }
+    { value: "healthcare", label: "Healthcare AI" },
+    { value: "fintech", label: "FinTech AI" },
+    { value: "edtech", label: "EdTech AI" },
+    { value: "iot", label: "IoT AI" },
+    { value: "ecommerce", label: "E-commerce AI" }
+  ];
+
+  const statuses = [
+    { value: "all", label: "All Statuses" },
+    { value: "active", label: "Active" },
+    { value: "judging", label: "Judging" },
+    { value: "completed", label: "Completed" }
   ];
 
   useEffect(() => {
@@ -79,192 +81,203 @@ const Challenges = () => {
     const matchesSearch = challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          challenge.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          challenge.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDomain = selectedDomain === "all" || challenge.domains?.some(domain => 
+      domain.toLowerCase().includes(selectedDomain.toLowerCase())
+    );
     const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
-    const matchesDomain = selectedDomain === "all" || selectedDomain === "upcoming" || 
-                         challenge.domains?.some(domain => 
-                           domain.toLowerCase().includes(selectedDomain.toLowerCase())
-                         );
     
-    return matchesSearch && matchesStatus && matchesDomain;
+    return matchesSearch && matchesDomain && matchesStatus;
   });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-500/20 text-green-300 border-green-500/30";
+      case "judging":
+        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+      case "completed":
+        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+    }
+  };
+
+  const formatPrize = (amount: number) => {
+    if (!amount) return 'TBD';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDeadline = (deadline: string) => {
+    return new Date(deadline).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getDaysLeft = (deadline: string) => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   const handleJoinChallenge = (challengeId: string) => {
     if (!user) {
       navigate("/auth");
       return;
     }
+    // Navigate to challenge details page (we'll implement this next)
     navigate(`/challenges/${challengeId}`);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
         <Header />
-        <div className="container mx-auto px-6 py-8 flex items-center justify-center">
-          <div className="text-gray-600 text-lg">Loading challenges...</div>
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-white text-lg">Loading challenges...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif' }}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2" style={{ letterSpacing: '-0.02em' }}>
-            Challenges
-          </h1>
-          <p className="text-base text-gray-500 mb-8">
-            Explore challenges and compete to win prizes and recognition
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-4">AI Building Challenges</h1>
+          <p className="text-white/80 text-lg">Showcase your AI product development skills and compete for prizes</p>
         </div>
 
-        {/* Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-3 mb-8">
-          {/* Search and Status Filters */}
-          <div className="flex gap-3 flex-1">
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
               <Input
-                placeholder="Search challenges..."
+                placeholder="Search challenges, companies, or technologies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-9 bg-gray-100 border-0 rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-blue-500"
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
-            
-            {/* Status Filters */}
-            <div className="flex gap-3">
-              {statusFilters.map(filter => (
-                <button
-                  key={filter.value}
-                  onClick={() => setSelectedStatus(filter.value)}
-                  className={`h-9 px-4 text-sm font-medium rounded-md border transition-colors ${
-                    selectedStatus === filter.value
-                      ? 'bg-gray-100 border-gray-300'
-                      : 'bg-white border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  {filter.label}
-                  <ChevronDown className="ml-2 h-3 w-3 inline" />
-                </button>
+            <select
+              value={selectedDomain}
+              onChange={(e) => setSelectedDomain(e.target.value)}
+              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+            >
+              {domains.map(domain => (
+                <option key={domain.value} value={domain.value} className="bg-slate-900">
+                  {domain.label}
+                </option>
               ))}
-            </div>
-          </div>
-
-          {/* Domain Tabs */}
-          <div className="flex gap-2 overflow-x-auto">
-            {domainTabs.map(tab => (
-              <button
-                key={tab.value}
-                onClick={() => setSelectedDomain(tab.value)}
-                className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
-                  selectedDomain === tab.value
-                    ? 'bg-gray-200 text-gray-900'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+            >
+              {statuses.map(status => (
+                <option key={status.value} value={status.value} className="bg-slate-900">
+                  {status.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
         {/* Results Summary */}
         <div className="mb-6">
-          <p className="text-sm text-gray-500">
+          <p className="text-white/80">
             Showing {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? 's' : ''}
             {searchTerm && ` for "${searchTerm}"`}
           </p>
         </div>
 
-        {/* Challenge Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredChallenges.map((challenge) => (
-            <div 
-              key={challenge.id} 
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:transform hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer"
-              onClick={() => handleJoinChallenge(challenge.id)}
-            >
-              {/* Featured Image */}
-              <div className="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                <div className="text-white text-lg font-semibold">
-                  {challenge.company_name || 'Challenge'}
-                </div>
-              </div>
-              
-              {/* Card Content */}
-              <div className="p-5">
-                {/* Company Label */}
-                <div className="text-xs text-gray-500 font-medium mb-2">
-                  by {challenge.company_name || 'Anonymous'}
-                </div>
-                
-                {/* Title */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2" style={{ lineHeight: '1.4' }}>
-                  {challenge.title}
-                </h3>
-                
-                {/* Description */}
-                <p className="text-sm text-gray-600 mb-4 line-clamp-3" style={{ lineHeight: '1.6' }}>
-                  {challenge.description}
-                </p>
-
-                {/* Prize and Status */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-sm font-medium text-gray-900">
-                    {challenge.prize_amount ? `$${challenge.prize_amount.toLocaleString()}` : 'Prize TBD'}
+        {/* Challenge Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {filteredChallenges.map((challenge) => {
+            const daysLeft = getDaysLeft(challenge.submission_deadline);
+            return (
+              <Card key={challenge.id} className="bg-white/10 border-white/20 hover:bg-white/15 transition-all cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge className={getStatusColor(challenge.status)}>
+                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+                    </Badge>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-white">
+                        {formatPrize(challenge.prize_amount)}
+                      </div>
+                      {challenge.prize_description && (
+                        <div className="text-white/60 text-sm">{challenge.prize_description}</div>
+                      )}
+                    </div>
                   </div>
-                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    challenge.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : challenge.status === 'judging'
-                      ? 'bg-yellow-100 text-yellow-800'
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
-                  </div>
-                </div>
+                  <CardTitle className="text-white text-xl mb-2">{challenge.title}</CardTitle>
+                  <CardDescription className="text-white/70">
+                    by {challenge.company_name || 'Anonymous'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-white/80">{challenge.description}</p>
+                  
+                  {challenge.domains && challenge.domains.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.domains.map((domain) => (
+                        <Badge key={domain} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                          {domain}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Domains */}
-                {challenge.domains && challenge.domains.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {challenge.domains.slice(0, 3).map((domain) => (
-                      <span key={domain} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                        {domain}
-                      </span>
-                    ))}
-                    {challenge.domains.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                        +{challenge.domains.length - 3} more
-                      </span>
-                    )}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center text-white/60">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Due: {formatDeadline(challenge.submission_deadline)}
+                    </div>
+                    <div className="flex items-center text-white/60">
+                      <Clock className="h-4 w-4 mr-2" />
+                      {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
+                    </div>
                   </div>
-                )}
 
-                {/* Join Button */}
-                <button 
-                  className="w-full h-9 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleJoinChallenge(challenge.id);
-                  }}
-                >
-                  Join Challenge
-                </button>
-              </div>
-            </div>
-          ))}
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      disabled={challenge.status === "completed" || daysLeft <= 0}
+                      onClick={() => handleJoinChallenge(challenge.id)}
+                    >
+                      {challenge.status === "active" ? "Join Challenge" : 
+                       challenge.status === "judging" ? "View Results" : "View Details"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-white/20 text-white hover:bg-white/10"
+                      onClick={() => handleJoinChallenge(challenge.id)}
+                    >
+                      Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
-        {/* Empty State */}
         {filteredChallenges.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-gray-500 text-base mb-4">No challenges found matching your criteria.</div>
+            <div className="text-white/60 text-lg">No challenges found matching your criteria.</div>
             <Button 
               onClick={() => {
                 setSearchTerm("");
@@ -272,7 +285,7 @@ const Challenges = () => {
                 setSelectedStatus("all");
               }}
               variant="outline" 
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              className="mt-4 border-white/20 text-white hover:bg-white/10"
             >
               Clear Filters
             </Button>
