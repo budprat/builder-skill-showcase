@@ -138,16 +138,55 @@ const Dashboard = () => {
   const deleteSubmission = async (submissionId: string) => {
     if (!user) return;
 
+    // Add confirmation dialog
+    const confirmed = window.confirm("Are you sure you want to delete this submission? This action cannot be undone.");
+    if (!confirmed) return;
+
     setDeletingSubmissionId(submissionId);
     try {
-      // Delete from submissions table
-      const { error } = await supabase
+      console.log('Attempting to delete submission:', submissionId);
+      console.log('User ID:', user.id);
+
+      // First check if the submission exists and belongs to the user
+      const { data: submissionCheck, error: checkError } = await supabase
+        .from('submissions')
+        .select('id, participant_id')
+        .eq('id', submissionId)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking submission:', checkError);
+        throw new Error('Submission not found or access denied');
+      }
+
+      if (submissionCheck.participant_id !== user.id) {
+        throw new Error('You can only delete your own submissions');
+      }
+
+      // Delete any related scores first
+      const { error: scoresError } = await supabase
+        .from('scores')
+        .delete()
+        .eq('submission_id', submissionId);
+
+      if (scoresError) {
+        console.warn('Error deleting related scores:', scoresError);
+        // Continue with submission deletion even if scores deletion fails
+      }
+
+      // Delete the submission
+      const { error: deleteError } = await supabase
         .from('submissions')
         .delete()
         .eq('id', submissionId)
-        .eq('participant_id', user.id); // Ensure user can only delete their own submissions
+        .eq('participant_id', user.id);
 
-      if (error) throw error;
+      if (deleteError) {
+        console.error('Error deleting submission:', deleteError);
+        throw deleteError;
+      }
+
+      console.log('Submission deleted successfully');
 
       toast({
         title: "Success",
@@ -155,8 +194,9 @@ const Dashboard = () => {
       });
 
       // Refresh submissions list
-      fetchSubmissions();
+      await fetchSubmissions();
     } catch (error: any) {
+      console.error('Delete submission error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete submission",
