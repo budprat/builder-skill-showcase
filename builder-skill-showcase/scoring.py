@@ -34,16 +34,16 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
         # The frontend uses 'user-files' bucket for file uploads
         bucket_name = "user-files"
-        
+
         print(f"Attempting to download file from bucket '{bucket_name}' with path: {supabase_path}")
-        
+
         # The user-files bucket should already exist from frontend uploads
         print(f"Attempting to access bucket '{bucket_name}'")
-        
+
         # Parse the file path from URL if needed
         actual_bucket = bucket_name
         actual_path = supabase_path
-        
+
         if supabase_path.startswith("http"):
             # Extract the file path from the URL
             # Example: https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/filename.pdf
@@ -59,41 +59,41 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
                     raise Exception(f"Could not parse file path from URL: {supabase_path}")
             else:
                 raise Exception(f"Invalid storage URL format: {supabase_path}")
-        
+
         # Try to download the file
         try:
             file_data = supabase.storage.from_(actual_bucket).download(actual_path)
             print(f"Successfully downloaded file, size: {len(file_data)} bytes")
         except Exception as download_error:
             print(f"Download failed from {actual_bucket}: {download_error}")
-            
+
             # List available files for debugging
             try:
                 files = supabase.storage.from_(actual_bucket).list()
                 print(f"Available files in bucket: {[f.get('name', f) for f in files]}")
-                
+
                 # Try to list files in the user's folder
                 user_folder = actual_path.split('/')[0]
                 user_files = supabase.storage.from_(actual_bucket).list(user_folder)
                 print(f"Available files in user folder {user_folder}: {[f.get('name', f) for f in user_files]}")
             except Exception as list_error:
                 print(f"Could not list files in bucket: {list_error}")
-            
+
             return f"PDF file not found at path: {actual_path}. Please ensure the file was uploaded correctly."
-        
+
         # Save and extract PDF
         temp_file_path = "/tmp/pitch_deck.pdf"
         with open(temp_file_path, "wb") as f:
             f.write(file_data)
-        
+
         print(f"Saved PDF to {temp_file_path}")
-        
+
         # Extract text from PDF
         with pdfplumber.open(temp_file_path) as pdf:
             text_content = "\n".join(page.extract_text() or "" for page in pdf.pages)
             print(f"Extracted {len(text_content)} characters from PDF")
             return text_content
-            
+
     except Exception as e:
         print(f"PDF extraction error: {e}")
         return f"Error extracting PDF: {str(e)}"
@@ -127,24 +127,24 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     for criterion, weight in rubric.items():
         prompt = f"""
         Evaluate the {criterion} criterion for this pitch deck based on the challenge description.
-        
+
         Challenge: {challenge_description}
-        
+
         Pitch Deck Content: {pitch_deck_text[:4000]}
-        
+
         Please evaluate the {criterion} aspect and return ONLY a JSON response in this exact format:
         {{"score": <integer from 0 to 100>, "explanation": "<2-3 sentence explanation>"}}
         """
-        
+
         try:
             response = gemini_model.generate_content(
                 prompt,
                 generation_config={"max_output_tokens": 300}
             )
-            
+
             # Extract JSON from response
             response_text = response.text.strip()
-            
+
             # Try to find JSON in the response
             if "{" in response_text and "}" in response_text:
                 start = response_text.find("{")
@@ -157,7 +157,7 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
                 # Fallback if JSON parsing fails
                 score = 50.0  # Default score
                 explanation = f"Evaluation completed for {criterion} criterion."
-                
+
         except Exception as e:
             print(f"Gemini API error for {criterion}: {e}")
             score = 50.0  # Default score
@@ -193,28 +193,35 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
     return submission
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
+    print(f"Generating feedback for submission {submission['id']}")
+    
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
-    
+
     """
     for criterion, score in submission["llm_scores"].items():
         feedback_prompt += f"{criterion}: {score['score']:.1f}/20.0 - {score['explanation']}\n"
-    
+
     feedback_prompt += "\nPlease provide an encouraging summary with specific actionable feedback for improvement."
-    
+
     try:
         response = gemini_model.generate_content(
             feedback_prompt,
             generation_config={"max_output_tokens": 500}
         )
         feedback = response.text
+        print(f"Generated feedback for submission {submission['id']}")
     except Exception as e:
         print(f"Feedback generation error: {e}")
         feedback = "Thank you for your submission. Detailed feedback will be available soon."
 
-    supabase.table("scores").update(
-        {"feedback": feedback, "status": "notified"}
-    ).eq("submission_id", submission["id"]).execute()
+    try:
+        supabase.table("scores").update(
+            {"feedback": feedback, "status": "final"}
+        ).eq("submission_id", submission["id"]).execute()
+        print(f"Updated score record with feedback for submission {submission['id']}")
+    except Exception as e:
+        print(f"Error updating score record: {e}")
 
     try:
         user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
@@ -225,37 +232,64 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
             html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
         )
         sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        sg.send(message)
+        #sg.send(message)
+        #print(f"Sent notification email for submission {submission['id']}")
     except Exception as e:
         print(f"Notification error: {e}")
 
     submission["status"] = "reviewed"
+    print(f"Set submission {submission['id']} status to 'reviewed'")
     return submission
 
 async def process_submission(submission: dict, supabase: Client):
+    print(f"Processing submission {submission['id']} with initial status: {submission['status']}")
+    
     submission = await pre_screen_submission(submission)
+    print(f"Pre-screening completed for submission {submission['id']}, status: {submission['status']}")
+    
     if submission["status"] == "prescreened":
         submission = await evaluate_rubric(submission, supabase)
+        print(f"Rubric evaluation completed for submission {submission['id']}, status: {submission['status']}")
+        
         submission = await aggregate_score(submission, supabase)
+        print(f"Score aggregation completed for submission {submission['id']}, status: {submission['status']}")
+        
         submission = await generate_feedback_and_notify(submission, supabase)
+        print(f"Feedback generation completed for submission {submission['id']}, status: {submission['status']}")
 
-    # Only update status if it's a valid value
-    valid_statuses = ["submitted", "reviewed", "pending", "prescreened", "evaluated", "scored"]
-    if submission["status"] in valid_statuses:
+    # Update the submission status in the database
+    try:
         supabase.table("submissions").update(
             {"status": submission["status"]}
         ).eq("id", submission["id"]).execute()
-    else:
-        # Use 'reviewed' as the final status instead of 'notified'
-        supabase.table("submissions").update(
-            {"status": "reviewed"}
-        ).eq("id", submission["id"]).execute()
+        print(f"Successfully updated submission {submission['id']} status to '{submission['status']}' in database")
+    except Exception as e:
+        print(f"Error updating submission {submission['id']} status: {e}")
+        # Try to set to reviewed as fallback
+        try:
+            supabase.table("submissions").update(
+                {"status": "reviewed"}
+            ).eq("id", submission["id"]).execute()
+            print(f"Fallback: Set submission {submission['id']} status to 'reviewed'")
+        except Exception as fallback_error:
+            print(f"Fallback failed for submission {submission['id']}: {fallback_error}")
 
 async def poll_submissions():
+    print("Starting submission polling service...")
     while True:
-        submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
-        for submission in submissions:
-            await process_submission(submission, supabase)
+        try:
+            submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
+            print(f"Found {len(submissions)} submissions with 'submitted' status")
+            
+            for submission in submissions:
+                print(f"Processing submission ID: {submission['id']}")
+                await process_submission(submission, supabase)
+                print(f"Completed processing submission ID: {submission['id']}")
+                
+        except Exception as e:
+            print(f"Error in polling loop: {e}")
+            
+        print("Waiting 60 seconds before next poll...")
         await asyncio.sleep(60)
 
 if __name__ == "__main__":
