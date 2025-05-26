@@ -34,16 +34,16 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
         # The frontend uses 'user-files' bucket for file uploads
         bucket_name = "user-files"
-        
+
         print(f"Attempting to download file from bucket '{bucket_name}' with path: {supabase_path}")
-        
+
         # The user-files bucket should already exist from frontend uploads
         print(f"Attempting to access bucket '{bucket_name}'")
-        
+
         # Parse the file path from URL if needed
         actual_bucket = bucket_name
         actual_path = supabase_path
-        
+
         if supabase_path.startswith("http"):
             # Extract the file path from the URL
             # Example: https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/filename.pdf
@@ -59,41 +59,41 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
                     raise Exception(f"Could not parse file path from URL: {supabase_path}")
             else:
                 raise Exception(f"Invalid storage URL format: {supabase_path}")
-        
+
         # Try to download the file
         try:
             file_data = supabase.storage.from_(actual_bucket).download(actual_path)
             print(f"Successfully downloaded file, size: {len(file_data)} bytes")
         except Exception as download_error:
             print(f"Download failed from {actual_bucket}: {download_error}")
-            
+
             # List available files for debugging
             try:
                 files = supabase.storage.from_(actual_bucket).list()
                 print(f"Available files in bucket: {[f.get('name', f) for f in files]}")
-                
+
                 # Try to list files in the user's folder
                 user_folder = actual_path.split('/')[0]
                 user_files = supabase.storage.from_(actual_bucket).list(user_folder)
                 print(f"Available files in user folder {user_folder}: {[f.get('name', f) for f in user_files]}")
             except Exception as list_error:
                 print(f"Could not list files in bucket: {list_error}")
-            
+
             return f"PDF file not found at path: {actual_path}. Please ensure the file was uploaded correctly."
-        
+
         # Save and extract PDF
         temp_file_path = "/tmp/pitch_deck.pdf"
         with open(temp_file_path, "wb") as f:
             f.write(file_data)
-        
+
         print(f"Saved PDF to {temp_file_path}")
-        
+
         # Extract text from PDF
         with pdfplumber.open(temp_file_path) as pdf:
             text_content = "\n".join(page.extract_text() or "" for page in pdf.pages)
             print(f"Extracted {len(text_content)} characters from PDF")
             return text_content
-            
+
     except Exception as e:
         print(f"PDF extraction error: {e}")
         return f"Error extracting PDF: {str(e)}"
@@ -127,24 +127,24 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     for criterion, weight in rubric.items():
         prompt = f"""
         Evaluate the {criterion} criterion for this pitch deck based on the challenge description.
-        
+
         Challenge: {challenge_description}
-        
+
         Pitch Deck Content: {pitch_deck_text[:4000]}
-        
+
         Please evaluate the {criterion} aspect and return ONLY a JSON response in this exact format:
         {{"score": <integer from 0 to 100>, "explanation": "<2-3 sentence explanation>"}}
         """
-        
+
         try:
             response = gemini_model.generate_content(
                 prompt,
                 generation_config={"max_output_tokens": 300}
             )
-            
+
             # Extract JSON from response
             response_text = response.text.strip()
-            
+
             # Try to find JSON in the response
             if "{" in response_text and "}" in response_text:
                 start = response_text.find("{")
@@ -157,7 +157,7 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
                 # Fallback if JSON parsing fails
                 score = 50.0  # Default score
                 explanation = f"Evaluation completed for {criterion} criterion."
-                
+
         except Exception as e:
             print(f"Gemini API error for {criterion}: {e}")
             score = 50.0  # Default score
@@ -195,13 +195,13 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
-    
+
     """
     for criterion, score in submission["llm_scores"].items():
         feedback_prompt += f"{criterion}: {score['score']:.1f}/20.0 - {score['explanation']}\n"
-    
+
     feedback_prompt += "\nPlease provide an encouraging summary with specific actionable feedback for improvement."
-    
+
     try:
         response = gemini_model.generate_content(
             feedback_prompt,
