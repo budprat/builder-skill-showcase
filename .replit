@@ -14,15 +14,11 @@ runButton = "Run"
 [[workflows.workflow]]
 name = "Run"
 author = 36874920
-mode = "parallel"
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd builder-skill-showcase && npm run dev"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd builder-skill-showcase && python scoring.py"
 
 [[ports]]
 localPort = 8080

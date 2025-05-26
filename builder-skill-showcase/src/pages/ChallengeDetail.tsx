@@ -428,8 +428,8 @@ const ChallengeDetail = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-white/70">Status:</span>
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                        Submitted
+                      <Badge className={submission.status === 'reviewed' ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"}>
+                        {submission.status === 'reviewed' ? 'Reviewed' : submission.status === 'submitted' ? 'Under Review' : submission.status}
                       </Badge>
                     </div>
                     <div className="text-white/70 text-sm">
@@ -439,52 +439,24 @@ const ChallengeDetail = () => {
                     {submission.scores && submission.scores.length > 0 && (
                       <>
                         <div>
-                          <h4 className="font-semibold mb-2 text-white">Overall Score</h4>
+                          <h4 className="text-white/70 font-semibold mb-2">Overall Score</h4>
                           <p className="text-2xl font-bold text-white">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
                         </div>
 
                         <div>
-                          <h4 className="font-semibold mb-2 text-white">GitHub Repository Analysis</h4>
-                          <div className="border border-white/20 p-3 rounded bg-white/10">
+                          <h4 className="text-white/70 font-semibold mb-2">GitHub Repository Analysis</h4>
+                          <div className="border border-white/20 p-3 rounded bg-white/5">
                             <div className="flex justify-between items-center mb-2">
-                              <span className="font-medium text-white">Repository Validation</span>
+                              <span className="font-medium text-white/80">Repository Validation</span>
                               <span className="font-bold text-white">{submission.scores[0].pre_screening_score}/5</span>
                             </div>
-                            <p className="text-sm text-white/70">
+                            <p className="text-sm text-white/60">
                               {submission.scores[0].pre_screening_score === 5 
                                 ? "✅ Repository exists and contains README.md" 
                                 : "❌ Repository validation failed - missing repository or README.md"}
                             </p>
                           </div>
                         </div>
-
-                        {submission.scores[0].llm_scores && (
-                          <div>
-                            <h4 className="font-semibold mb-2 text-white">Detailed Rubric Scores</h4>
-                            <div className="space-y-2">
-                              {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                <div key={criterion} className="border border-white/20 p-2 rounded bg-white/5">
-                                  <div className="flex justify-between items-center">
-                                    <span className="font-medium text-white">{criterion}</span>
-                                    <span className="font-bold text-white">{scoreData.score?.toFixed(1)}/20</span>
-                                  </div>
-                                  {scoreData.explanation && (
-                                    <p className="text-sm text-white/70 mt-1">{scoreData.explanation}</p>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {submission.scores[0].feedback && (
-                          <div>
-                            <h4 className="font-semibold mb-2 text-white">Feedback</h4>
-                            <div className="border border-white/20 p-3 rounded bg-white/10">
-                              <p className="text-white/80 whitespace-pre-wrap">{submission.scores[0].feedback}</p>
-                            </div>
-                          </div>
-                        )}
                       </>
                     )}
                     
