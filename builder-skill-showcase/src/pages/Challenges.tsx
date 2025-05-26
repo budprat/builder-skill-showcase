@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, User, Trophy, Clock } from "lucide-react";
+import { Search, Calendar, Clock, Toggle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -92,18 +93,18 @@ const Challenges = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-500/20 text-green-300 border-green-500/30";
+        return "bg-emerald-500 text-white";
       case "judging":
-        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+        return "bg-yellow-500 text-white";
       case "completed":
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+        return "bg-gray-500 text-white";
       default:
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+        return "bg-gray-500 text-white";
     }
   };
 
   const formatPrize = (amount: number) => {
-    if (!amount) return 'TBD';
+    if (!amount) return '$0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -132,13 +133,23 @@ const Challenges = () => {
       navigate("/auth");
       return;
     }
-    // Navigate to challenge details page (we'll implement this next)
     navigate(`/challenges/${challengeId}`);
+  };
+
+  const getDomainTagColor = (domain: string) => {
+    const colorMap: { [key: string]: string } = {
+      'Computer Vision': 'bg-gradient-to-r from-purple-500 to-blue-500',
+      'Healthcare AI': 'bg-gradient-to-r from-green-500 to-teal-500',
+      'Deep Learning': 'bg-gradient-to-r from-blue-500 to-purple-500',
+      'Natural Language Processing': 'bg-gradient-to-r from-pink-500 to-purple-500',
+      'Machine Learning': 'bg-gradient-to-r from-indigo-500 to-blue-500',
+    };
+    return colorMap[domain] || 'bg-slate-600';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900">
         <Header />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center">
           <div className="text-white text-lg">Loading challenges...</div>
@@ -148,35 +159,39 @@ const Challenges = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900" style={{fontFamily: '-apple-system, BlinkMacSystemFont, "Inter", sans-serif'}}>
       <Header />
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Main Container */}
+      <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">AI Building Challenges</h1>
-          <p className="text-white/80 text-lg">Showcase your AI product development skills and compete for prizes</p>
+        <div className="mb-12">
+          <h1 className="text-5xl font-bold text-white mb-6 leading-tight">AI Building Challenges</h1>
+          <p className="text-lg text-slate-300 mb-6">Showcase your AI product development skills and compete for prizes</p>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
-              <Input
-                placeholder="Search challenges, companies, or technologies..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
-              />
-            </div>
+        {/* Search and Filters */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-6">
+          {/* Search Bar */}
+          <div className="relative flex-1 lg:max-w-md">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <Input
+              placeholder="Search challenges, companies, or technologies..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-12 bg-slate-800 border-slate-700 text-white placeholder:text-slate-400 rounded-lg focus:border-purple-500 focus:ring-purple-500"
+            />
+          </div>
+
+          {/* Filters */}
+          <div className="flex gap-4">
             <select
               value={selectedDomain}
               onChange={(e) => setSelectedDomain(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-6 py-3 text-white focus:border-purple-500 focus:ring-purple-500 min-w-40"
             >
               {domains.map(domain => (
-                <option key={domain.value} value={domain.value} className="bg-slate-900">
+                <option key={domain.value} value={domain.value} className="bg-slate-800">
                   {domain.label}
                 </option>
               ))}
@@ -184,10 +199,10 @@ const Challenges = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-6 py-3 text-white focus:border-purple-500 focus:ring-purple-500 min-w-40"
             >
               {statuses.map(status => (
-                <option key={status.value} value={status.value} className="bg-slate-900">
+                <option key={status.value} value={status.value} className="bg-slate-800">
                   {status.label}
                 </option>
               ))}
@@ -196,22 +211,22 @@ const Challenges = () => {
         </div>
 
         {/* Results Summary */}
-        <div className="mb-6">
-          <p className="text-white/80">
+        <div className="mb-8">
+          <p className="text-sm text-slate-400">
             Showing {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? 's' : ''}
             {searchTerm && ` for "${searchTerm}"`}
           </p>
         </div>
 
-        {/* Challenge Cards */}
+        {/* Challenge Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredChallenges.map((challenge) => {
             const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
-              <Card key={challenge.id} className="bg-white/10 border-white/20 hover:bg-white/15 transition-all cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-start justify-between mb-2">
-                    <Badge className={getStatusColor(challenge.status)}>
+              <Card key={challenge.id} className="bg-slate-800 border-slate-700 hover:bg-slate-750 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 cursor-pointer rounded-2xl p-6">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between mb-4">
+                    <Badge className={`${getStatusColor(challenge.status)} px-2 py-1 text-xs font-medium rounded`}>
                       {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                     <div className="text-right">
@@ -219,55 +234,63 @@ const Challenges = () => {
                         {formatPrize(challenge.prize_amount)}
                       </div>
                       {challenge.prize_description && (
-                        <div className="text-white/60 text-sm">{challenge.prize_description}</div>
+                        <div className="text-orange-400 text-sm font-medium">{challenge.prize_description}</div>
                       )}
                     </div>
                   </div>
-                  <CardTitle className="text-white text-xl mb-2">{challenge.title}</CardTitle>
-                  <CardDescription className="text-white/70">
+                  <CardTitle className="text-white text-xl font-semibold mb-2">{challenge.title}</CardTitle>
+                  <CardDescription className="text-slate-400 text-sm">
                     by {challenge.company_name || 'Anonymous'}
                   </CardDescription>
                 </CardHeader>
+                
                 <CardContent className="space-y-4">
-                  <p className="text-white/80">{challenge.description}</p>
+                  <p className="text-slate-300 text-sm leading-relaxed line-clamp-3">{challenge.description}</p>
                   
                   {challenge.domains && challenge.domains.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {challenge.domains.map((domain) => (
-                        <Badge key={domain} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                        <Badge 
+                          key={domain} 
+                          className={`${getDomainTagColor(domain)} text-white text-xs px-3 py-1 rounded-full border-0`}
+                        >
                           {domain}
                         </Badge>
                       ))}
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center text-white/60">
+                  <div className="grid grid-cols-2 gap-4 text-sm text-slate-400">
+                    <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2" />
                       Due: {formatDeadline(challenge.submission_deadline)}
                     </div>
-                    <div className="flex items-center text-white/60">
+                    <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-2" />
                       {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex items-center gap-3 pt-4">
                     <Button 
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-2.5 rounded-lg transition-all duration-300"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
                       onClick={() => handleJoinChallenge(challenge.id)}
                     >
                       {challenge.status === "active" ? "Join Challenge" : 
                        challenge.status === "judging" ? "View Results" : "View Details"}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-white/20 text-white hover:bg-white/10"
-                      onClick={() => handleJoinChallenge(challenge.id)}
-                    >
-                      Details
-                    </Button>
+                    
+                    {/* Toggle Switch */}
+                    <div className="relative inline-block w-12 h-6">
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        defaultChecked={false}
+                      />
+                      <div className="block bg-slate-600 w-12 h-6 rounded-full cursor-pointer transition-colors duration-300"></div>
+                      <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300"></div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -276,8 +299,8 @@ const Challenges = () => {
         </div>
 
         {filteredChallenges.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-white/60 text-lg">No challenges found matching your criteria.</div>
+          <div className="text-center py-16">
+            <div className="text-slate-400 text-lg mb-4">No challenges found matching your criteria.</div>
             <Button 
               onClick={() => {
                 setSearchTerm("");
@@ -285,7 +308,7 @@ const Challenges = () => {
                 setSelectedStatus("all");
               }}
               variant="outline" 
-              className="mt-4 border-white/20 text-white hover:bg-white/10"
+              className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white"
             >
               Clear Filters
             </Button>
