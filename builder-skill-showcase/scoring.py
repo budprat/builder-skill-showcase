@@ -35,14 +35,21 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
         
         # Check if bucket exists and create if needed
         try:
-            buckets = supabase.storage.list_buckets()
-            bucket_exists = any(bucket.name == bucket_name for bucket in buckets)
-            if not bucket_exists:
+            buckets_response = supabase.storage.list_buckets()
+            existing_buckets = [bucket.name for bucket in buckets_response]
+            print(f"Existing buckets: {existing_buckets}")
+            
+            if bucket_name not in existing_buckets:
                 print(f"Bucket '{bucket_name}' doesn't exist, creating it...")
-                supabase.storage.create_bucket(bucket_name, {"public": True})
+                # Create bucket with correct syntax for Supabase Python client
+                create_response = supabase.storage.create_bucket(bucket_name, options={"public": True})
+                print(f"Bucket creation response: {create_response}")
                 print(f"Created bucket '{bucket_name}'")
+            else:
+                print(f"Bucket '{bucket_name}' already exists")
         except Exception as bucket_error:
             print(f"Error checking/creating bucket: {bucket_error}")
+            # Continue anyway - the bucket might exist but we can't list it due to permissions
         
         # Try to download the file directly
         try:
