@@ -1,77 +1,102 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Neural Network Theme Colors */
-    --background: 15 23% 16%; /* Dark Navy #0F172A */
-    --foreground: 210 40% 95%; /* Light text */
+    /* Primary Colors - Foundation & Trust */
+    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
+    --foreground: 215 25% 27%; /* Graphite #334155 */
 
-    /* Card backgrounds - Glassmorphic */
-    --card: 15 23% 16%; /* Dark Navy with transparency */
-    --card-foreground: 210 40% 95%;
+    /* Card backgrounds */
+    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
+    --card-foreground: 215 25% 27%; /* Graphite */
 
-    --popover: 15 23% 18%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 0 0% 100%; /* Titanium White */
+    --popover-foreground: 215 25% 27%; /* Graphite */
 
-    /* Primary - Neural Teal */
-    --primary: 172 76% 41%; /* Neural Teal #14B8A6 */
-    --primary-foreground: 15 23% 16%;
+    /* Primary Brand - Deep Space Blue */
+    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
+    --primary-foreground: 0 0% 100%; /* Titanium White */
 
-    /* Secondary - Neural Purple */
-    --secondary: 258 66% 65%; /* Neural Purple #8B5CF6 */
-    --secondary-foreground: 210 40% 95%;
+    /* Secondary - Subtle greys */
+    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
+    --secondary-foreground: 215 25% 27%; /* Graphite */
 
-    --muted: 15 23% 20%;
-    --muted-foreground: 210 20% 65%;
+    --muted: 216 33% 97%; /* Light Lunar Grey */
+    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
 
-    /* Accent - Gradient between teal and purple */
-    --accent: 172 76% 41%; /* Neural Teal */
-    --accent-foreground: 15 23% 16%;
+    /* Accent - Cyber Teal */
+    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
+    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
 
-    /* Destructive - Neural Red */
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 95%;
+    /* Destructive - Error Red */
+    --destructive: 0 84% 60%; /* Error Red #EF4444 */
+    --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 15 23% 25%;
-    --input: 15 23% 25%;
-    --ring: 172 76% 41%;
+    --border: 215 20% 82%; /* Light Stardust Silver */
+    --input: 215 20% 82%;
+    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Neural Network specific colors */
-    --neural-teal: 172 76% 41%; /* #14B8A6 */
-    --neural-purple: 258 66% 65%; /* #8B5CF6 */
-    --neural-connection: 0 0% 100%; /* White connections */
-    --neural-node-glow: 172 76% 61%; /* Brighter teal for glow */
-    --neural-dark: 15 23% 16%; /* Dark navy */
+    /* Sidebar colors */
+    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
+    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
+
+    /* Additional semantic colors */
+    --success: 142 71% 45%; /* Success Green #10B981 */
+    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
+    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
+    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
   }
 
   .dark {
-    --background: 15 23% 16%;
-    --foreground: 210 40% 95%;
-    --card: 15 23% 18%;
-    --card-foreground: 210 40% 95%;
-    --popover: 15 23% 18%;
-    --popover-foreground: 210 40% 95%;
-    --primary: 172 76% 41%;
-    --primary-foreground: 15 23% 16%;
-    --secondary: 258 66% 65%;
-    --secondary-foreground: 210 40% 95%;
-    --muted: 15 23% 20%;
-    --muted-foreground: 210 20% 65%;
-    --accent: 172 76% 41%;
-    --accent-foreground: 15 23% 16%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 95%;
-    --border: 15 23% 25%;
-    --input: 15 23% 25%;
-    --ring: 172 76% 41%;
+    /* Dark theme with Deep Space Blue as primary background */
+    --background: 215 100% 12%; /* Deep Space Blue */
+    --foreground: 0 0% 100%; /* Titanium White */
+
+    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 215 95% 15%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 177 100% 48%; /* Cyber Teal */
+    --primary-foreground: 215 100% 12%;
+
+    --secondary: 215 90% 18%;
+    --secondary-foreground: 215 20% 75%;
+
+    --muted: 215 90% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 177 100% 48%; /* Cyber Teal */
+    --accent-foreground: 215 100% 12%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 90% 18%;
+    --input: 215 90% 18%;
+    --ring: 177 100% 48%;
+
+    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 177 100% 48%;
+    --sidebar-primary-foreground: 215 100% 12%;
+    --sidebar-accent: 215 95% 15%;
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
   }
 }
 
@@ -81,311 +106,192 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
-    overflow-x: hidden;
   }
 
-  /* Neural Network Background */
-  .neural-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
-  }
-
-  /* Typography with neural glow */
+  /* Typography hierarchy following the design system */
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    text-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
   }
 
-  h1 { @apply text-4xl lg:text-5xl; }
-  h2 { @apply text-3xl lg:text-4xl; }
-  h3 { @apply text-2xl lg:text-3xl; }
-  h4 { @apply text-xl lg:text-2xl; }
-  h5 { @apply text-lg lg:text-xl; }
-  h6 { @apply text-base lg:text-lg; }
-
-  /* Glassmorphic Cards */
-  .neural-card {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(20, 184, 166, 0.2);
-    border-radius: 0.75rem;
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
+  h1 {
+    @apply text-4xl lg:text-5xl;
   }
 
-  .neural-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(20, 184, 166, 0.5), transparent);
+  h2 {
+    @apply text-3xl lg:text-4xl;
   }
 
-  .neural-card:hover {
-    border-color: rgba(20, 184, 166, 0.4);
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      0 0 20px rgba(20, 184, 166, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-    transition: all 0.3s ease;
+  h3 {
+    @apply text-2xl lg:text-3xl;
   }
 
-  /* Neural Nodes */
-  .neural-node {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #14B8A6, #8B5CF6);
-    box-shadow: 0 0 10px rgba(20, 184, 166, 0.6);
-    animation: neural-pulse 2s ease-in-out infinite;
-    position: absolute;
+  h4 {
+    @apply text-xl lg:text-2xl;
   }
 
-  .neural-node:hover {
-    transform: scale(1.5);
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.8);
-    animation: neural-bright-pulse 1s ease-in-out infinite;
+  h5 {
+    @apply text-lg lg:text-xl;
   }
 
-  /* Neural Connections */
-  .neural-connection {
-    position: absolute;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: neural-flow 3s linear infinite;
-    transform-origin: left center;
+  h6 {
+    @apply text-base lg:text-lg;
   }
 
-  /* Particle Effects */
-  .neural-particle {
-    position: fixed;
-    width: 2px;
-    height: 2px;
-    background: rgba(20, 184, 166, 0.8);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: particle-fade 1s ease-out forwards;
-    z-index: 1000;
+  /* Custom utility classes for the design system */
+  .text-cyber-teal {
+    color: hsl(var(--accent));
   }
 
-  /* Buttons with neural styling */
-  .neural-button {
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(139, 92, 246, 0.2));
-    border: 1px solid rgba(20, 184, 166, 0.3);
-    backdrop-filter: blur(10px);
-    color: hsl(var(--foreground));
-    position: relative;
-    overflow: hidden;
+  .bg-cyber-teal {
+    background-color: hsl(var(--accent));
   }
 
-  .neural-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s;
+  .text-nebula-purple {
+    color: hsl(var(--nebula-purple));
   }
 
-  .neural-button:hover::before {
-    left: 100%;
+  .bg-nebula-purple {
+    background-color: hsl(var(--nebula-purple));
   }
 
-  .neural-button:hover {
-    border-color: rgba(20, 184, 166, 0.5);
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
+  .text-deep-space {
+    color: hsl(var(--primary));
+  }
+
+  .bg-deep-space {
+    background-color: hsl(var(--primary));
+  }
+
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .bg-success {
+    background-color: hsl(var(--success));
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .bg-warning {
+    background-color: hsl(var(--warning));
+  }
+
+  .text-solar-flare {
+    color: hsl(var(--solar-flare));
+  }
+
+  .bg-solar-flare {
+    background-color: hsl(var(--solar-flare));
+  }
+
+  /* Geometric patterns and tech-inspired backgrounds */
+  .circuit-pattern {
+    background-image: 
+      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
+    background-size: 20px 20px;
+    opacity: 0.05;
+  }
+
+  .data-grid {
+    background-image: 
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.1;
+  }
+
+  /* Sophisticated card styling */
+  .elite-card {
+    @apply bg-card border border-border/50 rounded-lg shadow-sm;
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
+  }
+
+  .elite-card-hover {
+    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
+  }
+
+  /* Premium badge styling */
+  .elite-badge {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+    color: hsl(var(--primary));
+  }
+
+  .elite-badge-secondary {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
+    color: white;
+  }
+
+  /* Futuristic button styles */
+  .cta-primary {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
+    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
+  }
+
+  .cta-primary:hover {
+    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
     transform: translateY(-1px);
   }
 
-  /* Loading neural network animation */
-  .neural-loading {
-    display: flex;
-    gap: 4px;
-    align-items: center;
+  /* Progress and status indicators */
+  .progress-cyber {
+    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
   }
 
-  .neural-loading-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #14B8A6, #8B5CF6);
-    animation: neural-loading 1.4s ease-in-out infinite both;
+  /* Focus states with cyber teal */
+  .focus-cyber:focus {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
   }
 
-  .neural-loading-dot:nth-child(1) { animation-delay: -0.32s; }
-  .neural-loading-dot:nth-child(2) { animation-delay: -0.16s; }
-  .neural-loading-dot:nth-child(3) { animation-delay: 0s; }
-
-  /* Progress bars with neural flow */
-  .neural-progress {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(20, 184, 166, 0.2);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    position: relative;
+  /* Subtle animations for micro-interactions */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
   }
 
-  .neural-progress-fill {
-    background: linear-gradient(90deg, #14B8A6, #8B5CF6);
-    height: 100%;
-    position: relative;
-    overflow: hidden;
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
   }
 
-  .neural-progress-fill::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: neural-flow 2s linear infinite;
+  /* Grid system for structured layouts */
+  .elite-grid {
+    display: grid;
+    gap: 1.5rem;
   }
 
-  /* Badges with neural glow */
-  .neural-badge {
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(139, 92, 246, 0.2));
-    border: 1px solid rgba(20, 184, 166, 0.3);
-    backdrop-filter: blur(10px);
-    color: hsl(var(--foreground));
-    text-shadow: 0 0 5px rgba(20, 184, 166, 0.3);
+  .elite-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 
-  /* Input fields with neural styling */
-  .neural-input {
-    background: rgba(15, 23, 42, 0.6);
-    border: 1px solid rgba(20, 184, 166, 0.2);
-    backdrop-filter: blur(10px);
-    color: hsl(var(--foreground));
+  /* Professional spacing system */
+  .section-spacing {
+    @apply py-16 lg:py-24;
   }
 
-  .neural-input:focus {
-    border-color: rgba(20, 184, 166, 0.5);
-    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.1);
-    outline: none;
-  }
-
-  /* Scrollbar with neural styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #14B8A6, #8B5CF6);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #0D9488, #7C3AED);
+  .content-spacing {
+    @apply space-y-8 lg:space-y-12;
   }
 }
 
-/* Keyframe Animations */
-@keyframes neural-pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
+/* Scrollbar styling for a polished look */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-@keyframes neural-bright-pulse {
-  0%, 100% {
-    opacity: 0.8;
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.8);
-  }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 30px rgba(20, 184, 166, 1);
-  }
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
 }
 
-@keyframes neural-flow {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--accent));
+  border-radius: 3px;
 }
 
-@keyframes particle-fade {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-}
-
-@keyframes neural-loading {
-  0%, 80%, 100% {
-    transform: scale(0);
-    opacity: 0.3;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Utility classes for neural theme */
-.text-neural-glow {
-  text-shadow: 0 0 10px rgba(20, 184, 166, 0.4);
-}
-
-.bg-neural-gradient {
-  background: linear-gradient(135deg, #14B8A6, #8B5CF6);
-}
-
-.border-neural {
-  border-color: rgba(20, 184, 166, 0.3);
-}
-
-.shadow-neural {
-  box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .neural-node {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .neural-card {
-    backdrop-filter: blur(15px);
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent)/0.8);
 }

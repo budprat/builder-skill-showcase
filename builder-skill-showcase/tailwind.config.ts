@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -69,12 +70,6 @@ export default {
 				'solar-flare': 'hsl(var(--solar-flare))',
 				'success': 'hsl(var(--success))',
 				'warning': 'hsl(var(--warning))',
-				// Neural Network Theme Colors
-				'neural-dark': '#0F172A',
-				'neural-teal': '#14B8A6',
-				'neural-purple': '#8B5CF6',
-				'neural-connection': '#ffffff',
-				'neural-glow': '#22D3EE',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

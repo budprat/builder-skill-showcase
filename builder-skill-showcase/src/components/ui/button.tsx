@@ -5,19 +5,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "neural-button inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "neural-button border-neural-teal/30 hover:border-neural-teal/50 shadow-neural text-neural-glow",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
-          "bg-destructive/20 border-destructive/30 text-destructive-foreground hover:bg-destructive/30",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-neural-teal/20 bg-neural-dark/60 hover:bg-neural-teal/10 hover:border-neural-teal/40",
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "bg-neural-purple/20 border-neural-purple/30 text-secondary-foreground hover:bg-neural-purple/30",
-        ghost: "hover:bg-neural-teal/10 hover:text-neural-teal",
-        link: "text-neural-teal underline-offset-4 hover:underline text-neural-glow",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
