@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, FileText, Trophy, Upload, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { User, FileText, Trophy, Upload, Trash2, Edit } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
@@ -25,6 +26,14 @@ const Dashboard = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [updating, setUpdating] = useState(false);
   const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
+  const [editingSubmissionId, setEditingSubmissionId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    repository_url: "",
+    pitch_deck_url: "",
+    demo_video_url: "",
+    readme_notes: "",
+  });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const [profileData, setProfileData] = useState({
     full_name: "",
@@ -204,6 +213,55 @@ const Dashboard = () => {
       });
     } finally {
       setDeletingSubmissionId(null);
+    }
+  };
+
+  const openEditDialog = (submission: Submission) => {
+    setEditingSubmissionId(submission.id);
+    setEditFormData({
+      repository_url: submission.repository_url || "",
+      pitch_deck_url: submission.pitch_deck_url || "",
+      demo_video_url: submission.demo_video_url || "",
+      readme_notes: submission.readme_notes || "",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const updateSubmission = async () => {
+    if (!user || !editingSubmissionId) return;
+
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('submissions')
+        .update({
+          repository_url: editFormData.repository_url,
+          pitch_deck_url: editFormData.pitch_deck_url,
+          demo_video_url: editFormData.demo_video_url,
+          readme_notes: editFormData.readme_notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingSubmissionId)
+        .eq('participant_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Submission updated successfully",
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingSubmissionId(null);
+      await fetchSubmissions();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update submission",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -408,6 +466,14 @@ const Dashboard = () => {
                               {new Date(submission.created_at).toLocaleDateString()}
                             </div>
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditDialog(submission)}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
                               variant="destructive"
                               size="sm"
                               onClick={() => deleteSubmission(submission.id)}
@@ -436,6 +502,66 @@ const Dashboard = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Edit Submission Dialog */}
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Edit Submission</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit_repository_url">Repository URL</Label>
+                    <Input
+                      id="edit_repository_url"
+                      value={editFormData.repository_url}
+                      onChange={(e) => setEditFormData({...editFormData, repository_url: e.target.value})}
+                      placeholder="https://github.com/username/repo"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_pitch_deck_url">Pitch Deck URL</Label>
+                    <Input
+                      id="edit_pitch_deck_url"
+                      value={editFormData.pitch_deck_url}
+                      onChange={(e) => setEditFormData({...editFormData, pitch_deck_url: e.target.value})}
+                      placeholder="https://drive.google.com/file/d/..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_demo_video_url">Demo Video URL</Label>
+                    <Input
+                      id="edit_demo_video_url"
+                      value={editFormData.demo_video_url}
+                      onChange={(e) => setEditFormData({...editFormData, demo_video_url: e.target.value})}
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit_readme_notes">Additional Notes</Label>
+                    <Textarea
+                      id="edit_readme_notes"
+                      value={editFormData.readme_notes}
+                      onChange={(e) => setEditFormData({...editFormData, readme_notes: e.target.value})}
+                      placeholder="Any additional information about your solution..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={updateSubmission} disabled={updating}>
+                      {updating ? "Updating..." : "Update Submission"}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="files">
