@@ -14,10 +14,14 @@ from google.generativeai import configure, GenerativeModel
 # Load environment variables
 load_dotenv()
 
-# Use the same Supabase configuration as the frontend
+# Use service role key for backend operations
 SUPABASE_URL = "https://udjwjoymlofdocclufxv.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkandqb3ltbG9mZG9jY2x1Znh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDkwMzYsImV4cCI6MjA2MTUyNTAzNn0.mN9DM5QJGysbPOplOBSS7WH1qhPk4Y67JMd2gafzEog"
+# Use service role key from environment variable for backend operations
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkandqb3ltbG9mZG9jY2x1Znh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDkwMzYsImV4cCI6MjA2MTUyNTAzNn0.mN9DM5QJGysbPOplOBSS7WH1qhPk4Y67JMd2gafzEog"
 
+# Use service role key if available, otherwise fall back to anon key
+SUPABASE_KEY = SUPABASE_SERVICE_KEY if SUPABASE_SERVICE_KEY else SUPABASE_ANON_KEY
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Configure Gemini API
@@ -33,66 +37,49 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
         
         print(f"Attempting to download file from bucket '{bucket_name}' with path: {supabase_path}")
         
-        # Check if bucket exists and create if needed
-        try:
-            buckets_response = supabase.storage.list_buckets()
-            existing_buckets = [bucket.name for bucket in buckets_response]
-            print(f"Existing buckets: {existing_buckets}")
-            
-            if bucket_name not in existing_buckets:
-                print(f"Bucket '{bucket_name}' doesn't exist, creating it...")
-                # Create bucket with correct syntax for Supabase Python client
-                create_response = supabase.storage.create_bucket(bucket_name, options={"public": True})
-                print(f"Bucket creation response: {create_response}")
-                print(f"Created bucket '{bucket_name}'")
-            else:
-                print(f"Bucket '{bucket_name}' already exists")
-        except Exception as bucket_error:
-            print(f"Error checking/creating bucket: {bucket_error}")
-            # Continue anyway - the bucket might exist but we can't list it due to permissions
+        # The user-files bucket should already exist from frontend uploads
+        print(f"Attempting to access bucket '{bucket_name}'")
         
-        # Try to download the file directly
+        # Parse the file path from URL if needed
+        actual_bucket = bucket_name
+        actual_path = supabase_path
+        
+        if supabase_path.startswith("http"):
+            # Extract the file path from the URL
+            # Example: https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/filename.pdf
+            url_parts = supabase_path.split("/storage/v1/object/public/")
+            if len(url_parts) > 1:
+                # Extract bucket and file path
+                path_parts = url_parts[1].split("/", 1)
+                if len(path_parts) > 1:
+                    actual_bucket = path_parts[0]
+                    actual_path = path_parts[1]
+                    print(f"Extracted bucket: {actual_bucket}, path: {actual_path}")
+                else:
+                    raise Exception(f"Could not parse file path from URL: {supabase_path}")
+            else:
+                raise Exception(f"Invalid storage URL format: {supabase_path}")
+        
+        # Try to download the file
         try:
-            file_data = supabase.storage.from_(bucket_name).download(supabase_path)
+            file_data = supabase.storage.from_(actual_bucket).download(actual_path)
             print(f"Successfully downloaded file, size: {len(file_data)} bytes")
         except Exception as download_error:
-            print(f"Download failed from {bucket_name}: {download_error}")
+            print(f"Download failed from {actual_bucket}: {download_error}")
             
-            # If the path starts with a URL, extract just the file path
-            if supabase_path.startswith("http"):
-                # Extract the file path from the URL
-                # Example: https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/filename.pdf
-                url_parts = supabase_path.split("/storage/v1/object/public/")
-                if len(url_parts) > 1:
-                    # Extract bucket and file path
-                    path_parts = url_parts[1].split("/", 1)
-                    if len(path_parts) > 1:
-                        actual_bucket = path_parts[0]
-                        actual_path = path_parts[1]
-                        print(f"Extracted bucket: {actual_bucket}, path: {actual_path}")
-                        try:
-                            file_data = supabase.storage.from_(actual_bucket).download(actual_path)
-                        except Exception as second_download_error:
-                            print(f"Second download attempt failed: {second_download_error}")
-                            # Check if file exists in storage
-                            try:
-                                files = supabase.storage.from_(actual_bucket).list()
-                                print(f"Available files in bucket: {[f['name'] for f in files]}")
-                            except Exception as list_error:
-                                print(f"Could not list files in bucket: {list_error}")
-                            return "PDF file not found in storage. Please ensure the file was uploaded correctly."
-                    else:
-                        raise Exception(f"Could not parse file path from URL: {supabase_path}")
-                else:
-                    raise Exception(f"Invalid storage URL format: {supabase_path}")
-            else:
-                # Check if file exists when using direct path
-                try:
-                    files = supabase.storage.from_(bucket_name).list()
-                    print(f"Available files in bucket: {[f['name'] for f in files]}")
-                except Exception as list_error:
-                    print(f"Could not list files in bucket: {list_error}")
-                return f"PDF file not found at path: {supabase_path}. Please check the file upload."
+            # List available files for debugging
+            try:
+                files = supabase.storage.from_(actual_bucket).list()
+                print(f"Available files in bucket: {[f.get('name', f) for f in files]}")
+                
+                # Try to list files in the user's folder
+                user_folder = actual_path.split('/')[0]
+                user_files = supabase.storage.from_(actual_bucket).list(user_folder)
+                print(f"Available files in user folder {user_folder}: {[f.get('name', f) for f in user_files]}")
+            except Exception as list_error:
+                print(f"Could not list files in bucket: {list_error}")
+            
+            return f"PDF file not found at path: {actual_path}. Please ensure the file was uploaded correctly."
         
         # Save and extract PDF
         temp_file_path = "/tmp/pitch_deck.pdf"
