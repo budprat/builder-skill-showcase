@@ -1,21 +1,20 @@
-
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "cyber-badge",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "cyber-badge",
-        secondary: "cyber-badge-secondary",
+        default:
+          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+        secondary:
+          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
-          "bg-red-500/20 text-red-400 border-red-500/50 neon-glow-pink",
-        outline: "border border-cyber-electric-blue/50 bg-cyber-dark-gray/50 text-cyber-electric-blue backdrop-blur-md",
-        success: "bg-green-500/20 text-cyber-lime-green border-cyber-lime-green/50 neon-glow-green",
-        warning: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50",
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "text-foreground",
       },
     },
     defaultVariants: {

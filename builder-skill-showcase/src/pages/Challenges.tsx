@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Calendar, User, Trophy, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/layout/Header";
+import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
 
 interface Challenge {

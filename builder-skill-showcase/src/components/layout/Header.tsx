@@ -1,123 +1,182 @@
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Menu, X, User, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Zap, Code2, Shield } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
-const Header = () => {
+export const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate("/");
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 cyber-card border-b border-cyber-electric-blue/30 backdrop-blur-xl">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo with glitch effect */}
+    <header className="relative z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <div 
-            className="flex items-center space-x-3 cursor-pointer group"
-            onClick={() => navigate('/')}
+            className="text-xl font-bold text-white cursor-pointer"
+            onClick={() => navigate("/")}
           >
-            <div className="relative">
-              <Code2 className="h-8 w-8 text-cyber-electric-blue neon-glow-blue" />
-              <div className="absolute inset-0 animate-ping">
-                <Code2 className="h-8 w-8 text-cyber-neon-pink opacity-30" />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-2xl font-orbitron font-bold tracking-wider text-cyber-white group-hover:text-cyber-electric-blue transition-colors duration-300">
-                Elite<span className="text-cyber-neon-pink">Builders</span>
-              </h1>
-              <div className="h-0.5 bg-cyber-gradient-primary w-0 group-hover:w-full transition-all duration-500"></div>
-            </div>
+            Elite Builders
           </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <NavLink href="/challenges" icon={<Zap className="w-4 h-4" />}>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Button 
+              variant="ghost" 
+              className="text-white hover:text-white/80"
+              onClick={() => navigate("/challenges")}
+            >
               Challenges
-            </NavLink>
-            <NavLink href="/dashboard" icon={<User className="w-4 h-4" />}>
-              Dashboard
-            </NavLink>
-            {user?.email?.includes('admin') && (
-              <NavLink href="/admin" icon={<Shield className="w-4 h-4" />}>
-                Admin
-              </NavLink>
+            </Button>
+            {user && (
+              <Button 
+                variant="ghost" 
+                className="text-white hover:text-white/80"
+                onClick={() => navigate("/dashboard")}
+              >
+                Dashboard
+              </Button>
             )}
           </nav>
 
-          {/* User actions */}
-          <div className="flex items-center space-x-4">
+          {/* User Section */}
+          <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-sm font-rajdhani font-medium text-cyber-electric-blue">
-                    {user.user_metadata?.full_name || user.email}
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-cyber-lime-green rounded-full animate-pulse neon-glow-green"></div>
-                    <span className="text-xs text-cyber-lime-green font-rajdhani">ONLINE</span>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSignOut}
-                  className="group"
+              <>
+                <NotificationCenter />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end">
+                    <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/admin")}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Admin Panel</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:text-white/80"
+                  onClick={() => navigate("/auth")}
                 >
-                  <LogOut className="w-4 h-4 group-hover:text-cyber-neon-pink transition-colors" />
-                  <span className="hidden sm:inline">Sign Out</span>
+                  Sign In
+                </Button>
+                <Button 
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  onClick={() => navigate("/auth")}
+                >
+                  Get Started
                 </Button>
               </div>
-            ) : (
-              <Button
-                onClick={() => navigate('/auth')}
-                className="cyber-button"
-              >
-                <User className="w-4 h-4" />
-                Sign In
-              </Button>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Scanning line effect */}
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-cyber-gradient-primary opacity-50"></div>
-      <div className="absolute bottom-0 left-0 w-20 h-0.5 bg-cyber-electric-blue animate-pulse neon-glow-blue"></div>
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden text-white"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-white/10">
+            <div className="flex flex-col space-y-2">
+              <Button 
+                variant="ghost" 
+                className="text-white hover:text-white/80 justify-start"
+                onClick={() => {
+                  navigate("/challenges");
+                  setIsMenuOpen(false);
+                }}
+              >
+                Challenges
+              </Button>
+              {user ? (
+                <>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-white/80 justify-start"
+                    onClick={() => {
+                      navigate("/dashboard");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-white/80 justify-start"
+                    onClick={() => {
+                      navigate("/admin");
+                      setIsMenuOpen(false);
+                    }}
+                  >
+                    Admin Panel
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="text-white hover:text-white/80 justify-start"
+                    onClick={handleSignOut}
+                  >
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <Button 
+                  variant="ghost" 
+                  className="text-white hover:text-white/80 justify-start"
+                  onClick={() => {
+                    navigate("/auth");
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   );
 };
-
-interface NavLinkProps {
-  href: string;
-  children: React.ReactNode;
-  icon?: React.ReactNode;
-}
-
-const NavLink = ({ href, children, icon }: NavLinkProps) => {
-  const navigate = useNavigate();
-
-  return (
-    <button
-      onClick={() => navigate(href)}
-      className="group flex items-center space-x-2 text-cyber-white/80 hover:text-cyber-electric-blue font-rajdhani font-medium tracking-wide transition-all duration-300 relative"
-    >
-      {icon && (
-        <span className="group-hover:text-cyber-electric-blue group-hover:drop-shadow-[0_0_8px_rgba(0,217,255,0.8)] transition-all duration-300">
-          {icon}
-        </span>
-      )}
-      <span className="group-hover:text-cyber-electric-blue transition-colors duration-300">
-        {children}
-      </span>
-      <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-cyber-electric-blue group-hover:w-full transition-all duration-300 neon-glow-blue"></div>
-    </button>
-  );
-};
-
-export default Header;
