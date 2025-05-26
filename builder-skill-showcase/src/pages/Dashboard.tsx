@@ -505,7 +505,7 @@ const Dashboard = () => {
 
             {/* Edit Submission Dialog */}
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Edit Submission</DialogTitle>
                 </DialogHeader>
@@ -526,7 +526,28 @@ const Dashboard = () => {
                       id="edit_pitch_deck_url"
                       value={editFormData.pitch_deck_url}
                       onChange={(e) => setEditFormData({...editFormData, pitch_deck_url: e.target.value})}
-                      placeholder="https://drive.google.com/file/d/..."
+                      placeholder="https://drive.google.com/file/d/... or upload PDF below"
+                    />
+                  </div>
+
+                  {/* PDF Upload Section */}
+                  <div className="border rounded-lg p-4 bg-muted/50">
+                    <Label className="text-sm font-medium mb-2 block">Upload Pitch Deck PDF</Label>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Upload a PDF file directly to replace or set the pitch deck URL
+                    </p>
+                    <FileUpload
+                      fileType="document"
+                      title="Pitch Deck PDF"
+                      description="Upload your pitch deck as a PDF file"
+                      acceptedTypes=".pdf"
+                      onUploadComplete={(url) => {
+                        setEditFormData({...editFormData, pitch_deck_url: url});
+                        toast({
+                          title: "Success",
+                          description: "PDF uploaded and pitch deck URL updated",
+                        });
+                      }}
                     />
                   </div>
                   
