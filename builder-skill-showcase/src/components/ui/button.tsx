@@ -6,22 +6,22 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-bold transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "neo-primary hover-lift",
-        destructive: "bg-hot-pink text-white shadow-sm hover:bg-hot-pink/90 hover-lift glow-pink",
-        outline: "neo-secondary hover-lift",
-        secondary: "neo-secondary hover-lift",
-        ghost: "hover:bg-white/10 hover:text-neon-green text-white/80 transition-colors",
-        link: "text-neon-green underline-offset-4 hover:underline",
+        default: "elite-btn-primary",
+        destructive: "bg-red-500 text-white hover:bg-red-600 rounded-md px-6 py-3",
+        outline: "border border-elite-blue text-elite-blue bg-white hover:bg-elite-light rounded-md px-6 py-3",
+        secondary: "elite-btn-secondary",
+        ghost: "text-elite-blue hover:bg-elite-light rounded-md px-4 py-2",
+        link: "text-elite-orange underline-offset-4 hover:underline px-0 py-0",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-lg px-3",
-        lg: "h-12 rounded-xl px-8",
-        icon: "h-10 w-10",
+        default: "px-6 py-3 text-base",
+        sm: "px-4 py-2 text-sm rounded-sm",
+        lg: "px-8 py-4 text-lg rounded-md",
+        icon: "h-10 w-10 rounded-md",
       },
     },
     defaultVariants: {

@@ -1,157 +1,139 @@
 
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Star, Trophy, Users, Zap, Code, Brain, Rocket, Shield, Target, Award, ChevronRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
+import { 
+  Brain, 
+  Code, 
+  Trophy, 
+  Users, 
+  Zap, 
+  Star,
+  ArrowRight,
+  CheckCircle,
+  Target,
+  Award,
+  Lightbulb
+} from "lucide-react";
 
-const Index = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [showAdminTools, setShowAdminTools] = useState(false);
-
-  // Show admin tools if user email contains 'admin' or is a specific test email
-  useEffect(() => {
-    if (user?.email && (user.email.includes('admin') || user.email === 'test@example.com')) {
-      setShowAdminTools(true);
-    }
-  }, [user]);
-
+export default function Index() {
   const features = [
     {
       icon: Brain,
       title: "AI-Powered Challenges",
-      description: "Cutting-edge AI problems that push the boundaries of what's possible",
-      color: "text-electric-purple"
-    },
-    {
-      icon: Trophy,
-      title: "Premium Rewards",
-      description: "Substantial prizes and recognition for outstanding innovations",
-      color: "text-electric-orange"
+      description: "Take on cutting-edge AI challenges designed by industry experts to push your skills to the limit."
     },
     {
       icon: Code,
-      title: "Real-World Impact",
-      description: "Build solutions that matter and shape the future of technology",
-      color: "text-neon-green"
+      title: "Real-World Projects",
+      description: "Build practical AI solutions that solve actual business problems and showcase your expertise."
+    },
+    {
+      icon: Trophy,
+      title: "Elite Recognition",
+      description: "Earn prestigious badges and certificates that demonstrate your AI mastery to employers worldwide."
     },
     {
       icon: Users,
-      title: "Elite Community",
-      description: "Connect with top-tier AI builders and industry leaders",
-      color: "text-electric-blue"
+      title: "Expert Community",
+      description: "Connect with top AI developers, get mentorship, and collaborate on groundbreaking projects."
     }
   ];
 
   const stats = [
-    { number: "10K+", label: "Elite Builders", icon: Users },
-    { number: "$500K+", label: "Total Prizes", icon: Trophy },
-    { number: "95%", label: "Success Rate", icon: Target },
-    { number: "24/7", label: "AI Support", icon: Shield }
+    { number: "10,000+", label: "Developers" },
+    { number: "500+", label: "Challenges" },
+    { number: "50+", label: "Companies" },
+    { number: "95%", label: "Success Rate" }
+  ];
+
+  const benefits = [
+    "Industry-recognized certifications",
+    "Direct hiring pipeline to top companies",
+    "Exclusive access to AI tools and resources",
+    "Monthly challenges with cash prizes",
+    "Personalized learning paths",
+    "24/7 expert mentorship"
   ];
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 neo-grid opacity-20"></div>
-      <div className="absolute inset-0 glow-dots opacity-10"></div>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-electric-purple rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-neon-green rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-hot-pink rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
-      
+    <div className="min-h-screen bg-background">
       <Header />
       
       {/* Hero Section */}
-      <section className="relative section-spacing px-4">
-        <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-6xl mx-auto content-spacing">
-            {/* Elite Badge */}
-            <div className="inline-flex items-center gap-3 neo-badge mb-8 floating">
-              <Star className="w-5 h-5" />
-              <span>The Future of AI Innovation</span>
-              <Zap className="w-5 h-5" />
+      <section className="elite-section bg-white">
+        <div className="elite-container">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 elite-badge-accent mb-6">
+              <Star className="w-4 h-4" />
+              The Future of AI Development
+              <Zap className="w-4 h-4" />
             </div>
-
-            <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
-              Build Tomorrow's{" "}
-              <span className="block bg-gradient-to-r from-electric-purple via-neon-green to-electric-blue bg-clip-text text-transparent gradient-shift">
-                AI Revolution
-              </span>
+            
+            <h1 className="mb-6">
+              Master AI Development with<br />
+              <span className="text-elite-orange">EliteBuilders</span>
             </h1>
             
-            <p className="text-2xl md:text-3xl text-white/90 mb-12 leading-relaxed max-w-5xl mx-auto font-medium">
-              Join the most exclusive AI builders community. Compete in cutting-edge challenges, 
-              earn substantial rewards, and build the future of artificial intelligence.
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              Join the world's most exclusive AI development platform. Take on real-world challenges, 
+              build cutting-edge solutions, and fast-track your career with top tech companies.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-              <Button 
-                size="lg" 
-                className="neo-primary text-xl px-10 py-6 hover-lift group"
-                onClick={() => navigate(user ? "/challenges" : "/auth")}
-              >
-                {user ? "Explore Challenges" : "Join Elite Builders"}
-                <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button 
-                size="lg" 
-                className="neo-secondary text-xl px-10 py-6 hover-lift group"
-                onClick={() => navigate("/challenges")}
-              >
-                View Live Challenges
-                <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-              {stats.map((stat, index) => (
-                <Card key={index} className="neo-card-hover text-center">
-                  <CardContent className="p-6">
-                    <stat.icon className="h-8 w-8 mx-auto mb-3 text-neon-green" />
-                    <div className="text-3xl font-black text-white mb-2">{stat.number}</div>
-                    <div className="text-white/70 font-semibold">{stat.label}</div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/challenges">
+                <Button size="lg" className="w-full sm:w-auto">
+                  Start Building <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  Join Elite Community
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="elite-section bg-elite-light">
+        <div className="elite-container">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl font-bold text-elite-blue mb-2">{stat.number}</div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto">
+      <section className="elite-section">
+        <div className="elite-container">
           <div className="text-center mb-16">
-            <Badge className="neo-badge-secondary mb-6">
-              <Rocket className="w-4 h-4 mr-2" />
-              Revolutionary Platform
-            </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
-              Why Elite Builders Choose Us
-            </h2>
-            <p className="text-xl text-white/80 max-w-3xl mx-auto">
-              Experience the most advanced AI challenge platform designed for tomorrow's innovators
+            <h2 className="mb-4">Why Choose EliteBuilders?</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              We've created the most comprehensive platform for AI developers to showcase their skills, 
+              learn from experts, and connect with leading companies.
             </p>
           </div>
-
-          <div className="neo-grid neo-grid-auto">
+          
+          <div className="elite-grid">
             {features.map((feature, index) => (
-              <Card key={index} className="neo-card-hover group">
-                <CardHeader className="text-center pb-4">
-                  <div className="mx-auto mb-4 p-4 rounded-2xl bg-gradient-to-br from-electric-purple/20 to-neon-green/20 w-fit">
-                    <feature.icon className={`h-8 w-8 ${feature.color}`} />
+              <Card key={index} className="text-center">
+                <CardHeader>
+                  <div className="w-16 h-16 bg-elite-orange rounded-full flex items-center justify-center mx-auto mb-4">
+                    <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <CardTitle className="text-2xl text-white group-hover:text-neon-green transition-colors">
-                    {feature.title}
-                  </CardTitle>
+                  <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-center text-white/70 text-lg leading-relaxed">
+                  <CardDescription className="text-base">
                     {feature.description}
                   </CardDescription>
                 </CardContent>
@@ -161,50 +143,119 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-20 px-4">
-        <div className="container mx-auto text-center">
-          <Card className="neo-card max-w-4xl mx-auto glow-purple">
-            <CardContent className="p-12">
-              <div className="flex justify-center mb-6">
-                <Badge className="neo-badge-accent">
-                  <Award className="w-4 h-4 mr-2" />
-                  Limited Access
-                </Badge>
-              </div>
-              <h3 className="text-4xl md:text-5xl font-black text-white mb-6">
-                Ready to Build the Future?
-              </h3>
-              <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-                Join thousands of elite AI builders who are already shaping tomorrow's technology. 
-                Your next breakthrough starts here.
+      {/* Benefits Section */}
+      <section className="elite-section bg-elite-light">
+        <div className="elite-container">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <Badge variant="accent" className="mb-4">Premium Benefits</Badge>
+              <h2 className="mb-6">Unlock Your AI Career Potential</h2>
+              <p className="text-lg text-gray-600 mb-8">
+                EliteBuilders isn't just a platform—it's your gateway to the most prestigious 
+                opportunities in AI development. Our comprehensive program ensures you're ready 
+                for the future of technology.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="neo-primary text-lg px-8 py-4 hover-lift"
-                  onClick={() => navigate(user ? "/dashboard" : "/auth")}
-                >
-                  {user ? "Go to Dashboard" : "Start Building Now"}
-                  <Rocket className="ml-2 h-5 w-5" />
-                </Button>
-                {showAdminTools && (
-                  <Button 
-                    size="lg" 
-                    className="neo-secondary text-lg px-8 py-4 hover-lift"
-                    onClick={() => navigate("/admin")}
-                  >
-                    Admin Panel
-                    <Shield className="ml-2 h-5 w-5" />
-                  </Button>
-                )}
+              
+              <div className="space-y-4">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-gray-700">{benefit}</span>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Target className="w-6 h-6 text-elite-orange" />
+                    <CardTitle>Skill-Based Matching</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Our AI matches your skills with the perfect challenges and career opportunities.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Award className="w-6 h-6 text-elite-blue" />
+                    <CardTitle>Industry Recognition</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Earn certificates and badges recognized by Fortune 500 companies worldwide.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    <Lightbulb className="w-6 h-6 text-yellow-500" />
+                    <CardTitle>Innovation Focus</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Work on breakthrough AI projects that shape the future of technology.
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* CTA Section */}
+      <section className="elite-section bg-elite-blue text-white">
+        <div className="elite-container text-center">
+          <h2 className="mb-4 text-white">Ready to Join the Elite?</h2>
+          <p className="text-xl mb-8 text-blue-100 max-w-2xl mx-auto">
+            Take the first step towards becoming an AI elite. Start with our beginner-friendly 
+            challenges or dive into advanced projects that will challenge your expertise.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/challenges">
+              <Button size="lg" variant="default" className="w-full sm:w-auto bg-elite-orange hover:bg-orange-600">
+                View Challenges <Trophy className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-elite-blue">
+                Create Account
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="elite-container">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-8 h-8 bg-elite-orange rounded-lg flex items-center justify-center">
+                <Trophy className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xl font-bold">EliteBuilders</span>
+            </div>
+            <p className="text-gray-400 mb-6">Building the future of AI, one developer at a time.</p>
+            <div className="flex justify-center space-x-6 text-sm text-gray-400">
+              <Link to="/privacy" className="hover:text-white">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-white">Terms of Service</Link>
+              <Link to="/contact" className="hover:text-white">Contact</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default Index;
+}

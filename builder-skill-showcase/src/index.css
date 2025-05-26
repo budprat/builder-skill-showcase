@@ -1,95 +1,83 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern Gradient Design System */
-    --background: 225 15% 8%; /* Deep Charcoal #0F0F23 */
-    --foreground: 210 40% 98%; /* Pure White #FAFBFF */
+    /* EliteBuilders Design System */
+    --elite-deep-blue: #003366;
+    --elite-lighter-blue: #336699;
+    --elite-orange: #FF6600;
+    --elite-light-grey: #F5F5F5;
+    --elite-dark-grey: #333333;
+    --elite-white: #FFFFFF;
+    --elite-error-red: #FF0000;
+    --elite-disabled-grey: #CCCCCC;
+    --elite-disabled-text: #666666;
+    --elite-hover-grey: #E0E0E0;
+    --elite-alt-row: #F5F5F5;
 
-    /* Card backgrounds */
-    --card: 225 15% 12%; /* Charcoal #1A1A35 */
-    --card-foreground: 210 40% 98%; /* Pure White */
-
-    --popover: 225 15% 12%; /* Charcoal */
-    --popover-foreground: 210 40% 98%; /* Pure White */
-
-    /* Primary Brand - Electric Purple */
-    --primary: 270 100% 65%; /* Electric Purple #7C3AED */
-    --primary-foreground: 210 40% 98%; /* Pure White */
-
-    /* Secondary - Cosmic Blue */
-    --secondary: 225 15% 20%; /* Dark Cosmic Blue #2A2A4A */
-    --secondary-foreground: 210 40% 90%; /* Light Grey */
-
-    --muted: 225 15% 16%; /* Muted Dark */
-    --muted-foreground: 210 20% 70%; /* Muted Light */
-
-    /* Accent - Neon Green */
-    --accent: 165 100% 50%; /* Neon Green #00FF8A */
-    --accent-foreground: 225 15% 8%; /* Deep Charcoal */
-
-    /* Destructive - Hot Pink */
-    --destructive: 330 100% 60%; /* Hot Pink #FF3366 */
-    --destructive-foreground: 210 40% 98%;
-
-    /* Borders and inputs */
-    --border: 225 15% 25%; /* Border Grey */
-    --input: 225 15% 20%;
-    --ring: 165 100% 50%; /* Neon Green for focus rings */
-
-    --radius: 0.75rem;
-
-    /* Sidebar colors */
-    --sidebar-background: 225 15% 6%; /* Ultra Dark */
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 270 100% 65%; /* Electric Purple */
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 225 15% 18%;
-    --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 225 15% 25%;
-    --sidebar-ring: 165 100% 50%;
-
-    /* Additional semantic colors */
-    --success: 140 100% 50%; /* Bright Green #00FF66 */
-    --warning: 45 100% 55%; /* Electric Orange #FFAA00 */
-    --info: 200 100% 60%; /* Electric Blue #00BBFF */
-    --gradient-primary: linear-gradient(135deg, #7C3AED, #00FF8A);
-    --gradient-secondary: linear-gradient(135deg, #00BBFF, #FF3366);
-    --gradient-accent: linear-gradient(135deg, #00FF8A, #FFAA00);
+    /* Convert to HSL for Tailwind compatibility */
+    --background: 0 0% 96%; /* #F5F5F5 */
+    --foreground: 0 0% 20%; /* #333333 */
+    
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 0 0% 20%; /* #333333 */
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    
+    --primary: 210 100% 20%; /* #003366 */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 50% 40%; /* #336699 */
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 24 100% 50%; /* #FF6600 */
+    --accent-foreground: 0 0% 100%;
+    
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    
+    --destructive: 0 100% 50%; /* #FF0000 */
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 210 50% 40%; /* #336699 */
+    --input: 210 50% 40%;
+    --ring: 24 100% 50%;
+    
+    --radius: 0.25rem; /* 4px */
+    
+    /* Additional EliteBuilders colors */
+    --hover: 0 0% 88%; /* #E0E0E0 */
+    --disabled: 0 0% 80%; /* #CCCCCC */
+    --disabled-text: 0 0% 40%; /* #666666 */
   }
 
   .dark {
-    /* Enhanced dark theme */
-    --background: 225 15% 4%; /* Ultra Deep */
-    --foreground: 210 40% 98%;
-
-    --card: 225 15% 8%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 225 15% 8%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 270 100% 70%; /* Brighter Electric Purple */
-    --primary-foreground: 225 15% 4%;
-
-    --secondary: 225 15% 15%;
-    --secondary-foreground: 210 40% 85%;
-
-    --muted: 225 15% 10%;
-    --muted-foreground: 210 20% 65%;
-
-    --accent: 165 100% 55%; /* Brighter Neon Green */
-    --accent-foreground: 225 15% 4%;
-
-    --destructive: 330 100% 65%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 225 15% 20%;
-    --input: 225 15% 15%;
-    --ring: 165 100% 55%;
+    /* Keep existing dark theme values for potential dark mode toggle */
+    --background: 210 100% 20%;
+    --foreground: 0 0% 96%;
+    --card: 210 100% 18%;
+    --card-foreground: 0 0% 96%;
+    --popover: 210 100% 18%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 210 100% 20%;
+    --secondary: 210 50% 30%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 210 100% 15%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 24 100% 55%;
+    --accent-foreground: 210 100% 20%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 210 50% 30%;
+    --input: 210 50% 25%;
+    --ring: 24 100% 55%;
   }
 }
 
@@ -100,327 +88,468 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    background: linear-gradient(135deg, hsl(var(--background)), hsl(225 15% 6%));
-    min-height: 100vh;
+    font-family: 'Open Sans', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: var(--elite-light-grey);
+    color: var(--elite-dark-grey);
   }
 
-  /* Modern Typography */
+  /* EliteBuilders Typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--elite-deep-blue);
   }
 
   h1 {
-    @apply text-5xl lg:text-7xl;
-    font-weight: 900;
-  }
-
-  h2 {
-    @apply text-4xl lg:text-5xl;
+    font-size: 32px;
     font-weight: 800;
   }
 
-  h3 {
-    @apply text-3xl lg:text-4xl;
+  h2 {
+    font-size: 24px;
     font-weight: 700;
   }
 
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
   h4 {
-    @apply text-2xl lg:text-3xl;
+    font-size: 16px;
     font-weight: 600;
   }
 
   h5 {
-    @apply text-xl lg:text-2xl;
+    font-size: 14px;
     font-weight: 600;
   }
 
   h6 {
-    @apply text-lg lg:text-xl;
+    font-size: 12px;
     font-weight: 600;
   }
 
-  /* Modern Utility Classes */
-  .text-electric-purple {
-    color: hsl(var(--primary));
+  /* EliteBuilders Button Styles */
+  .elite-btn-primary {
+    background-color: var(--elite-orange);
+    color: var(--elite-white);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
 
-  .bg-electric-purple {
-    background-color: hsl(var(--primary));
+  .elite-btn-primary:hover {
+    background-color: #E55A00;
+    transform: translateY(-1px);
   }
 
-  .text-neon-green {
-    color: hsl(var(--accent));
+  .elite-btn-primary:active {
+    transform: translateY(0);
   }
 
-  .bg-neon-green {
-    background-color: hsl(var(--accent));
+  .elite-btn-secondary {
+    background-color: var(--elite-lighter-blue);
+    color: var(--elite-white);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
   }
 
-  .text-hot-pink {
-    color: hsl(var(--destructive));
+  .elite-btn-secondary:hover {
+    background-color: #2A5580;
+    transform: translateY(-1px);
   }
 
-  .bg-hot-pink {
-    background-color: hsl(var(--destructive));
+  .elite-btn-secondary:active {
+    transform: translateY(0);
   }
 
-  .text-electric-blue {
-    color: hsl(var(--info));
+  .elite-btn-disabled {
+    background-color: var(--elite-disabled-grey);
+    color: var(--elite-disabled-text);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    border: none;
+    cursor: not-allowed;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .bg-electric-blue {
-    background-color: hsl(var(--info));
+  /* EliteBuilders Form Styles */
+  .elite-input {
+    border: 1px solid var(--elite-lighter-blue);
+    padding: 10px;
+    border-radius: 4px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    background-color: var(--elite-white);
+    color: var(--elite-dark-grey);
+    transition: border-color 0.2s ease;
+    width: 100%;
   }
 
-  .text-electric-orange {
-    color: hsl(var(--warning));
+  .elite-input:focus {
+    outline: none;
+    border-color: var(--elite-deep-blue);
+    box-shadow: 0 0 0 3px rgba(51, 102, 153, 0.1);
   }
 
-  .bg-electric-orange {
-    background-color: hsl(var(--warning));
+  .elite-input.error {
+    border-color: var(--elite-error-red);
   }
 
-  .text-bright-green {
-    color: hsl(var(--success));
+  .elite-label {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--elite-dark-grey);
+    display: block;
+    margin-bottom: 4px;
   }
 
-  .bg-bright-green {
-    background-color: hsl(var(--success));
+  .elite-error-message {
+    color: var(--elite-error-red);
+    font-size: 12px;
+    margin-top: 4px;
+    font-family: 'Open Sans', sans-serif;
   }
 
-  /* Modern Patterns */
-  .neo-grid {
-    background-image: 
-      linear-gradient(rgba(124, 58, 237, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124, 58, 237, 0.1) 1px, transparent 1px);
-    background-size: 40px 40px;
+  /* EliteBuilders Card Styles */
+  .elite-card {
+    background-color: var(--elite-white);
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
   }
 
-  .glow-dots {
-    background-image: 
-      radial-gradient(circle at 2px 2px, rgba(0, 255, 138, 0.3) 1px, transparent 0);
-    background-size: 30px 30px;
-  }
-
-  .cyber-mesh {
-    background-image: 
-      conic-gradient(from 0deg at 50% 50%, 
-        rgba(124, 58, 237, 0.1), 
-        rgba(0, 255, 138, 0.1), 
-        rgba(255, 51, 102, 0.1), 
-        rgba(124, 58, 237, 0.1));
-    background-size: 100px 100px;
-  }
-
-  /* Ultra Modern Card Styling */
-  .neo-card {
-    background: linear-gradient(145deg, 
-      rgba(26, 26, 53, 0.8), 
-      rgba(42, 42, 74, 0.4));
-    border: 1px solid rgba(124, 58, 237, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-
-  .neo-card-hover {
-    @apply neo-card transition-all duration-300;
-  }
-
-  .neo-card-hover:hover {
+  .elite-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.3),
-      0 4px 20px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border-color: rgba(0, 255, 138, 0.4);
   }
 
-  /* Futuristic Badge Styling */
-  .neo-badge {
-    background: var(--gradient-primary);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    color: hsl(var(--background));
-    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  .elite-card-header {
+    border-bottom: 1px solid #E0E0E0;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
   }
 
-  .neo-badge-secondary {
-    background: var(--gradient-secondary);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    color: white;
-    box-shadow: 0 4px 15px rgba(0, 187, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  .elite-card-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--elite-deep-blue);
+    margin: 0;
   }
 
-  .neo-badge-accent {
-    background: var(--gradient-accent);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    color: hsl(var(--background));
-    box-shadow: 0 4px 15px rgba(0, 255, 138, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  .elite-card-description {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    color: var(--elite-dark-grey);
+    margin: 4px 0 0 0;
+    opacity: 0.8;
   }
 
-  /* Ultra Modern Button Styles */
-  .neo-primary {
-    background: var(--gradient-primary);
-    @apply text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
-    box-shadow: 
-      0 4px 20px rgba(124, 58, 237, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  /* EliteBuilders Table Styles */
+  .elite-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--elite-white);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .neo-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  .elite-table-header {
+    background-color: var(--elite-deep-blue);
+    color: var(--elite-white);
   }
 
-  .neo-secondary {
-    background: linear-gradient(135deg, 
-      rgba(42, 42, 74, 0.8), 
-      rgba(26, 26, 53, 0.8));
-    @apply text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(124, 58, 237, 0.3);
+  .elite-table-header th {
+    padding: 16px;
+    text-align: left;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
   }
 
-  .neo-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border-color: rgba(0, 255, 138, 0.5);
+  .elite-table-header th:hover {
+    background-color: #004080;
   }
 
-  /* Glow Effects */
-  .glow-purple {
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+  .elite-table-row {
+    border-bottom: 1px solid #E0E0E0;
+    transition: background-color 0.2s ease;
   }
 
-  .glow-green {
-    box-shadow: 0 0 30px rgba(0, 255, 138, 0.5);
+  .elite-table-row:nth-child(even) {
+    background-color: var(--elite-alt-row);
   }
 
-  .glow-pink {
-    box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+  .elite-table-row:hover {
+    background-color: var(--elite-hover-grey);
   }
 
-  .glow-blue {
-    box-shadow: 0 0 30px rgba(0, 187, 255, 0.5);
+  .elite-table-cell {
+    padding: 12px 16px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    color: var(--elite-dark-grey);
   }
 
-  /* Advanced Animations */
-  .pulse-glow {
-    animation: pulse-glow 3s ease-in-out infinite;
+  /* EliteBuilders Badge Styles */
+  .elite-badge {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  .floating {
-    animation: floating 6s ease-in-out infinite;
+  .elite-badge-primary {
+    background-color: var(--elite-deep-blue);
+    color: var(--elite-white);
   }
 
-  .gradient-shift {
-    background-size: 200% 200%;
-    animation: gradient-shift 4s ease infinite;
+  .elite-badge-secondary {
+    background-color: var(--elite-lighter-blue);
+    color: var(--elite-white);
   }
 
-  @keyframes floating {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+  .elite-badge-accent {
+    background-color: var(--elite-orange);
+    color: var(--elite-white);
   }
 
-  @keyframes pulse-glow {
-    0%, 100% { 
-      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+  .elite-badge-success {
+    background-color: #28A745;
+    color: var(--elite-white);
+  }
+
+  .elite-badge-warning {
+    background-color: #FFC107;
+    color: var(--elite-dark-grey);
+  }
+
+  .elite-badge-danger {
+    background-color: var(--elite-error-red);
+    color: var(--elite-white);
+  }
+
+  /* EliteBuilders Modal Styles */
+  .elite-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .elite-modal-content {
+    background-color: var(--elite-white);
+    border-radius: 8px;
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideIn 0.2s ease-out;
+  }
+
+  .elite-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--elite-dark-grey);
+    transition: color 0.2s ease;
+  }
+
+  .elite-modal-close:hover {
+    color: var(--elite-error-red);
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
     }
-    50% { 
-      box-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  @keyframes gradient-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+  /* EliteBuilders Header Styles */
+  .elite-header {
+    background-color: var(--elite-white);
+    border-bottom: 2px solid var(--elite-deep-blue);
+    padding: 16px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  /* Modern Grid System */
-  .neo-grid {
+  .elite-nav-link {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: var(--elite-dark-grey);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .elite-nav-link:hover {
+    background-color: var(--elite-light-grey);
+    color: var(--elite-deep-blue);
+  }
+
+  .elite-nav-link.active {
+    background-color: var(--elite-deep-blue);
+    color: var(--elite-white);
+  }
+
+  /* EliteBuilders Layout */
+  .elite-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .elite-section {
+    padding: 40px 0;
+  }
+
+  .elite-grid {
     display: grid;
-    gap: 2rem;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 
-  .neo-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .elite-container {
+      padding: 0 16px;
+    }
+    
+    .elite-section {
+      padding: 24px 0;
+    }
+    
+    .elite-card {
+      padding: 16px;
+    }
+    
+    h1 {
+      font-size: 24px;
+    }
+    
+    h2 {
+      font-size: 20px;
+    }
+    
+    .elite-btn-primary,
+    .elite-btn-secondary {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+    
+    .elite-table-header th,
+    .elite-table-cell {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
   }
 
-  /* Professional Spacing */
-  .section-spacing {
-    @apply py-20 lg:py-32;
+  /* Utility Classes */
+  .text-elite-blue {
+    color: var(--elite-deep-blue);
   }
 
-  .content-spacing {
-    @apply space-y-12 lg:space-y-16;
+  .text-elite-orange {
+    color: var(--elite-orange);
   }
 
-  /* Modern Focus States */
-  .focus-neo:focus {
-    @apply outline-none;
-    box-shadow: 
-      0 0 0 3px rgba(0, 255, 138, 0.3),
-      0 4px 20px rgba(124, 58, 237, 0.2);
+  .bg-elite-blue {
+    background-color: var(--elite-deep-blue);
   }
 
-  /* Hover Lift Effect */
-  .hover-lift {
-    @apply transition-all duration-300;
+  .bg-elite-orange {
+    background-color: var(--elite-orange);
   }
 
-  .hover-lift:hover {
-    transform: translateY(-4px);
+  .bg-elite-light {
+    background-color: var(--elite-light-grey);
+  }
+
+  .border-elite-blue {
+    border-color: var(--elite-lighter-blue);
   }
 }
 
-/* Ultra Modern Scrollbar */
+/* Selection Colors */
+::selection {
+  background: rgba(255, 102, 0, 0.3);
+  color: var(--elite-dark-grey);
+}
+
+::-moz-selection {
+  background: rgba(255, 102, 0, 0.3);
+  color: var(--elite-dark-grey);
+}
+
+/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, 
-    rgba(26, 26, 53, 0.5), 
-    rgba(42, 42, 74, 0.5));
+  background: var(--elite-light-grey);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gradient-primary);
+  background: var(--elite-lighter-blue);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gradient-accent);
-}
-
-/* Selection Colors */
-::selection {
-  background: rgba(0, 255, 138, 0.3);
-  color: white;
-}
-
-::-moz-selection {
-  background: rgba(0, 255, 138, 0.3);
-  color: white;
+  background: var(--elite-deep-blue);
 }
