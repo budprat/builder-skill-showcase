@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import Header from "@/components/layout/Header";
+import { Header } from "@/components/layout/Header";
 import { EcosystemEffects, WeatherSystem, BioCircuitOverlay } from "@/components/ui/ecosystem-effects";
 import { ArrowRight, Star, Trophy, Zap, Users, Target, Award, Calendar, TrendingUp } from "lucide-react";
 
