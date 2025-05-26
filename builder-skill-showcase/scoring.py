@@ -22,13 +22,14 @@ configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Custom DSPy Adapter for Gemini API
 class GeminiDSPyAdapter(dspy.LM):
-    def __init__(self, model):
-        super().__init__(model)
-        self.model = GenerativeModel(model)
+    def __init__(self, model_name):
+        super().__init__(model_name)
+        self.model_name = model_name
+        self.gemini_model = GenerativeModel(model_name)
 
     def generate(self, prompt, max_tokens=200, **kwargs):
         try:
-            response = self.model.generate_content(
+            response = self.gemini_model.generate_content(
                 prompt,
                 generation_config={"max_output_tokens": max_tokens}
             )
@@ -36,6 +37,10 @@ class GeminiDSPyAdapter(dspy.LM):
         except Exception as e:
             print(f"Gemini API error: {e}")
             return [{"text": ""}]
+
+    @property
+    def model(self):
+        return self.model_name
 
 # Configure DSPy
 dspy.settings.configure(lm=GeminiDSPyAdapter("gemini-1.5-pro"))
@@ -67,13 +72,28 @@ feedback_agent = LlmAgent(
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
+        # First check if the bucket exists and create it if it doesn't
+        try:
+            supabase.storage.get_bucket("submissions")
+        except Exception as bucket_error:
+            print(f"Storage bucket error: {bucket_error}")
+            # Try to create the bucket
+            try:
+                supabase.storage.create_bucket("submissions", {"public": False})
+                print("Created 'submissions' bucket")
+            except Exception as create_error:
+                print(f"Failed to create bucket: {create_error}")
+                return "Error: Storage bucket not available"
+        
+        # Download and extract PDF
+        file_data = supabase.storage.from_("submissions").download(supabase_path)
         with open("/tmp/pitch_deck.pdf", "wb") as f:
-            f.write(supabase.storage.from_("submissions").download(supabase_path))
+            f.write(file_data)
         with pdfplumber.open("/tmp/pitch_deck.pdf") as pdf:
             return "\n".join(page.extract_text() or "" for page in pdf.pages)
     except Exception as e:
         print(f"PDF extraction error: {e}")
-        return ""
+        return f"Error extracting PDF: {str(e)}"
 
 async def pre_screen_submission(submission: dict) -> dict:
     try:
