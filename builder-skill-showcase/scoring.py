@@ -52,13 +52,29 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
                         actual_bucket = path_parts[0]
                         actual_path = path_parts[1]
                         print(f"Extracted bucket: {actual_bucket}, path: {actual_path}")
-                        file_data = supabase.storage.from_(actual_bucket).download(actual_path)
+                        try:
+                            file_data = supabase.storage.from_(actual_bucket).download(actual_path)
+                        except Exception as second_download_error:
+                            print(f"Second download attempt failed: {second_download_error}")
+                            # Check if file exists in storage
+                            try:
+                                files = supabase.storage.from_(actual_bucket).list()
+                                print(f"Available files in bucket: {[f['name'] for f in files]}")
+                            except Exception as list_error:
+                                print(f"Could not list files in bucket: {list_error}")
+                            return "PDF file not found in storage. Please ensure the file was uploaded correctly."
                     else:
                         raise Exception(f"Could not parse file path from URL: {supabase_path}")
                 else:
                     raise Exception(f"Invalid storage URL format: {supabase_path}")
             else:
-                raise download_error
+                # Check if file exists when using direct path
+                try:
+                    files = supabase.storage.from_(bucket_name).list()
+                    print(f"Available files in bucket: {[f['name'] for f in files]}")
+                except Exception as list_error:
+                    print(f"Could not list files in bucket: {list_error}")
+                return f"PDF file not found at path: {supabase_path}. Please check the file upload."
         
         # Save and extract PDF
         temp_file_path = "/tmp/pitch_deck.pdf"
@@ -192,9 +208,8 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
         feedback = "Thank you for your submission. Detailed feedback will be available soon."
 
     supabase.table("scores").update(
-        {"feedback": feedback, "status": "notified"},
-        {"submission_id": submission["id"]}
-    ).execute()
+        {"feedback": feedback, "status": "notified"}
+    ).eq("submission_id", submission["id"]).execute()
 
     try:
         user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
@@ -220,9 +235,8 @@ async def process_submission(submission: dict, supabase: Client):
         submission = await generate_feedback_and_notify(submission, supabase)
 
     supabase.table("submissions").update(
-        {"status": submission["status"]},
-        {"id": submission["id"]}
-    ).execute()
+        {"status": submission["status"]}
+    ).eq("id", submission["id"]).execute()
 
 async def poll_submissions():
     while True:
