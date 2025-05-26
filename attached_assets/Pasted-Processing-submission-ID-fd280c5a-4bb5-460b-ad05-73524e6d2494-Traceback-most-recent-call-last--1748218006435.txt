@@ -1,0 +1,40 @@
+Processing submission ID: fd280c5a-4bb5-460b-ad05-73524e6d2494
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/storage3/_sync/file_api.py", line 53, in _request
+    response.raise_for_status()
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/submissions/https://github.com/budprat/Portfolio/blob/main/lovable_app.html'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/builder-skill-showcase/scoring.py", line 233, in <module>
+    asyncio.run(poll_submissions())
+  File "/nix/store/clx0mcir7qw8zk36zbr4jra789g3knf6-python3-3.11.10/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/nix/store/clx0mcir7qw8zk36zbr4jra789g3knf6-python3-3.11.10/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/nix/store/clx0mcir7qw8zk36zbr4jra789g3knf6-python3-3.11.10/lib/python3.11/asyncio/base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/builder-skill-showcase/scoring.py", line 225, in poll_submissions
+    await process_submission(submission, supabase)
+  File "/home/runner/workspace/builder-skill-showcase/scoring.py", line 195, in process_submission
+    submission = await evaluate_rubric(submission, supabase)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/builder-skill-showcase/scoring.py", line 93, in evaluate_rubric
+    pitch_deck_text = extract_pdf_text(submission["pitch_deck_url"], supabase)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/builder-skill-showcase/scoring.py", line 88, in extract_pdf_text
+    f.write(supabase.storage.from_("submissions").download(supabase_path))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/storage3/_sync/file_api.py", line 427, in download
+    response = self._request(
+               ^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/storage3/_sync/file_api.py", line 56, in _request
+    raise StorageApiError(resp["message"], resp["error"], resp["statusCode"])
+storage3.exceptions.StorageApiError: {'statusCode': 404, 'error': Bucket not found, 'message': Bucket not found}

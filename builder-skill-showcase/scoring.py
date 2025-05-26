@@ -20,6 +20,14 @@ from sendgrid.helpers.mail import Mail
 
 
 load_dotenv()
+
+# Debug environment variables
+print("=== ENVIRONMENT CHECK ===")
+print(f"SUPABASE_URL: {'SET' if os.getenv('SUPABASE_URL') else 'MISSING'}")
+print(f"SUPABASE_KEY: {'SET' if os.getenv('SUPABASE_KEY') else 'MISSING'}")
+print(f"GITHUB_TOKEN: {'SET' if os.getenv('GITHUB_TOKEN') else 'MISSING'}")
+print(f"SENDGRID_API_KEY: {'SET' if os.getenv('SENDGRID_API_KEY') else 'MISSING'}")
+
 supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
 
 
@@ -195,9 +203,30 @@ async def process_submission(submission: dict, supabase: Client):
 
 async def poll_submissions():
     while True:
+        print("=== POLLING FOR SUBMISSIONS ===")
+        
+        # Check all submissions first
+        all_submissions = supabase.table("submissions").select("*").execute().data
+        print(f"Total submissions in database: {len(all_submissions)}")
+        
+        # Show status breakdown
+        status_count = {}
+        for sub in all_submissions:
+            status = sub.get("status", "null")
+            status_count[status] = status_count.get(status, 0) + 1
+        print(f"Status breakdown: {status_count}")
+        
+        # Get submissions to process
         submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
+        print(f"Submissions with 'submitted' status: {len(submissions)}")
+        
         for submission in submissions:
+            print(f"Processing submission ID: {submission['id']}")
             await process_submission(submission, supabase)
+        
+        if len(submissions) == 0:
+            print("No submissions to process. Waiting...")
+        
         await asyncio.sleep(60)  # Poll every minute
 
 if __name__ == "__main__":
