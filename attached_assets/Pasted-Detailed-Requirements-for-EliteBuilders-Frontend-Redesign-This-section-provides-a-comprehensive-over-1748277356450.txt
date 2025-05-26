@@ -1,0 +1,129 @@
+Detailed Requirements for EliteBuilders Frontend Redesign
+This section provides a comprehensive overview of the requirements for the frontend redesign of the EliteBuilders web application, focusing on design, user experience, performance, and accessibility while ensuring no impact on existing functionality.
+
+1. Introduction
+EliteBuilders is a web-based platform that connects AI talent with industry through competitive challenges, allowing participants to showcase end-to-end AI product development skills. This Product Requirements Document (PRD) outlines the requirements for a frontend redesign to modernize the user interface (UI) and user experience (UX). The redesign aims to align with modern web design best practices, optimize performance, and incorporate aesthetically pleasing elements such as animations, styles, and a cohesive color palette, all while preserving the platform’s existing functionality.
+
+2. Objectives
+Enhance Visual Appeal: Create a modern, professional, and tech-inspired interface that reflects the innovative nature of the AI community.
+Improve User Engagement: Design intuitive navigation and interactive elements to increase user satisfaction and retention.
+Ensure Responsiveness: Deliver a seamless experience across desktop, tablet, and mobile devices.
+Optimize Performance: Achieve fast load times and smooth interactions through efficient design and coding practices.
+Maintain Functionality: Ensure the redesign integrates seamlessly with existing backend APIs, preserving all current features and workflows.
+Promote Accessibility: Adhere to accessibility standards to make the platform inclusive for all users.
+3. Design Principles
+The redesign will adhere to the following principles to ensure a high-quality user experience:
+
+Modern Aesthetics: A clean, minimalist design with ample whitespace, inspired by platforms like GitHub and Dribbble, to convey professionalism and innovation.
+Intuitive Navigation: Clear menus, prominent calls to action, and consistent layouts to facilitate easy interaction for AI builders and sponsors.
+Responsive Layout: Fully responsive design optimized for desktop (primary focus) and mobile devices, ensuring usability across all screen sizes.
+Performance Optimization: Fast load times and smooth interactions through optimized assets, lazy loading, and efficient coding practices.
+Accessibility: Compliance with WCAG 2.1 AA guidelines to ensure inclusivity for users with disabilities.
+4. Color Palette
+The color palette is designed to reflect a tech-oriented, professional aesthetic while ensuring readability and visual harmony:
+
+Primary Color: Deep Blue (#003366) for headers, navigation bars, and primary buttons.
+Secondary Color: Lighter Blue (#336699) for secondary elements like subheadings and borders.
+Accent Color: Orange (#FF6600) for calls to action, highlights, and interactive elements.
+Background Color: Light Grey (#F5F5F5) for main content areas to reduce eye strain.
+Text Color: Dark Grey (#333333) for body text to ensure high contrast and readability.
+5. Typography
+Typography will be modern and readable, aligning with the platform’s professional tone:
+
+Headings: Montserrat, Bold for a strong, modern look in titles and section headers.
+Body Text: Open Sans, Regular for clear, legible content in paragraphs and labels.
+6. Key Components
+The redesign will cover all major pages and components of the EliteBuilders platform, ensuring consistency and usability.
+
+6.1. Challenges Catalogue
+Layout: Display challenges in a grid of cards for a visually appealing and scannable presentation.
+Card Content:
+Challenge title
+Sponsor logo
+Brief description (truncated to 100 characters)
+Tags (e.g., NLP, Computer Vision)
+Prize information
+Submission deadline
+Participant count
+Interactivity: Hover effects on cards (e.g., slight scale-up or shadow) to indicate interactivity.
+Filters: Dropdowns or buttons for filtering by domain, sponsor, prize value, and deadline, with a clear “Apply Filters” button.
+Empty State: If no challenges match filters, display a message: “No challenges found. Try adjusting your filters.”
+6.2. Challenge Detail Page
+Hero Section: Prominent display of challenge title, sponsor logo, and key details (prize, deadline).
+Content Sections:
+Problem statement
+Deliverables (prototype, pitch deck, demo video)
+Data packs (download links or API instructions)
+Evaluation rubric
+Prizes
+Timeline
+Rules
+Organization: Use tabs or accordions to organize extensive content, improving readability.
+Call to Action: A prominent “Participate” or “Submit” button in the accent color (#FF6600).
+Responsive Design: Stack sections vertically on mobile devices for clarity.
+6.3. User Profile
+Header: Profile picture, name, and headline in a clean, card-like layout.
+Sections:
+Skills (tag-based display)
+Experience summary
+Links (GitHub, LinkedIn, portfolio)
+Participated challenges with statuses
+Badges (displayed as icons with tooltips)
+Edit Functionality: A modal or dedicated page for editing profile details, with clear form fields and validation.
+Badge Display: Visual icons for badges (e.g., “Top 10%,” “Sponsor Favorite”) with hover tooltips explaining each badge.
+6.4. Submission Page
+Form Design: Multi-step form for uploading deliverables (repository link, pitch deck, demo video).
+Instructions: Clear, concise instructions for each field, with examples where applicable.
+Validation: Real-time validation with error messages (e.g., “Please provide a valid GitHub URL”).
+Progress Indicators: Visual progress bar or step indicators for multi-step submissions.
+Upload Feedback: Progress bars for file uploads, success messages upon completion, and error messages with actionable steps for failures.
+6.5. Leaderboards
+Layout: Table format with columns for rank, participant name/alias, and score.
+Interactivity: Filters for specific challenges or seasons, with sortable columns.
+Styling: Highlight top ranks (e.g., top 3) with distinct colors or icons (e.g., gold, silver, bronze).
+Empty State: Display “No rankings available yet” if the leaderboard is empty.
+6.6. Sponsor Dashboard
+Overview: Summary of active challenges with metrics (e.g., number of participants, submissions).
+Submission List: Table of submissions with ranks, scores, and links to detailed views.
+Detailed View: Access to full submission packages (repository, pitch deck, video, participant profile).
+Contact Functionality: Button to initiate contact with participants, triggering a notification.
+Branding: Prominent display of sponsor logo and colors.
+6.7. Notification System
+In-App Notifications: A bell icon in the navigation bar with a dropdown showing recent notifications (e.g., submission status, new challenges).
+Email Notifications: Well-designed email templates matching the platform’s branding, with clear subject lines and actionable links.
+Preferences: User-configurable settings for notification frequency and types.
+6.8. Authentication Pages
+Sign-Up/Login: Clean, minimal pages with prominent OAuth buttons (Google, GitHub, LinkedIn) and an email/password option.
+Background: Subtle tech-themed illustration or gradient to enhance visual appeal without distraction.
+7. Animations and Interactions
+Animations will enhance user engagement while maintaining performance:
+
+Page Transitions: Fade-in effects for smooth page loads.
+Modals: Slide-in animations for pop-ups (e.g., profile editing, submission details).
+Hover Effects: Subtle scale-up or shadow effects on buttons and cards.
+Loading States: Spinners or progress bars for asynchronous operations like file uploads.
+Performance Consideration: Use CSS animations over JavaScript where possible to minimize performance impact.
+8. Performance Requirements
+To ensure a high-performing interface, the redesign will meet the following metrics:
+
+Initial Page Load Time: Under 2 seconds, achieved through optimized assets and minimal render-blocking resources.
+Time to Interactive: Under 3 seconds, ensuring users can interact quickly.
+Asset Optimization: Images compressed to under 100KB where possible, using formats like WebP.
+Lazy Loading: Implement for images and non-critical content to reduce initial load times.
+Caching: Use browser caching for static assets to improve subsequent page loads.
+9. Accessibility
+The redesign will comply with WCAG 2.1 AA guidelines to ensure inclusivity:
+
+Semantic HTML: Use proper HTML5 elements for structure and accessibility.
+ARIA Labels: Implement for dynamic content and interactive elements.
+Keyboard Navigation: Ensure all interactive elements are accessible via keyboard.
+Screen Reader Compatibility: Test with tools like NVDA and VoiceOver.
+Color Contrast: Maintain sufficient contrast ratios for text and interactive elements.
+10. UI Component Library
+A design system will ensure consistency across the platform:
+
+Buttons: Primary (orange, #FF6600), secondary (blue, #336699), and disabled states with consistent padding and typography.
+Forms: Standardized input fields, selects, and checkboxes with clear labels and error states.
+Tables: Responsive tables with sortable headers and hover effects on rows.
+Modals and Tooltips: Consistent styling with slide-in animations and close buttons.
+Documentation: A style guide documenting all components, colors, and typography.
