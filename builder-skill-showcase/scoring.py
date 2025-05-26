@@ -33,6 +33,17 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
         
         print(f"Attempting to download file from bucket '{bucket_name}' with path: {supabase_path}")
         
+        # Check if bucket exists and create if needed
+        try:
+            buckets = supabase.storage.list_buckets()
+            bucket_exists = any(bucket.name == bucket_name for bucket in buckets)
+            if not bucket_exists:
+                print(f"Bucket '{bucket_name}' doesn't exist, creating it...")
+                supabase.storage.create_bucket(bucket_name, {"public": True})
+                print(f"Created bucket '{bucket_name}'")
+        except Exception as bucket_error:
+            print(f"Error checking/creating bucket: {bucket_error}")
+        
         # Try to download the file directly
         try:
             file_data = supabase.storage.from_(bucket_name).download(supabase_path)
