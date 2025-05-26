@@ -70,6 +70,18 @@ export default {
 				'solar-flare': 'hsl(var(--solar-flare))',
 				'success': 'hsl(var(--success))',
 				'warning': 'hsl(var(--warning))',
+				
+				// Cyberpunk colors
+				'cyber-black': '#0a0a0a',
+				'cyber-dark-gray': '#1a1a1a',
+				'cyber-gray': '#2a2a2a',
+				'cyber-purple': '#6B46C1',
+				'cyber-hot-pink': '#EC4899',
+				'cyber-electric-blue': '#00D9FF',
+				'cyber-lime-green': '#39FF14',
+				'cyber-neon-pink': '#FF10F0',
+				'cyber-white': '#ffffff',
+				'cyber-cyan': '#00ffff',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
