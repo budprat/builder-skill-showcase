@@ -105,9 +105,16 @@ async def pre_screen_submission(submission: dict) -> dict:
         repo.get_contents("README.md")
         submission["pre_screening_score"] = 5.0
         submission["status"] = "prescreened"
-    except GithubException:
+        print(f"Pre-screening PASSED for submission {submission['id']}: Repository exists and has README.md")
+    except GithubException as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
+        print(f"Pre-screening FAILED for submission {submission['id']}: {str(e)}")
+        print(f"Failure reason: Unable to access repository or README.md not found at {submission['repository_url']}")
+    except Exception as e:
+        submission["pre_screening_score"] = 0.0
+        submission["status"] = "prescreening_failed"
+        print(f"Pre-screening FAILED for submission {submission['id']}: Unexpected error - {str(e)}")
     return submission
 
 async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
@@ -194,7 +201,7 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
     print(f"Generating feedback for submission {submission['id']}")
-    
+
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
 
@@ -243,17 +250,17 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
 
 async def process_submission(submission: dict, supabase: Client):
     print(f"Processing submission {submission['id']} with initial status: {submission['status']}")
-    
+
     submission = await pre_screen_submission(submission)
     print(f"Pre-screening completed for submission {submission['id']}, status: {submission['status']}")
-    
+
     if submission["status"] == "prescreened":
         submission = await evaluate_rubric(submission, supabase)
         print(f"Rubric evaluation completed for submission {submission['id']}, status: {submission['status']}")
-        
+
         submission = await aggregate_score(submission, supabase)
         print(f"Score aggregation completed for submission {submission['id']}, status: {submission['status']}")
-        
+
         submission = await generate_feedback_and_notify(submission, supabase)
         print(f"Feedback generation completed for submission {submission['id']}, status: {submission['status']}")
 
@@ -280,15 +287,15 @@ async def poll_submissions():
         try:
             submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
             print(f"Found {len(submissions)} submissions with 'submitted' status")
-            
+
             for submission in submissions:
                 print(f"Processing submission ID: {submission['id']}")
                 await process_submission(submission, supabase)
                 print(f"Completed processing submission ID: {submission['id']}")
-                
+
         except Exception as e:
             print(f"Error in polling loop: {e}")
-            
+
         print("Waiting 10 seconds before next poll...")
         await asyncio.sleep(10)
 
