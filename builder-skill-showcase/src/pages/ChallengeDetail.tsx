@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Calendar, Clock, Trophy, FileText, Video, Github, ArrowLeft, Upload, X, File } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -438,57 +437,55 @@ const ChallengeDetail = () => {
                     </div>
 
                     {submission.scores && submission.scores.length > 0 && (
-                      <ScrollArea className="h-96 w-full">
-                        <div className="space-y-4 pr-4">
-                          <div>
-                            <h4 className="font-semibold mb-2 text-white">Overall Score</h4>
-                            <p className="text-2xl font-bold text-white">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold mb-2 text-white">GitHub Repository Analysis</h4>
-                            <div className="border border-white/20 p-3 rounded bg-white/10">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="font-medium text-white">Repository Validation</span>
-                                <span className="font-bold text-white">{submission.scores[0].pre_screening_score}/5</span>
-                              </div>
-                              <p className="text-sm text-white/70">
-                                {submission.scores[0].pre_screening_score === 5 
-                                  ? "✅ Repository exists and contains README.md" 
-                                  : "❌ Repository validation failed - missing repository or README.md"}
-                              </p>
-                            </div>
-                          </div>
-
-                          {submission.scores[0].llm_scores && (
-                            <div>
-                              <h4 className="font-semibold mb-2 text-white">Detailed Rubric Scores</h4>
-                              <div className="space-y-2">
-                                {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                  <div key={criterion} className="border border-white/20 p-2 rounded bg-white/5">
-                                    <div className="flex justify-between items-center">
-                                      <span className="font-medium text-white">{criterion}</span>
-                                      <span className="font-bold text-white">{scoreData.score?.toFixed(1)}/20</span>
-                                    </div>
-                                    {scoreData.explanation && (
-                                      <p className="text-sm text-white/70 mt-1">{scoreData.explanation}</p>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {submission.scores[0].feedback && (
-                            <div>
-                              <h4 className="font-semibold mb-2 text-white">Feedback</h4>
-                              <div className="border border-white/20 p-3 rounded bg-white/10">
-                                <p className="text-white/80 whitespace-pre-wrap">{submission.scores[0].feedback}</p>
-                              </div>
-                            </div>
-                          )}
+                      <>
+                        <div>
+                          <h4 className="font-semibold mb-2 text-white">Overall Score</h4>
+                          <p className="text-2xl font-bold text-white">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
                         </div>
-                      </ScrollArea>
+
+                        <div>
+                          <h4 className="font-semibold mb-2 text-white">GitHub Repository Analysis</h4>
+                          <div className="border border-white/20 p-3 rounded bg-white/10">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="font-medium text-white">Repository Validation</span>
+                              <span className="font-bold text-white">{submission.scores[0].pre_screening_score}/5</span>
+                            </div>
+                            <p className="text-sm text-white/70">
+                              {submission.scores[0].pre_screening_score === 5 
+                                ? "✅ Repository exists and contains README.md" 
+                                : "❌ Repository validation failed - missing repository or README.md"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {submission.scores[0].llm_scores && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-white">Detailed Rubric Scores</h4>
+                            <div className="space-y-2">
+                              {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                <div key={criterion} className="border border-white/20 p-2 rounded bg-white/5">
+                                  <div className="flex justify-between items-center">
+                                    <span className="font-medium text-white">{criterion}</span>
+                                    <span className="font-bold text-white">{scoreData.score?.toFixed(1)}/20</span>
+                                  </div>
+                                  {scoreData.explanation && (
+                                    <p className="text-sm text-white/70 mt-1">{scoreData.explanation}</p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {submission.scores[0].feedback && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-white">Feedback</h4>
+                            <div className="border border-white/20 p-3 rounded bg-white/10">
+                              <p className="text-white/80 whitespace-pre-wrap">{submission.scores[0].feedback}</p>
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
                     
                     {submission.final_score && (
