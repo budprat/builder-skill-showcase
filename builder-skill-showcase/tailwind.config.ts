@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -14,11 +15,7 @@ export default {
 			center: true,
 			padding: '2rem',
 			screens: {
-				'sm': '640px',
-				'md': '768px',
-				'lg': '1024px',
-				'xl': '1200px',
-				'2xl': '1200px'
+				'2xl': '1400px'
 			}
 		},
 		extend: {
@@ -56,6 +53,23 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				sidebar: {
+					DEFAULT: 'hsl(var(--sidebar-background))',
+					foreground: 'hsl(var(--sidebar-foreground))',
+					primary: 'hsl(var(--sidebar-primary))',
+					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+					accent: 'hsl(var(--sidebar-accent))',
+					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+					border: 'hsl(var(--sidebar-border))',
+					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom EliteBuilders colors
+				'cyber-teal': 'hsl(var(--accent))',
+				'deep-space': 'hsl(var(--primary))',
+				'nebula-purple': 'hsl(var(--nebula-purple))',
+				'solar-flare': 'hsl(var(--solar-flare))',
+				'success': 'hsl(var(--success))',
+				'warning': 'hsl(var(--warning))',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -64,58 +78,113 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+				mono: ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
 			},
 			fontSize: {
-				base: '16px',
-			},
-			lineHeight: {
-				base: '1.6',
-			},
-			letterSpacing: {
-				tight: '-0.02em',
-				normal: '-0.01em',
-			},
-			animation: {
-				'subtle-fade': 'subtle-fade 0.6s ease-out forwards',
-				'flow': 'flow 10s ease-in-out infinite',
-				'progress': 'progress 2s ease-in-out infinite',
-			},
-			keyframes: {
-				'subtle-fade': {
-					'from': { 
-						opacity: '0', 
-						transform: 'translateY(10px)' 
-					},
-					'to': { 
-						opacity: '1', 
-						transform: 'translateY(0)' 
-					}
-				},
-				'flow': {
-					'0%, 100%': { 
-						backgroundPosition: '0% 50%' 
-					},
-					'50%': { 
-						backgroundPosition: '100% 50%' 
-					}
-				},
-				'progress': {
-					'0%': { 
-						transform: 'translateX(-100%)' 
-					},
-					'100%': { 
-						transform: 'translateX(100%)' 
-					}
-				}
+				'xs': ['0.75rem', { lineHeight: '1rem' }],
+				'sm': ['0.875rem', { lineHeight: '1.25rem' }],
+				'base': ['1rem', { lineHeight: '1.5rem' }],
+				'lg': ['1.125rem', { lineHeight: '1.75rem' }],
+				'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+				'2xl': ['1.5rem', { lineHeight: '2rem' }],
+				'3xl': ['1.875rem', { lineHeight: '2.25rem' }],
+				'4xl': ['2.25rem', { lineHeight: '2.5rem' }],
+				'5xl': ['3rem', { lineHeight: '1' }],
+				'6xl': ['3.75rem', { lineHeight: '1' }],
+				'7xl': ['4.5rem', { lineHeight: '1' }],
 			},
 			spacing: {
 				'18': '4.5rem',
+				'88': '22rem',
+				'92': '23rem',
+				'96': '24rem',
+				'128': '32rem',
 			},
-			transitionDuration: {
-				'200': '200ms',
+			backdropBlur: {
+				xs: '2px',
 			},
-			transitionTimingFunction: {
-				'ease-out': 'cubic-bezier(0, 0, 0.2, 1)',
+			keyframes: {
+				'accordion-down': {
+					from: {
+						height: '0'
+					},
+					to: {
+						height: 'var(--radix-accordion-content-height)'
+					}
+				},
+				'accordion-up': {
+					from: {
+						height: 'var(--radix-accordion-content-height)'
+					},
+					to: {
+						height: '0'
+					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'scale-in': {
+					'0%': {
+						transform: 'scale(0.95)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '1'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						transform: 'translateY(100%)',
+						opacity: '0'
+					},
+					'100%': {
+						transform: 'translateY(0)',
+						opacity: '1'
+					}
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						boxShadow: '0 0 20px hsl(var(--accent)/0.3)'
+					},
+					'50%': {
+						boxShadow: '0 0 30px hsl(var(--accent)/0.5)'
+					}
+				},
+				'gradient-shift': {
+					'0%, 100%': {
+						backgroundPosition: '0% 50%'
+					},
+					'50%': {
+						backgroundPosition: '100% 50%'
+					}
+				}
+			},
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+				'slide-up': 'slide-up 0.3s ease-out',
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'gradient-shift': 'gradient-shift 3s ease-in-out infinite',
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'circuit-pattern': 'radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0)',
+				'data-grid': 'linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px)',
+			},
+			backgroundSize: {
+				'circuit': '20px 20px',
+				'grid': '20px 20px',
 			}
 		}
 	},
