@@ -1,102 +1,81 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Primary Colors - Foundation & Trust */
-    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
-    --foreground: 215 25% 27%; /* Graphite #334155 */
+    /* Cyberpunk Color Palette */
+    --cyber-black: #0a0a0a;
+    --cyber-dark-gray: #1a1a1a;
+    --cyber-gray: #2a2a2a;
+    --cyber-purple: #6B46C1;
+    --cyber-hot-pink: #EC4899;
+    --cyber-electric-blue: #00D9FF;
+    --cyber-lime-green: #39FF14;
+    --cyber-neon-pink: #FF10F0;
+    --cyber-white: #ffffff;
+    --cyber-cyan: #00ffff;
+    
+    /* Base theme colors mapped to cyberpunk palette */
+    --background: 10 10 10; /* Deep black */
+    --foreground: 0 0% 100%; /* Pure white */
 
-    /* Card backgrounds */
-    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
-    --card-foreground: 215 25% 27%; /* Graphite */
+    --card: 26 26 26; /* Dark gray */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 100%; /* Titanium White */
-    --popover-foreground: 215 25% 27%; /* Graphite */
+    --popover: 26 26 26;
+    --popover-foreground: 0 0% 100%;
 
-    /* Primary Brand - Deep Space Blue */
-    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
-    --primary-foreground: 0 0% 100%; /* Titanium White */
+    --primary: 255 0% 100%; /* White for primary text */
+    --primary-foreground: 10 10 10;
 
-    /* Secondary - Subtle greys */
-    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
-    --secondary-foreground: 215 25% 27%; /* Graphite */
+    --secondary: 42 42 42; /* Medium gray */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 216 33% 97%; /* Light Lunar Grey */
-    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
+    --muted: 26 26 26;
+    --muted-foreground: 0 0% 70%;
 
-    /* Accent - Cyber Teal */
-    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
-    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
+    --accent: 316 100% 50%; /* Hot pink */
+    --accent-foreground: 0 0% 100%;
 
-    /* Destructive - Error Red */
-    --destructive: 0 84% 60%; /* Error Red #EF4444 */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 215 20% 82%; /* Light Stardust Silver */
-    --input: 215 20% 82%;
-    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
+    --border: 42 42 42;
+    --input: 26 26 26;
+    --ring: 190 100% 50%; /* Electric blue */
 
     --radius: 0.5rem;
 
-    /* Sidebar colors */
-    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
-    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
-
-    /* Additional semantic colors */
-    --success: 142 71% 45%; /* Success Green #10B981 */
-    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
-    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
-    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
+    /* Custom cyberpunk gradients */
+    --cyber-gradient-primary: linear-gradient(135deg, #6B46C1 0%, #EC4899 100%);
+    --cyber-gradient-secondary: linear-gradient(135deg, #00D9FF 0%, #39FF14 100%);
+    --cyber-gradient-holographic: linear-gradient(135deg, #FF10F0 0%, #00D9FF 50%, #39FF14 100%);
   }
 
   .dark {
-    /* Dark theme with Deep Space Blue as primary background */
-    --background: 215 100% 12%; /* Deep Space Blue */
-    --foreground: 0 0% 100%; /* Titanium White */
-
-    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --background: 10 10 10;
+    --foreground: 0 0% 100%;
+    --card: 26 26 26;
     --card-foreground: 0 0% 100%;
-
-    --popover: 215 95% 15%;
+    --popover: 26 26 26;
     --popover-foreground: 0 0% 100%;
-
-    --primary: 177 100% 48%; /* Cyber Teal */
-    --primary-foreground: 215 100% 12%;
-
-    --secondary: 215 90% 18%;
-    --secondary-foreground: 215 20% 75%;
-
-    --muted: 215 90% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 177 100% 48%; /* Cyber Teal */
-    --accent-foreground: 215 100% 12%;
-
+    --primary: 0 0% 100%;
+    --primary-foreground: 10 10 10;
+    --secondary: 42 42 42;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 26 26 26;
+    --muted-foreground: 0 0% 70%;
+    --accent: 316 100% 50%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 215 90% 18%;
-    --input: 215 90% 18%;
-    --ring: 177 100% 48%;
-
-    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-primary: 177 100% 48%;
-    --sidebar-primary-foreground: 215 100% 12%;
-    --sidebar-accent: 215 95% 15%;
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
+    --border: 42 42 42;
+    --input: 26 26 26;
+    --ring: 190 100% 50%;
   }
 }
 
@@ -106,169 +85,389 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-cyber-black text-cyber-white font-rajdhani;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(0, 217, 255, 0.15) 1px, transparent 0),
+      linear-gradient(rgba(0, 217, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 217, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px, 20px 20px, 20px 20px;
+    animation: matrix-scroll 20s linear infinite;
   }
 
-  /* Typography hierarchy following the design system */
+  /* Typography with tech fonts */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply font-orbitron font-bold tracking-wider text-cyber-white;
+    text-shadow: 0 0 10px currentColor;
   }
 
   h1 {
-    @apply text-4xl lg:text-5xl;
+    @apply text-4xl lg:text-6xl;
+    animation: glitch-text 3s ease-in-out infinite;
   }
 
   h2 {
-    @apply text-3xl lg:text-4xl;
+    @apply text-3xl lg:text-5xl;
   }
 
   h3 {
-    @apply text-2xl lg:text-3xl;
+    @apply text-2xl lg:text-4xl;
   }
 
   h4 {
-    @apply text-xl lg:text-2xl;
+    @apply text-xl lg:text-3xl;
   }
 
   h5 {
-    @apply text-lg lg:text-xl;
+    @apply text-lg lg:text-2xl;
   }
 
   h6 {
-    @apply text-base lg:text-lg;
+    @apply text-base lg:text-xl;
   }
 
-  /* Custom utility classes for the design system */
-  .text-cyber-teal {
-    color: hsl(var(--accent));
+  /* Utility classes for cyberpunk theme */
+  .font-orbitron {
+    font-family: 'Orbitron', monospace;
   }
 
-  .bg-cyber-teal {
-    background-color: hsl(var(--accent));
+  .font-rajdhani {
+    font-family: 'Rajdhani', sans-serif;
   }
 
-  .text-nebula-purple {
-    color: hsl(var(--nebula-purple));
+  .bg-cyber-black {
+    background-color: var(--cyber-black);
   }
 
-  .bg-nebula-purple {
-    background-color: hsl(var(--nebula-purple));
+  .bg-cyber-dark-gray {
+    background-color: var(--cyber-dark-gray);
   }
 
-  .text-deep-space {
-    color: hsl(var(--primary));
+  .bg-cyber-gray {
+    background-color: var(--cyber-gray);
   }
 
-  .bg-deep-space {
-    background-color: hsl(var(--primary));
+  .text-cyber-white {
+    color: var(--cyber-white);
   }
 
-  .text-success {
-    color: hsl(var(--success));
+  .text-cyber-electric-blue {
+    color: var(--cyber-electric-blue);
   }
 
-  .bg-success {
-    background-color: hsl(var(--success));
+  .text-cyber-lime-green {
+    color: var(--cyber-lime-green);
   }
 
-  .text-warning {
-    color: hsl(var(--warning));
+  .text-cyber-hot-pink {
+    color: var(--cyber-hot-pink);
   }
 
-  .bg-warning {
-    background-color: hsl(var(--warning));
+  .text-cyber-neon-pink {
+    color: var(--cyber-neon-pink);
   }
 
-  .text-solar-flare {
-    color: hsl(var(--solar-flare));
+  .text-cyber-purple {
+    color: var(--cyber-purple);
   }
 
-  .bg-solar-flare {
-    background-color: hsl(var(--solar-flare));
+  /* Cyberpunk card styling */
+  .cyber-card {
+    @apply bg-cyber-dark-gray border border-cyber-electric-blue/30 rounded-lg shadow-lg;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 0 20px rgba(0, 217, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  /* Geometric patterns and tech-inspired backgrounds */
-  .circuit-pattern {
-    background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
-    background-size: 20px 20px;
-    opacity: 0.05;
+  .cyber-card:hover {
+    border-color: var(--cyber-electric-blue);
+    box-shadow: 
+      0 0 20px rgba(0, 217, 255, 0.4),
+      0 0 40px rgba(0, 217, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
   }
 
-  .data-grid {
-    background-image: 
-      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
+  .cyber-card:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyber-electric-blue), transparent);
+    animation: scanning-line 2s ease-in-out infinite;
   }
 
-  /* Sophisticated card styling */
-  .elite-card {
-    @apply bg-card border border-border/50 rounded-lg shadow-sm;
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
+  /* Neon button styling */
+  .cyber-button {
+    @apply relative overflow-hidden font-orbitron font-semibold tracking-wider;
+    background: var(--cyber-gradient-holographic);
+    background-size: 200% 200%;
+    border: 1px solid var(--cyber-electric-blue);
+    color: var(--cyber-white);
+    text-shadow: 0 0 10px currentColor;
+    box-shadow: 
+      0 0 20px rgba(0, 217, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    animation: holographic-shimmer 3s ease-in-out infinite;
+    transition: all 0.3s ease;
   }
 
-  .elite-card-hover {
-    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
-  }
-
-  /* Premium badge styling */
-  .elite-badge {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-    color: hsl(var(--primary));
-  }
-
-  .elite-badge-secondary {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
-    color: white;
-  }
-
-  /* Futuristic button styles */
-  .cta-primary {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
-    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
-  }
-
-  .cta-primary:hover {
-    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
+  .cyber-button:hover {
+    box-shadow: 
+      0 0 30px rgba(0, 217, 255, 0.6),
+      0 0 60px rgba(255, 16, 240, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
   }
 
-  /* Progress and status indicators */
-  .progress-cyber {
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+  .cyber-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
   }
 
-  /* Focus states with cyber teal */
-  .focus-cyber:focus {
-    @apply outline-none ring-2 ring-accent ring-offset-2;
+  .cyber-button:hover::before {
+    left: 100%;
   }
 
-  /* Subtle animations for micro-interactions */
-  .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  /* Glitch text animation */
+  @keyframes glitch-text {
+    0%, 100% { 
+      transform: translate(0);
+      filter: hue-rotate(0deg);
+    }
+    20% { 
+      transform: translate(-2px, 2px);
+      filter: hue-rotate(90deg);
+    }
+    40% { 
+      transform: translate(-2px, -2px);
+      filter: hue-rotate(180deg);
+    }
+    60% { 
+      transform: translate(2px, 2px);
+      filter: hue-rotate(270deg);
+    }
+    80% { 
+      transform: translate(2px, -2px);
+      filter: hue-rotate(360deg);
+    }
   }
 
-  .glow-accent {
-    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
+  /* Holographic shimmer animation */
+  @keyframes holographic-shimmer {
+    0%, 100% { 
+      background-position: 0% 50%;
+    }
+    50% { 
+      background-position: 100% 50%;
+    }
   }
 
-  /* Grid system for structured layouts */
-  .elite-grid {
-    display: grid;
-    gap: 1.5rem;
+  /* Scanning line animation */
+  @keyframes scanning-line {
+    0% { left: -100%; }
+    100% { left: 100%; }
   }
 
-  .elite-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* Matrix background scroll */
+  @keyframes matrix-scroll {
+    0% { background-position: 0px 0px, 0px 0px, 0px 0px; }
+    100% { background-position: 0px 20px, 0px 20px, 0px 20px; }
   }
 
-  /* Professional spacing system */
+  /* Neon glow utility classes */
+  .neon-glow-blue {
+    box-shadow: 
+      0 0 20px var(--cyber-electric-blue),
+      0 0 40px var(--cyber-electric-blue);
+  }
+
+  .neon-glow-pink {
+    box-shadow: 
+      0 0 20px var(--cyber-neon-pink),
+      0 0 40px var(--cyber-neon-pink);
+  }
+
+  .neon-glow-green {
+    box-shadow: 
+      0 0 20px var(--cyber-lime-green),
+      0 0 40px var(--cyber-lime-green);
+  }
+
+  .neon-glow-purple {
+    box-shadow: 
+      0 0 20px var(--cyber-purple),
+      0 0 40px var(--cyber-purple);
+  }
+
+  /* Cyber badge styling */
+  .cyber-badge {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-orbitron font-semibold tracking-wider;
+    background: var(--cyber-gradient-primary);
+    color: var(--cyber-white);
+    border: 1px solid var(--cyber-electric-blue);
+    text-shadow: 0 0 10px currentColor;
+    box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+  }
+
+  .cyber-badge-secondary {
+    background: var(--cyber-gradient-secondary);
+    border-color: var(--cyber-lime-green);
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+  }
+
+  /* Input styling */
+  .cyber-input {
+    @apply bg-cyber-dark-gray border border-cyber-electric-blue/30 text-cyber-white font-rajdhani;
+    backdrop-filter: blur(10px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .cyber-input:focus {
+    border-color: var(--cyber-electric-blue);
+    box-shadow: 
+      0 0 20px rgba(0, 217, 255, 0.3),
+      inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    outline: none;
+  }
+
+  /* Table styling */
+  .cyber-table {
+    @apply bg-cyber-dark-gray border border-cyber-electric-blue/30;
+    backdrop-filter: blur(10px);
+  }
+
+  .cyber-table th {
+    @apply bg-cyber-gray text-cyber-electric-blue font-orbitron font-semibold tracking-wider;
+    border-bottom: 2px solid var(--cyber-electric-blue);
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .cyber-table td {
+    @apply border-b border-cyber-electric-blue/20;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-table tr:hover td {
+    @apply bg-cyber-electric-blue/10;
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.1);
+  }
+
+  /* Loading spinner with cyberpunk effect */
+  .cyber-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--cyber-dark-gray);
+    border-top: 3px solid var(--cyber-electric-blue);
+    border-radius: 50%;
+    animation: cyber-spin 1s linear infinite;
+    box-shadow: 0 0 20px var(--cyber-electric-blue);
+  }
+
+  @keyframes cyber-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Modal/Dialog styling */
+  .cyber-modal {
+    @apply bg-cyber-dark-gray border border-cyber-electric-blue;
+    backdrop-filter: blur(20px);
+    box-shadow: 
+      0 0 50px rgba(0, 217, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  .cyber-overlay {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Tabs styling */
+  .cyber-tabs {
+    @apply border-b border-cyber-electric-blue/30;
+  }
+
+  .cyber-tab {
+    @apply font-orbitron font-medium tracking-wider text-cyber-white/70;
+    transition: all 0.3s ease;
+  }
+
+  .cyber-tab[data-state="active"] {
+    @apply text-cyber-electric-blue;
+    text-shadow: 0 0 10px currentColor;
+    border-bottom: 2px solid var(--cyber-electric-blue);
+    box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+  }
+
+  /* Status indicators */
+  .status-submitted {
+    @apply text-cyber-electric-blue;
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .status-reviewed {
+    @apply text-cyber-lime-green;
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .status-pending {
+    @apply text-cyber-hot-pink;
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .status-failed {
+    @apply text-red-400;
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  /* Responsive design for mobile */
+  @media (max-width: 768px) {
+    body {
+      background-size: 15px 15px, 15px 15px, 15px 15px;
+    }
+    
+    h1 {
+      @apply text-3xl;
+    }
+    
+    .cyber-card {
+      margin: 0.5rem;
+    }
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--cyber-dark-gray);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--cyber-electric-blue);
+    border-radius: 4px;
+    box-shadow: 0 0 10px var(--cyber-electric-blue);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cyber-neon-pink);
+    box-shadow: 0 0 15px var(--cyber-neon-pink);
+  }
+
+  /* Section spacing */
   .section-spacing {
     @apply py-16 lg:py-24;
   }
@@ -276,22 +475,16 @@
   .content-spacing {
     @apply space-y-8 lg:space-y-12;
   }
-}
 
-/* Scrollbar styling for a polished look */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent));
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent)/0.8);
+  /* Matrix rain effect container */
+  .matrix-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.1;
+  }
 }
