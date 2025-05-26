@@ -232,8 +232,8 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
             html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
         )
         sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        sg.send(message)
-        print(f"Sent notification email for submission {submission['id']}")
+        #sg.send(message)
+        #print(f"Sent notification email for submission {submission['id']}")
     except Exception as e:
         print(f"Notification error: {e}")
 
