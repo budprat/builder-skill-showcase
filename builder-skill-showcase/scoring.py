@@ -54,18 +54,15 @@ evaluator_agent = LlmAgent(
     name="pitch_deck_evaluator",
     model="gemini-1.5-pro",
     instruction="Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}.",
-    description="Evaluates pitch decks against predefined criteria.",
-    api_key=os.getenv("GOOGLE_API_KEY")
+    description="Evaluates pitch decks against predefined criteria."
 )
 
 # ADK Agent for Feedback
-configure(api_key=os.getenv("GOOGLE_API_KEY"))  # Ensure API is configured
 feedback_agent = LlmAgent(
     name="feedback_formatter",
     model="gemini-1.5-pro",
     instruction="Format LLM evaluation results into concise, user-friendly feedback.",
-    description="Generates readable feedback.",
-    api_key=os.getenv("GOOGLE_API_KEY")
+    description="Generates readable feedback."
 )
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
@@ -81,7 +78,7 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
 async def pre_screen_submission(submission: dict) -> dict:
     try:
         g = Github(os.getenv("GITHUB_TOKEN"))
-        repo = g.get_repo(submission["github_repo_url"].split("github.com/")[1])
+        repo = g.get_repo(submission["repository_url"].split("github.com/")[1])
         repo.get_contents("README.md")
         submission["pre_screening_score"] = 5.0
         submission["status"] = "prescreened"
