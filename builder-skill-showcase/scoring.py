@@ -13,7 +13,12 @@ from google.generativeai import configure, GenerativeModel
 
 # Load environment variables
 load_dotenv()
-supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+
+# Use the same Supabase configuration as the frontend
+SUPABASE_URL = "https://udjwjoymlofdocclufxv.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkandqb3ltbG9mZG9jY2x1Znh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDkwMzYsImV4cCI6MjA2MTUyNTAzNn0.mN9DM5QJGysbPOplOBSS7WH1qhPk4Y67JMd2gafzEog"
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Configure Gemini API
 configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -23,27 +28,51 @@ gemini_model = GenerativeModel("gemini-1.5-pro")
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
-        # First check if the bucket exists and create it if it doesn't
-        try:
-            bucket_info = supabase.storage.get_bucket("submissions")
-            print(f"Bucket exists: {bucket_info}")
-        except Exception as bucket_error:
-            print(f"Storage bucket error: {bucket_error}")
-            # Try to create the bucket with correct syntax
-            try:
-                result = supabase.storage.create_bucket("submissions")
-                print(f"Created 'submissions' bucket: {result}")
-            except Exception as create_error:
-                print(f"Failed to create bucket: {create_error}")
-                # If bucket creation fails, try without creating bucket (bucket might exist but get_bucket failed)
-                print("Attempting to download file anyway...")
+        # The frontend uses 'user-files' bucket for file uploads
+        bucket_name = "user-files"
         
-        # Download and extract PDF
-        file_data = supabase.storage.from_("submissions").download(supabase_path)
-        with open("/tmp/pitch_deck.pdf", "wb") as f:
+        print(f"Attempting to download file from bucket '{bucket_name}' with path: {supabase_path}")
+        
+        # Try to download the file directly
+        try:
+            file_data = supabase.storage.from_(bucket_name).download(supabase_path)
+            print(f"Successfully downloaded file, size: {len(file_data)} bytes")
+        except Exception as download_error:
+            print(f"Download failed from {bucket_name}: {download_error}")
+            
+            # If the path starts with a URL, extract just the file path
+            if supabase_path.startswith("http"):
+                # Extract the file path from the URL
+                # Example: https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/filename.pdf
+                url_parts = supabase_path.split("/storage/v1/object/public/")
+                if len(url_parts) > 1:
+                    # Extract bucket and file path
+                    path_parts = url_parts[1].split("/", 1)
+                    if len(path_parts) > 1:
+                        actual_bucket = path_parts[0]
+                        actual_path = path_parts[1]
+                        print(f"Extracted bucket: {actual_bucket}, path: {actual_path}")
+                        file_data = supabase.storage.from_(actual_bucket).download(actual_path)
+                    else:
+                        raise Exception(f"Could not parse file path from URL: {supabase_path}")
+                else:
+                    raise Exception(f"Invalid storage URL format: {supabase_path}")
+            else:
+                raise download_error
+        
+        # Save and extract PDF
+        temp_file_path = "/tmp/pitch_deck.pdf"
+        with open(temp_file_path, "wb") as f:
             f.write(file_data)
-        with pdfplumber.open("/tmp/pitch_deck.pdf") as pdf:
-            return "\n".join(page.extract_text() or "" for page in pdf.pages)
+        
+        print(f"Saved PDF to {temp_file_path}")
+        
+        # Extract text from PDF
+        with pdfplumber.open(temp_file_path) as pdf:
+            text_content = "\n".join(page.extract_text() or "" for page in pdf.pages)
+            print(f"Extracted {len(text_content)} characters from PDF")
+            return text_content
+            
     except Exception as e:
         print(f"PDF extraction error: {e}")
         return f"Error extracting PDF: {str(e)}"
