@@ -1,5 +1,5 @@
-import * as React from "react"
 
+import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<
@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "neo-card text-white",
+      "rounded-lg border border-[#E5E5E5] bg-white text-[#333333] shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300",
       className
     )}
     {...props}
@@ -26,22 +26,29 @@ const CardHeader = React.forwardRef<
 CardHeader.displayName = "CardHeader"
 
 const CardTitle = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <div
+  <h3
     ref={ref}
-    className={cn("font-bold leading-none tracking-tight text-white", className)}
+    className={cn(
+      "text-xl font-bold leading-tight tracking-tight text-[#003366] font-['Montserrat']",
+      className
+    )}
     {...props}
   />
 ))
 CardTitle.displayName = "CardTitle"
 
 const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("text-sm text-white/70", className)} {...props} />
+  <p
+    ref={ref}
+    className={cn("text-sm text-[#666666] font-['Open_Sans'] leading-relaxed", className)}
+    {...props}
+  />
 ))
 CardDescription.displayName = "CardDescription"
 

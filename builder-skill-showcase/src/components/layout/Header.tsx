@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, User, LogOut, Zap, Home, Trophy, BarChart3 } from "lucide-react";
+import { Menu, X, User, LogOut, Zap, Home, Trophy, BarChart3, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export const Header = () => {
@@ -23,25 +23,24 @@ export const Header = () => {
   ];
 
   return (
-    <header className="relative z-50 border-b border-white/10 backdrop-blur-xl bg-background/80">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+    <header className="elite-nav sticky top-0 z-50 backdrop-blur-sm bg-[#003366]/95 border-b border-white/10">
+      <div className="elite-container">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div 
-            className="flex items-center space-x-3 cursor-pointer group"
+            className="flex items-center space-x-3 cursor-pointer group transition-all duration-300"
             onClick={() => navigate("/")}
           >
             <div className="relative">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-electric-purple to-neon-green flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Zap className="h-7 w-7 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-[#FF6600] flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                <Zap className="h-6 w-6 text-white" />
               </div>
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-electric-purple to-neon-green opacity-50 blur-lg group-hover:opacity-70 transition-opacity"></div>
             </div>
             <div>
-              <h1 className="text-2xl font-black bg-gradient-to-r from-electric-purple to-neon-green bg-clip-text text-transparent">
+              <h1 className="text-2xl font-black text-white font-['Montserrat']">
                 EliteBuilders
               </h1>
-              <Badge className="text-xs bg-neon-green/20 text-neon-green border-neon-green/30">
+              <Badge variant="accent" className="text-xs">
                 AI PLATFORM
               </Badge>
             </div>
@@ -55,7 +54,7 @@ export const Header = () => {
                 <button
                   key={item.label}
                   onClick={() => navigate(item.href)}
-                  className="flex items-center space-x-2 text-white/80 hover:text-neon-green transition-colors font-semibold group"
+                  className="elite-nav-link flex items-center space-x-2 text-white/90 hover:text-[#FF6600] transition-colors font-semibold group"
                 >
                   <item.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                   <span>{item.label}</span>
@@ -68,17 +67,26 @@ export const Header = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-3 bg-white/5 rounded-xl px-4 py-2 border border-white/10">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-electric-purple to-neon-green flex items-center justify-center">
+                {/* Notification Bell */}
+                <button className="relative p-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-[#FF6600] rounded-full"></span>
+                </button>
+                
+                {/* User Profile */}
+                <div className="flex items-center space-x-3 bg-white/10 rounded-lg px-4 py-2 border border-white/20">
+                  <div className="w-8 h-8 rounded-lg bg-[#FF6600] flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
-                  <span className="text-white font-semibold">
+                  <span className="text-white font-semibold font-['Open_Sans']">
                     {user.user_metadata?.full_name || user.email?.split('@')[0]}
                   </span>
                 </div>
+                
                 <Button 
                   onClick={handleSignOut}
-                  className="neo-secondary"
+                  variant="secondary"
+                  size="sm"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
@@ -88,13 +96,16 @@ export const Header = () => {
               <div className="flex items-center space-x-3">
                 <Button 
                   onClick={() => navigate("/auth")}
-                  className="neo-secondary"
+                  variant="outline"
+                  size="sm"
+                  className="border-white/30 text-white hover:bg-white hover:text-[#003366]"
                 >
                   Sign In
                 </Button>
                 <Button 
                   onClick={() => navigate("/auth")}
-                  className="neo-primary"
+                  variant="default"
+                  size="sm"
                 >
                   Join Now
                 </Button>
@@ -104,7 +115,7 @@ export const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+            className="md:hidden p-2 rounded-lg bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -113,8 +124,8 @@ export const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-white/10">
-            <div className="px-4 py-6 space-y-4">
+          <div className="md:hidden absolute top-full left-0 right-0 bg-[#003366]/98 backdrop-blur-lg border-b border-white/10 shadow-xl">
+            <div className="p-4 space-y-4">
               {navItems.map((item) => {
                 if (item.authRequired && !user) return null;
                 return (
@@ -124,22 +135,22 @@ export const Header = () => {
                       navigate(item.href);
                       setIsMenuOpen(false);
                     }}
-                    className="flex items-center space-x-3 w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-colors"
+                    className="flex items-center space-x-3 w-full text-left p-3 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
                   >
-                    <item.icon className="h-5 w-5 text-neon-green" />
-                    <span className="font-semibold">{item.label}</span>
+                    <item.icon className="h-5 w-5 text-[#FF6600]" />
+                    <span className="font-semibold font-['Open_Sans']">{item.label}</span>
                   </button>
                 );
               })}
               
-              <div className="pt-4 border-t border-white/10">
+              <div className="pt-4 border-t border-white/20">
                 {user ? (
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/5">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-electric-purple to-neon-green flex items-center justify-center">
+                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/10">
+                      <div className="w-8 h-8 rounded-lg bg-[#FF6600] flex items-center justify-center">
                         <User className="h-4 w-4 text-white" />
                       </div>
-                      <span className="text-white font-semibold">
+                      <span className="text-white font-semibold font-['Open_Sans']">
                         {user.user_metadata?.full_name || user.email?.split('@')[0]}
                       </span>
                     </div>
@@ -148,7 +159,8 @@ export const Header = () => {
                         handleSignOut();
                         setIsMenuOpen(false);
                       }}
-                      className="w-full neo-secondary"
+                      variant="secondary"
+                      className="w-full"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
@@ -161,7 +173,8 @@ export const Header = () => {
                         navigate("/auth");
                         setIsMenuOpen(false);
                       }}
-                      className="w-full neo-secondary"
+                      variant="outline"
+                      className="w-full border-white/30 text-white hover:bg-white hover:text-[#003366]"
                     >
                       Sign In
                     </Button>
@@ -170,7 +183,8 @@ export const Header = () => {
                         navigate("/auth");
                         setIsMenuOpen(false);
                       }}
-                      className="w-full neo-primary"
+                      variant="default"
+                      className="w-full"
                     >
                       Join Now
                     </Button>
