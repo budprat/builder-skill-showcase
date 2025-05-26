@@ -23,9 +23,10 @@ configure(api_key=os.getenv("GOOGLE_API_KEY"))
 # Custom DSPy Adapter for Gemini API
 class GeminiDSPyAdapter(dspy.LM):
     def __init__(self, model_name):
-        super().__init__(model_name)
-        self.model_name = model_name
+        # Set the model before calling super() to avoid property conflicts
+        self._model_name = model_name
         self.gemini_model = GenerativeModel(model_name)
+        super().__init__(model_name)
 
     def generate(self, prompt, max_tokens=200, **kwargs):
         try:
@@ -37,10 +38,6 @@ class GeminiDSPyAdapter(dspy.LM):
         except Exception as e:
             print(f"Gemini API error: {e}")
             return [{"text": ""}]
-
-    @property
-    def model(self):
-        return self.model_name
 
 # Configure DSPy
 dspy.settings.configure(lm=GeminiDSPyAdapter("gemini-1.5-pro"))
