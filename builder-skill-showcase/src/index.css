@@ -1,297 +1,236 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* Primary Colors - Foundation & Trust */
-    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
-    --foreground: 215 25% 27%; /* Graphite #334155 */
+/* Dark space theme colors and gradients */
+:root {
+  --deep-space: #0A0A0F;
+  --primary: #1A1A2E;
+  --cyber-teal: #00D4AA;
+  --nebula-purple: #9D4EDD;
+  --solar-flare: #FFB700;
+}
 
-    /* Card backgrounds */
-    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
-    --card-foreground: 215 25% 27%; /* Graphite */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, var(--deep-space) 0%, var(--primary) 100%);
+  color: white;
+  min-height: 100vh;
+}
 
-    --popover: 0 0% 100%; /* Titanium White */
-    --popover-foreground: 215 25% 27%; /* Graphite */
+/* Elite styling classes */
+.elite-badge {
+  background: linear-gradient(45deg, rgba(0, 212, 170, 0.1), rgba(157, 78, 221, 0.1));
+  border: 1px solid rgba(0, 212, 170, 0.3);
+  color: var(--cyber-teal);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
 
-    /* Primary Brand - Deep Space Blue */
-    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
-    --primary-foreground: 0 0% 100%; /* Titanium White */
+.cta-primary {
+  background: linear-gradient(45deg, var(--cyber-teal), var(--nebula-purple));
+  border: none;
+  transition: all 0.3s ease;
+}
 
-    /* Secondary - Subtle greys */
-    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
-    --secondary-foreground: 215 25% 27%; /* Graphite */
+.cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 170, 0.3);
+}
 
-    --muted: 216 33% 97%; /* Light Lunar Grey */
-    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
+.elite-grid {
+  display: grid;
+  gap: 2rem;
+}
 
-    /* Accent - Cyber Teal */
-    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
-    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
+.elite-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
 
-    /* Destructive - Error Red */
-    --destructive: 0 84% 60%; /* Error Red #EF4444 */
-    --destructive-foreground: 0 0% 100%;
+.elite-card-hover {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-    /* Borders and inputs */
-    --border: 215 20% 82%; /* Light Stardust Silver */
-    --input: 215 20% 82%;
-    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
+.elite-card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 212, 170, 0.15);
+  border-color: rgba(0, 212, 170, 0.3);
+}
 
-    --radius: 0.5rem;
+.section-spacing {
+  padding: 80px 0;
+}
 
-    /* Sidebar colors */
-    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
-    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
+.content-spacing {
+  margin-bottom: 3rem;
+}
 
-    /* Additional semantic colors */
-    --success: 142 71% 45%; /* Success Green #10B981 */
-    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
-    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
-    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* Tech pattern animations */
+.circuit-pattern {
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 98px,
+      rgba(0, 212, 170, 0.03) 100px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 98px,
+      rgba(157, 78, 221, 0.03) 100px
+    );
+}
+
+.data-grid {
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(0, 212, 170, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(157, 78, 221, 0.05) 0%, transparent 50%);
+}
+
+/* Animation keyframes */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  .dark {
-    /* Dark theme with Deep Space Blue as primary background */
-    --background: 215 100% 12%; /* Deep Space Blue */
-    --foreground: 0 0% 100%; /* Titanium White */
-
-    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --card-foreground: 0 0% 100%;
-
-    --popover: 215 95% 15%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 177 100% 48%; /* Cyber Teal */
-    --primary-foreground: 215 100% 12%;
-
-    --secondary: 215 90% 18%;
-    --secondary-foreground: 215 20% 75%;
-
-    --muted: 215 90% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 177 100% 48%; /* Cyber Teal */
-    --accent-foreground: 215 100% 12%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 90% 18%;
-    --input: 215 90% 18%;
-    --ring: 177 100% 48%;
-
-    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-primary: 177 100% 48%;
-    --sidebar-primary-foreground: 215 100% 12%;
-    --sidebar-accent: 215 95% 15%;
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-
-  body {
-    @apply bg-background text-foreground font-sans;
-    font-feature-settings: "rlig" 1, "calt" 1;
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
+}
 
-  /* Typography hierarchy following the design system */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.6s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Challenge page specific styles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive behavior */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
 
   h1 {
-    @apply text-4xl lg:text-5xl;
+    font-size: 2rem !important;
   }
 
   h2 {
-    @apply text-3xl lg:text-4xl;
+    font-size: 1.5rem !important;
   }
 
-  h3 {
-    @apply text-2xl lg:text-3xl;
+  .text-lg {
+    font-size: 0.875rem !important;
   }
 
-  h4 {
-    @apply text-xl lg:text-2xl;
+  .text-base {
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .container {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: all 0.2s ease;
+}
+
+/* Focus states for accessibility */
+button:focus,
+input:focus,
+[tabindex]:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Button hover effects */
+button:hover {
+  transform: translateY(-1px);
+}
+
+/* Link hover effects */
+a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive typography */
+@media (max-width: 768px) {
+  .section-spacing {
+    padding: 60px 0;
   }
 
-  h5 {
-    @apply text-lg lg:text-xl;
-  }
-
-  h6 {
-    @apply text-base lg:text-lg;
-  }
-
-  /* Custom utility classes for the design system */
-  .text-cyber-teal {
-    color: hsl(var(--accent));
-  }
-
-  .bg-cyber-teal {
-    background-color: hsl(var(--accent));
-  }
-
-  .text-nebula-purple {
-    color: hsl(var(--nebula-purple));
-  }
-
-  .bg-nebula-purple {
-    background-color: hsl(var(--nebula-purple));
-  }
-
-  .text-deep-space {
-    color: hsl(var(--primary));
-  }
-
-  .bg-deep-space {
-    background-color: hsl(var(--primary));
-  }
-
-  .text-success {
-    color: hsl(var(--success));
-  }
-
-  .bg-success {
-    background-color: hsl(var(--success));
-  }
-
-  .text-warning {
-    color: hsl(var(--warning));
-  }
-
-  .bg-warning {
-    background-color: hsl(var(--warning));
-  }
-
-  .text-solar-flare {
-    color: hsl(var(--solar-flare));
-  }
-
-  .bg-solar-flare {
-    background-color: hsl(var(--solar-flare));
-  }
-
-  /* Geometric patterns and tech-inspired backgrounds */
-  .circuit-pattern {
-    background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
-    background-size: 20px 20px;
-    opacity: 0.05;
-  }
-
-  .data-grid {
-    background-image: 
-      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
-  }
-
-  /* Sophisticated card styling */
-  .elite-card {
-    @apply bg-card border border-border/50 rounded-lg shadow-sm;
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
-  }
-
-  .elite-card-hover {
-    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
-  }
-
-  /* Premium badge styling */
-  .elite-badge {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-    color: hsl(var(--primary));
-  }
-
-  .elite-badge-secondary {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
-    color: white;
-  }
-
-  /* Futuristic button styles */
-  .cta-primary {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
-    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
-  }
-
-  .cta-primary:hover {
-    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
-    transform: translateY(-1px);
-  }
-
-  /* Progress and status indicators */
-  .progress-cyber {
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-  }
-
-  /* Focus states with cyber teal */
-  .focus-cyber:focus {
-    @apply outline-none ring-2 ring-accent ring-offset-2;
-  }
-
-  /* Subtle animations for micro-interactions */
-  .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-0.5;
-  }
-
-  .glow-accent {
-    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
-  }
-
-  /* Grid system for structured layouts */
   .elite-grid {
-    display: grid;
     gap: 1.5rem;
   }
-
-  .elite-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
-
-  /* Professional spacing system */
-  .section-spacing {
-    @apply py-16 lg:py-24;
-  }
-
-  .content-spacing {
-    @apply space-y-8 lg:space-y-12;
-  }
-}
-
-/* Scrollbar styling for a polished look */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent));
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent)/0.8);
 }
