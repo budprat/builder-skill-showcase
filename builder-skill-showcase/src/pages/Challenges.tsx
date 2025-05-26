@@ -1,36 +1,56 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Search, Calendar, User, Trophy, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Clock, Calendar, DollarSign, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Challenge {
   id: string;
   title: string;
   description: string;
+  company_name: string;
+  domains: string[];
   prize_amount: number;
   prize_description: string;
   submission_deadline: string;
   status: string;
-  company_name: string;
-  domains: string[];
   created_at: string;
 }
 
 const Challenges = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [domainFilter, setDomainFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedDomain, setSelectedDomain] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const domains = [
+    { value: "all", label: "All Domains" },
+    { value: "nlp", label: "Natural Language Processing" },
+    { value: "cv", label: "Computer Vision" },
+    { value: "ml", label: "Machine Learning" },
+    { value: "healthcare", label: "Healthcare AI" },
+    { value: "fintech", label: "FinTech AI" },
+    { value: "edtech", label: "EdTech AI" },
+    { value: "iot", label: "IoT AI" },
+    { value: "ecommerce", label: "E-commerce AI" }
+  ];
+
+  const statuses = [
+    { value: "all", label: "All Statuses" },
+    { value: "active", label: "Active" },
+    { value: "judging", label: "Judging" },
+    { value: "completed", label: "Completed" }
+  ];
 
   useEffect(() => {
     fetchChallenges();
@@ -38,200 +58,217 @@ const Challenges = () => {
 
   const fetchChallenges = async () => {
     try {
-      console.log("=== FETCHING CHALLENGES ===");
       const { data, error } = await supabase
-        .from("challenges")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .from('challenges')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Error fetching challenges:", error);
-        return;
-      }
-
+      if (error) throw error;
       setChallenges(data || []);
-      console.log("Fetched challenges count:", data?.length || 0);
-      console.log("Challenge IDs:", data?.map(c => c.id) || []);
     } catch (error) {
-      console.error("Error fetching challenges:", error);
+      console.error('Error fetching challenges:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load challenges. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDeadline = (deadline: string) => {
-    const date = new Date(deadline);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return {
-      formatted: date.toLocaleDateString(),
-      daysLeft: diffDays > 0 ? diffDays : 0,
-      isExpired: diffDays <= 0
-    };
-  };
+  const filteredChallenges = challenges.filter(challenge => {
+    const matchesSearch = challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         challenge.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         challenge.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDomain = selectedDomain === "all" || challenge.domains?.some(domain => 
+      domain.toLowerCase().includes(selectedDomain.toLowerCase())
+    );
+    const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
+    
+    return matchesSearch && matchesDomain && matchesStatus;
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800";
-      case "draft":
-        return "bg-gray-100 text-gray-800";
+        return "bg-green-500/20 text-green-300 border-green-500/30";
       case "judging":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
       case "completed":
-        return "bg-blue-100 text-blue-800";
+        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
     }
   };
 
-  const filteredChallenges = challenges.filter((challenge) => {
-    const matchesSearch = challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         challenge.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         challenge.domains?.some(domain => domain.toLowerCase().includes(searchTerm.toLowerCase()));
+  const formatPrize = (amount: number) => {
+    if (!amount) return 'TBD';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
 
-    const matchesDomain = domainFilter === "all" || challenge.domains?.includes(domainFilter);
-    const matchesStatus = statusFilter === "all" || challenge.status === statusFilter;
+  const formatDeadline = (deadline: string) => {
+    return new Date(deadline).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
-    return matchesSearch && matchesDomain && matchesStatus;
-  });
+  const getDaysLeft = (deadline: string) => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
-  const allDomains = Array.from(new Set(challenges.flatMap(c => c.domains || [])));
+  const handleJoinChallenge = (challengeId: string) => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    // Navigate to challenge details page (we'll implement this next)
+    navigate(`/challenges/${challengeId}`);
+  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-center items-center h-64">
-            <div className="text-lg">Loading challenges...</div>
-          </div>
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-white text-lg">Loading challenges...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
+        {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">AI Building Challenges</h1>
-          <p className="text-xl text-gray-600 mb-6">
-            Showcase your AI product development skills and compete for prizes
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-4">AI Building Challenges</h1>
+          <p className="text-white/80 text-lg">Showcase your AI product development skills and compete for prizes</p>
+        </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+        {/* Filters */}
+        <div className="mb-8 space-y-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
               <Input
                 placeholder="Search challenges, companies, or technologies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
             </div>
-            <Select value={domainFilter} onValueChange={setDomainFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Domains" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Domains</SelectItem>
-                {allDomains.map((domain) => (
-                  <SelectItem key={domain} value={domain}>
-                    {domain}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="judging">Judging</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={selectedDomain}
+              onChange={(e) => setSelectedDomain(e.target.value)}
+              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+            >
+              {domains.map(domain => (
+                <option key={domain.value} value={domain.value} className="bg-slate-900">
+                  {domain.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+            >
+              {statuses.map(status => (
+                <option key={status.value} value={status.value} className="bg-slate-900">
+                  {status.label}
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
 
-          <p className="text-sm text-gray-500">
+        {/* Results Summary */}
+        <div className="mb-6">
+          <p className="text-white/80">
             Showing {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? 's' : ''}
+            {searchTerm && ` for "${searchTerm}"`}
           </p>
         </div>
 
-        {/* Challenge Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Challenge Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredChallenges.map((challenge) => {
-            const deadline = formatDeadline(challenge.submission_deadline);
-
+            const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
-              <Card key={challenge.id} className="hover:shadow-lg transition-shadow">
+              <Card key={challenge.id} className="bg-white/10 border-white/20 hover:bg-white/15 transition-all cursor-pointer">
                 <CardHeader>
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-start justify-between mb-2">
                     <Badge className={getStatusColor(challenge.status)}>
-                      {challenge.status}
+                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                     <div className="text-right">
-                      <div className="flex items-center text-green-600 font-semibold">
-                        <DollarSign className="h-4 w-4 mr-1" />
-                        {challenge.prize_amount?.toLocaleString() || "0"}
+                      <div className="text-2xl font-bold text-white">
+                        {formatPrize(challenge.prize_amount)}
                       </div>
                       {challenge.prize_description && (
-                        <div className="text-sm text-gray-500">
-                          {challenge.prize_description}
-                        </div>
+                        <div className="text-white/60 text-sm">{challenge.prize_description}</div>
                       )}
                     </div>
                   </div>
-                  <CardTitle className="text-xl mb-2">{challenge.title}</CardTitle>
-                  <CardDescription className="text-sm text-gray-600">
-                    by {challenge.company_name || "Anonymous"}
+                  <CardTitle className="text-white text-xl mb-2">{challenge.title}</CardTitle>
+                  <CardDescription className="text-white/70">
+                    by {challenge.company_name || 'Anonymous'}
                   </CardDescription>
                 </CardHeader>
-
-                <CardContent>
-                  <p className="text-gray-700 mb-4 line-clamp-3">
-                    {challenge.description}
-                  </p>
-
-                  {/* Domains */}
+                <CardContent className="space-y-4">
+                  <p className="text-white/80">{challenge.description}</p>
+                  
                   {challenge.domains && challenge.domains.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {challenge.domains.map((domain, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.domains.map((domain) => (
+                        <Badge key={domain} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
                           {domain}
                         </Badge>
                       ))}
                     </div>
                   )}
 
-                  {/* Deadline Info */}
-                  <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      Due: {deadline.formatted}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center text-white/60">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Due: {formatDeadline(challenge.submission_deadline)}
                     </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {deadline.isExpired ? "Expired" : `${deadline.daysLeft} days left`}
+                    <div className="flex items-center text-white/60">
+                      <Clock className="h-4 w-4 mr-2" />
+                      {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
                     </div>
                   </div>
 
-                  <Button 
-                    className="w-full"
-                    onClick={() => navigate(`/challenges/${challenge.id}`)}
-                    disabled={deadline.isExpired}
-                  >
-                    {deadline.isExpired ? "Challenge Expired" : "View Challenge"}
-                  </Button>
+                  <div className="flex gap-2 pt-2">
+                    <Button 
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      disabled={challenge.status === "completed" || daysLeft <= 0}
+                      onClick={() => handleJoinChallenge(challenge.id)}
+                    >
+                      {challenge.status === "active" ? "Join Challenge" : 
+                       challenge.status === "judging" ? "View Results" : "View Details"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="border-white/20 text-white hover:bg-white/10"
+                      onClick={() => handleJoinChallenge(challenge.id)}
+                    >
+                      Details
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -240,7 +277,18 @@ const Challenges = () => {
 
         {filteredChallenges.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No challenges found matching your criteria.</p>
+            <div className="text-white/60 text-lg">No challenges found matching your criteria.</div>
+            <Button 
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedDomain("all");
+                setSelectedStatus("all");
+              }}
+              variant="outline" 
+              className="mt-4 border-white/20 text-white hover:bg-white/10"
+            >
+              Clear Filters
+            </Button>
           </div>
         )}
       </div>

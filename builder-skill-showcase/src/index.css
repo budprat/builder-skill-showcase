@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -293,34 +294,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--accent)/0.8);
-}
-
-.toast {
-  padding: 16px;
-}
-
-.toast-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.toast-description {
-  opacity: 0.8;
-}
-
-/* Toggle Switch Styles */
-input:checked + .block {
-  background-color: #8b5cf6;
-}
-
-input:checked + .block .dot {
-  transform: translateX(24px);
-}
-
-/* Line Clamp Utilities */
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
