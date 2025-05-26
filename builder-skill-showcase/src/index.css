@@ -1,102 +1,63 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Primary Colors - Foundation & Trust */
-    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
-    --foreground: 215 25% 27%; /* Graphite #334155 */
+    /* AI-Nature Hybrid Color Palette */
+    --background: 120 30% 8%; /* Deep Forest Green #0A2E1B */
+    --foreground: 120 15% 85%; /* Light Sage #D5E8D4 */
 
-    /* Card backgrounds */
-    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
-    --card-foreground: 215 25% 27%; /* Graphite */
+    --card: 120 25% 12%; /* Darker Forest #0F3A21 */
+    --card-foreground: 120 15% 85%; /* Light Sage */
 
-    --popover: 0 0% 100%; /* Titanium White */
-    --popover-foreground: 215 25% 27%; /* Graphite */
+    --popover: 120 25% 12%;
+    --popover-foreground: 120 15% 85%;
 
-    /* Primary Brand - Deep Space Blue */
-    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
-    --primary-foreground: 0 0% 100%; /* Titanium White */
+    /* Primary - Digital Chlorophyll */
+    --primary: 140 70% 35%; /* Digital Green #1E8449 */
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary - Subtle greys */
-    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
-    --secondary-foreground: 215 25% 27%; /* Graphite */
+    /* Secondary - Moss Tech */
+    --secondary: 100 20% 25%; /* Moss Grey #3D4A3A */
+    --secondary-foreground: 120 15% 85%;
 
-    --muted: 216 33% 97%; /* Light Lunar Grey */
-    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
+    --muted: 120 20% 15%; /* Dark Moss #1C3D20 */
+    --muted-foreground: 120 10% 60%;
 
-    /* Accent - Cyber Teal */
-    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
-    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
+    /* Accent - Bio Electric */
+    --accent: 55 100% 50%; /* Electric Gold #FFD700 */
+    --accent-foreground: 120 30% 8%;
 
-    /* Destructive - Error Red */
-    --destructive: 0 84% 60%; /* Error Red #EF4444 */
+    /* Destructive - Toxic Alert */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs */
-    --border: 215 20% 82%; /* Light Stardust Silver */
-    --input: 215 20% 82%;
-    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
+    --border: 120 15% 20%; /* Bark Brown */
+    --input: 120 15% 20%;
+    --ring: 55 100% 50%; /* Electric Gold */
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    /* Sidebar colors */
-    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
-    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
-
-    /* Additional semantic colors */
-    --success: 142 71% 45%; /* Success Green #10B981 */
-    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
-    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
-    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
+    /* Custom ecosystem colors */
+    --photosynthesis-start: 120 60% 15%; /* #0A2E1B */
+    --photosynthesis-end: 140 70% 35%; /* #1E8449 */
+    --bio-circuit: 55 100% 50%; /* #FFD700 */
+    --digital-flora: 140 50% 30%; /* #267326 */
+    --energy-flow: 180 100% 75%; /* #7FFFD4 */
+    --organic-tech: 85 60% 45%; /* #9ACD32 */
   }
 
   .dark {
-    /* Dark theme with Deep Space Blue as primary background */
-    --background: 215 100% 12%; /* Deep Space Blue */
-    --foreground: 0 0% 100%; /* Titanium White */
-
-    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --card-foreground: 0 0% 100%;
-
-    --popover: 215 95% 15%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 177 100% 48%; /* Cyber Teal */
-    --primary-foreground: 215 100% 12%;
-
-    --secondary: 215 90% 18%;
-    --secondary-foreground: 215 20% 75%;
-
-    --muted: 215 90% 18%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 177 100% 48%; /* Cyber Teal */
-    --accent-foreground: 215 100% 12%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 215 90% 18%;
-    --input: 215 90% 18%;
-    --ring: 177 100% 48%;
-
-    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-primary: 177 100% 48%;
-    --sidebar-primary-foreground: 215 100% 12%;
-    --sidebar-accent: 215 95% 15%;
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
+    --background: 120 35% 6%; /* Deeper Forest */
+    --foreground: 120 20% 90%;
+    --card: 120 30% 10%;
+    --card-foreground: 120 20% 90%;
+    --primary: 140 80% 40%;
+    --accent: 55 100% 60%;
   }
 }
 
@@ -108,179 +69,329 @@
   body {
     @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background-image: 
+      radial-gradient(circle at 20% 30%, hsl(var(--photosynthesis-start)) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, hsl(var(--photosynthesis-end)) 0%, transparent 50%),
+      linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
   }
 
-  /* Typography hierarchy following the design system */
+  /* Typography with organic feel */
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Orbitron', system-ui, -apple-system, sans-serif;
+    text-shadow: 0 0 10px hsl(var(--accent) / 0.3);
   }
 
-  h1 {
-    @apply text-4xl lg:text-5xl;
+  h1 { @apply text-4xl lg:text-5xl; }
+  h2 { @apply text-3xl lg:text-4xl; }
+  h3 { @apply text-2xl lg:text-3xl; }
+  h4 { @apply text-xl lg:text-2xl; }
+  h5 { @apply text-lg lg:text-xl; }
+  h6 { @apply text-base lg:text-lg; }
+
+  /* Digital Flora Cards */
+  .digital-flora {
+    background: linear-gradient(135deg, 
+      hsl(var(--photosynthesis-start)) 0%,
+      hsl(var(--photosynthesis-end)) 100%
+    );
+    border: 1px solid hsl(var(--bio-circuit) / 0.3);
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  h2 {
-    @apply text-3xl lg:text-4xl;
-  }
-
-  h3 {
-    @apply text-2xl lg:text-3xl;
-  }
-
-  h4 {
-    @apply text-xl lg:text-2xl;
-  }
-
-  h5 {
-    @apply text-lg lg:text-xl;
-  }
-
-  h6 {
-    @apply text-base lg:text-lg;
-  }
-
-  /* Custom utility classes for the design system */
-  .text-cyber-teal {
-    color: hsl(var(--accent));
-  }
-
-  .bg-cyber-teal {
-    background-color: hsl(var(--accent));
-  }
-
-  .text-nebula-purple {
-    color: hsl(var(--nebula-purple));
-  }
-
-  .bg-nebula-purple {
-    background-color: hsl(var(--nebula-purple));
-  }
-
-  .text-deep-space {
-    color: hsl(var(--primary));
-  }
-
-  .bg-deep-space {
-    background-color: hsl(var(--primary));
-  }
-
-  .text-success {
-    color: hsl(var(--success));
-  }
-
-  .bg-success {
-    background-color: hsl(var(--success));
-  }
-
-  .text-warning {
-    color: hsl(var(--warning));
-  }
-
-  .bg-warning {
-    background-color: hsl(var(--warning));
-  }
-
-  .text-solar-flare {
-    color: hsl(var(--solar-flare));
-  }
-
-  .bg-solar-flare {
-    background-color: hsl(var(--solar-flare));
-  }
-
-  /* Geometric patterns and tech-inspired backgrounds */
-  .circuit-pattern {
+  .digital-flora::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
-    background-size: 20px 20px;
-    opacity: 0.05;
+      repeating-linear-gradient(90deg, 
+        transparent, transparent 2px, 
+        hsl(var(--bio-circuit) / 0.4) 2px, 
+        hsl(var(--bio-circuit) / 0.4) 4px
+      ),
+      repeating-linear-gradient(0deg, 
+        transparent, transparent 2px, 
+        hsl(var(--bio-circuit) / 0.4) 2px, 
+        hsl(var(--bio-circuit) / 0.4) 4px
+      );
+    background-size: 40px 40px;
+    opacity: 0.3;
+    animation: circuit-flow 8s linear infinite;
   }
 
-  .data-grid {
-    background-image: 
-      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
+  .digital-flora:hover {
+    transform: scale(1.02) rotateY(2deg);
+    box-shadow: 
+      0 20px 40px hsl(var(--accent) / 0.2),
+      0 0 30px hsl(var(--energy-flow) / 0.4),
+      inset 0 0 20px hsl(var(--bio-circuit) / 0.1);
+    animation: bloom 0.6s ease-out;
   }
 
-  /* Sophisticated card styling */
-  .elite-card {
-    @apply bg-card border border-border/50 rounded-lg shadow-sm;
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
+  /* Digital Tree Animation */
+  .digital-tree {
+    position: fixed;
+    bottom: 0;
+    right: 10%;
+    width: 200px;
+    height: 300px;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"><path d="M100 300 L100 200 Q80 180 90 160 Q120 140 110 120 Q95 100 105 80 Q125 60 115 40 Q100 20 110 0" stroke="%23FFD700" stroke-width="3" fill="none"/><circle cx="90" cy="160" r="8" fill="%231E8449"/><circle cx="110" cy="120" r="10" fill="%231E8449"/><circle cx="105" cy="80" r="12" fill="%231E8449"/><circle cx="115" cy="40" r="15" fill="%231E8449"/></svg>') no-repeat center;
+    background-size: contain;
+    opacity: 0.6;
+    animation: tree-grow 10s ease-out forwards, sway 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
   }
 
-  .elite-card-hover {
-    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
+  /* Weather System */
+  .weather-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2;
   }
 
-  /* Premium badge styling */
-  .elite-badge {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-    color: hsl(var(--primary));
+  .data-rain {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, hsl(var(--energy-flow)), transparent);
+    animation: data-rain 3s linear infinite;
   }
 
-  .elite-badge-secondary {
-    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
-    color: white;
+  .data-rain:nth-child(odd) {
+    animation-duration: 2.5s;
+    --x-drift: 10px;
   }
 
-  /* Futuristic button styles */
-  .cta-primary {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
-    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
+  .data-rain:nth-child(even) {
+    animation-duration: 3.5s;
+    --x-drift: -15px;
   }
 
-  .cta-primary:hover {
-    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
-    transform: translateY(-1px);
+  /* Bio-Circuit Fusion */
+  .bio-circuit {
+    background: 
+      repeating-linear-gradient(90deg, 
+        transparent, transparent 2px, 
+        hsl(var(--bio-circuit)) 2px, 
+        hsl(var(--bio-circuit)) 4px
+      ),
+      repeating-linear-gradient(0deg, 
+        transparent, transparent 2px, 
+        hsl(var(--bio-circuit)) 2px, 
+        hsl(var(--bio-circuit)) 4px
+      );
+    mask-image: radial-gradient(ellipse 80% 60% at center, black 40%, transparent 70%);
+    opacity: 0.2;
+    animation: circuit-pulse 6s ease-in-out infinite;
   }
 
-  /* Progress and status indicators */
-  .progress-cyber {
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-  }
-
-  /* Focus states with cyber teal */
-  .focus-cyber:focus {
-    @apply outline-none ring-2 ring-accent ring-offset-2;
-  }
-
-  /* Subtle animations for micro-interactions */
-  .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-0.5;
-  }
-
-  .glow-accent {
-    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
-  }
-
-  /* Grid system for structured layouts */
-  .elite-grid {
+  /* Organic Grid Layout */
+  .organic-grid {
     display: grid;
-    gap: 1.5rem;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-auto-rows: masonry;
   }
 
-  .elite-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  /* Particle Effects */
+  .digital-pollen {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: hsl(var(--accent));
+    border-radius: 50%;
+    box-shadow: 0 0 10px hsl(var(--accent));
+    animation: pollen-drift 15s ease-in-out infinite;
   }
 
-  /* Professional spacing system */
-  .section-spacing {
-    @apply py-16 lg:py-24;
+  .energy-photosynthesis {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: hsl(var(--energy-flow));
+    border-radius: 50%;
+    box-shadow: 0 0 15px hsl(var(--energy-flow));
+    animation: photosynthesis-rise 8s ease-out infinite;
   }
 
-  .content-spacing {
-    @apply space-y-8 lg:space-y-12;
+  /* Enhanced Components */
+  .ecosystem-card {
+    @apply digital-flora p-6 relative overflow-hidden;
+    backdrop-filter: blur(10px);
+  }
+
+  .ecosystem-button {
+    @apply relative overflow-hidden px-6 py-3 rounded-lg font-medium transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--bio-circuit) / 0.5);
+  }
+
+  .ecosystem-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(var(--energy-flow) / 0.4), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .ecosystem-button:hover::before {
+    left: 100%;
+  }
+
+  .ecosystem-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px hsl(var(--accent) / 0.3);
+  }
+
+  .ecosystem-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--organic-tech)), hsl(var(--digital-flora)));
+    color: hsl(var(--background));
+    border: 1px solid hsl(var(--bio-circuit) / 0.6);
+    box-shadow: 0 0 15px hsl(var(--accent) / 0.2);
+  }
+
+  /* Terraformed Background */
+  .terrain-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: 
+      radial-gradient(circle at 30% 20%, hsl(var(--muted) / 0.8) 0%, transparent 50%),
+      radial-gradient(circle at 70% 80%, hsl(var(--primary) / 0.6) 0%, transparent 50%),
+      radial-gradient(circle at 20% 70%, hsl(var(--accent) / 0.4) 0%, transparent 50%);
+    animation: terrain-shift 20s ease-in-out infinite;
+    z-index: -1;
   }
 }
 
-/* Scrollbar styling for a polished look */
+/* Keyframe Animations */
+@keyframes tree-grow {
+  0% { 
+    transform: scaleY(0) translateY(100px); 
+    opacity: 0; 
+  }
+  100% { 
+    transform: scaleY(1) translateY(0); 
+    opacity: 0.6; 
+  }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes data-rain {
+  0% { 
+    transform: translateY(-100vh) translateX(var(--x-drift, 0px)); 
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { 
+    transform: translateY(100vh) translateX(calc(var(--x-drift, 0px) * -1)); 
+    opacity: 0;
+  }
+}
+
+@keyframes circuit-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+@keyframes circuit-pulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes bloom {
+  0% { transform: scale(1) rotateY(0deg); }
+  50% { transform: scale(1.05) rotateY(5deg); }
+  100% { transform: scale(1.02) rotateY(2deg); }
+}
+
+@keyframes pollen-drift {
+  0% { 
+    transform: translate(0, 0) rotate(0deg); 
+    opacity: 0;
+  }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { 
+    transform: translate(200px, -100px) rotate(360deg); 
+    opacity: 0;
+  }
+}
+
+@keyframes photosynthesis-rise {
+  0% { 
+    transform: translateY(100px) scale(0.5); 
+    opacity: 0;
+  }
+  50% { 
+    opacity: 1; 
+    transform: translateY(50px) scale(1);
+  }
+  100% { 
+    transform: translateY(-100px) scale(0.3); 
+    opacity: 0;
+  }
+}
+
+@keyframes terrain-shift {
+  0%, 100% { 
+    transform: translate(0, 0) rotate(0deg); 
+  }
+  33% { 
+    transform: translate(50px, -30px) rotate(1deg); 
+  }
+  66% { 
+    transform: translate(-30px, 20px) rotate(-0.5deg); 
+  }
+}
+
+/* Lightning Flash Effect */
+@keyframes lightning-flash {
+  0%, 90%, 100% { opacity: 0; }
+  5%, 85% { opacity: 1; }
+}
+
+.lightning-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, hsl(var(--accent) / 0.3), transparent);
+  pointer-events: none;
+  z-index: 3;
+  animation: lightning-flash 8s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+/* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -288,10 +399,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent));
-  border-radius: 3px;
+  background: linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--accent)));
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent)/0.8);
+  background: linear-gradient(to bottom, hsl(var(--accent)), hsl(var(--primary)));
 }
