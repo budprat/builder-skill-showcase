@@ -5,91 +5,98 @@
 
 @layer base {
   :root {
-    /* Modern Gradient Design System */
-    --background: 225 15% 8%; /* Deep Charcoal #0F0F23 */
-    --foreground: 210 40% 98%; /* Pure White #FAFBFF */
+    /* Primary Colors - Foundation & Trust */
+    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
+    --foreground: 215 25% 27%; /* Graphite #334155 */
 
     /* Card backgrounds */
-    --card: 225 15% 12%; /* Charcoal #1A1A35 */
-    --card-foreground: 210 40% 98%; /* Pure White */
+    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
+    --card-foreground: 215 25% 27%; /* Graphite */
 
-    --popover: 225 15% 12%; /* Charcoal */
-    --popover-foreground: 210 40% 98%; /* Pure White */
+    --popover: 0 0% 100%; /* Titanium White */
+    --popover-foreground: 215 25% 27%; /* Graphite */
 
-    /* Primary Brand - Electric Purple */
-    --primary: 270 100% 65%; /* Electric Purple #7C3AED */
-    --primary-foreground: 210 40% 98%; /* Pure White */
+    /* Primary Brand - Deep Space Blue */
+    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
+    --primary-foreground: 0 0% 100%; /* Titanium White */
 
-    /* Secondary - Cosmic Blue */
-    --secondary: 225 15% 20%; /* Dark Cosmic Blue #2A2A4A */
-    --secondary-foreground: 210 40% 90%; /* Light Grey */
+    /* Secondary - Subtle greys */
+    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
+    --secondary-foreground: 215 25% 27%; /* Graphite */
 
-    --muted: 225 15% 16%; /* Muted Dark */
-    --muted-foreground: 210 20% 70%; /* Muted Light */
+    --muted: 216 33% 97%; /* Light Lunar Grey */
+    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
 
-    /* Accent - Neon Green */
-    --accent: 165 100% 50%; /* Neon Green #00FF8A */
-    --accent-foreground: 225 15% 8%; /* Deep Charcoal */
+    /* Accent - Cyber Teal */
+    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
+    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
 
-    /* Destructive - Hot Pink */
-    --destructive: 330 100% 60%; /* Hot Pink #FF3366 */
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive - Error Red */
+    --destructive: 0 84% 60%; /* Error Red #EF4444 */
+    --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 225 15% 25%; /* Border Grey */
-    --input: 225 15% 20%;
-    --ring: 165 100% 50%; /* Neon Green for focus rings */
+    --border: 215 20% 82%; /* Light Stardust Silver */
+    --input: 215 20% 82%;
+    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     /* Sidebar colors */
-    --sidebar-background: 225 15% 6%; /* Ultra Dark */
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 270 100% 65%; /* Electric Purple */
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 225 15% 18%;
-    --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 225 15% 25%;
-    --sidebar-ring: 165 100% 50%;
+    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
+    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
 
     /* Additional semantic colors */
-    --success: 140 100% 50%; /* Bright Green #00FF66 */
-    --warning: 45 100% 55%; /* Electric Orange #FFAA00 */
-    --info: 200 100% 60%; /* Electric Blue #00BBFF */
-    --gradient-primary: linear-gradient(135deg, #7C3AED, #00FF8A);
-    --gradient-secondary: linear-gradient(135deg, #00BBFF, #FF3366);
-    --gradient-accent: linear-gradient(135deg, #00FF8A, #FFAA00);
+    --success: 142 71% 45%; /* Success Green #10B981 */
+    --warning: 38 92% 50%; /* Warning Amber #F59E0B */
+    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
+    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
   }
 
   .dark {
-    /* Enhanced dark theme */
-    --background: 225 15% 4%; /* Ultra Deep */
-    --foreground: 210 40% 98%;
+    /* Dark theme with Deep Space Blue as primary background */
+    --background: 215 100% 12%; /* Deep Space Blue */
+    --foreground: 0 0% 100%; /* Titanium White */
 
-    --card: 225 15% 8%;
-    --card-foreground: 210 40% 98%;
+    --card: 215 95% 15%; /* Slightly lighter Deep Space Blue */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 225 15% 8%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 215 95% 15%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 270 100% 70%; /* Brighter Electric Purple */
-    --primary-foreground: 225 15% 4%;
+    --primary: 177 100% 48%; /* Cyber Teal */
+    --primary-foreground: 215 100% 12%;
 
-    --secondary: 225 15% 15%;
-    --secondary-foreground: 210 40% 85%;
+    --secondary: 215 90% 18%;
+    --secondary-foreground: 215 20% 75%;
 
-    --muted: 225 15% 10%;
-    --muted-foreground: 210 20% 65%;
+    --muted: 215 90% 18%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 165 100% 55%; /* Brighter Neon Green */
-    --accent-foreground: 225 15% 4%;
+    --accent: 177 100% 48%; /* Cyber Teal */
+    --accent-foreground: 215 100% 12%;
 
-    --destructive: 330 100% 65%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 225 15% 20%;
-    --input: 225 15% 15%;
-    --ring: 165 100% 55%;
+    --border: 215 90% 18%;
+    --input: 215 90% 18%;
+    --ring: 177 100% 48%;
+
+    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
+    --sidebar-foreground: 215 20% 75%;
+    --sidebar-primary: 177 100% 48%;
+    --sidebar-primary-foreground: 215 100% 12%;
+    --sidebar-accent: 215 95% 15%;
+    --sidebar-accent-foreground: 215 20% 75%;
+    --sidebar-border: 215 90% 18%;
+    --sidebar-ring: 177 100% 48%;
   }
 }
 
@@ -99,328 +106,192 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: linear-gradient(135deg, hsl(var(--background)), hsl(225 15% 6%));
-    min-height: 100vh;
   }
 
-  /* Modern Typography */
+  /* Typography hierarchy following the design system */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight;
+    @apply font-semibold tracking-tight;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   h1 {
-    @apply text-5xl lg:text-7xl;
-    font-weight: 900;
+    @apply text-4xl lg:text-5xl;
   }
 
   h2 {
-    @apply text-4xl lg:text-5xl;
-    font-weight: 800;
+    @apply text-3xl lg:text-4xl;
   }
 
   h3 {
-    @apply text-3xl lg:text-4xl;
-    font-weight: 700;
+    @apply text-2xl lg:text-3xl;
   }
 
   h4 {
-    @apply text-2xl lg:text-3xl;
-    font-weight: 600;
+    @apply text-xl lg:text-2xl;
   }
 
   h5 {
-    @apply text-xl lg:text-2xl;
-    font-weight: 600;
+    @apply text-lg lg:text-xl;
   }
 
   h6 {
-    @apply text-lg lg:text-xl;
-    font-weight: 600;
+    @apply text-base lg:text-lg;
   }
 
-  /* Modern Utility Classes */
-  .text-electric-purple {
-    color: hsl(var(--primary));
-  }
-
-  .bg-electric-purple {
-    background-color: hsl(var(--primary));
-  }
-
-  .text-neon-green {
+  /* Custom utility classes for the design system */
+  .text-cyber-teal {
     color: hsl(var(--accent));
   }
 
-  .bg-neon-green {
+  .bg-cyber-teal {
     background-color: hsl(var(--accent));
   }
 
-  .text-hot-pink {
-    color: hsl(var(--destructive));
+  .text-nebula-purple {
+    color: hsl(var(--nebula-purple));
   }
 
-  .bg-hot-pink {
-    background-color: hsl(var(--destructive));
+  .bg-nebula-purple {
+    background-color: hsl(var(--nebula-purple));
   }
 
-  .text-electric-blue {
-    color: hsl(var(--info));
+  .text-deep-space {
+    color: hsl(var(--primary));
   }
 
-  .bg-electric-blue {
-    background-color: hsl(var(--info));
+  .bg-deep-space {
+    background-color: hsl(var(--primary));
   }
 
-  .text-electric-orange {
-    color: hsl(var(--warning));
-  }
-
-  .bg-electric-orange {
-    background-color: hsl(var(--warning));
-  }
-
-  .text-bright-green {
+  .text-success {
     color: hsl(var(--success));
   }
 
-  .bg-bright-green {
+  .bg-success {
     background-color: hsl(var(--success));
   }
 
-  /* Modern Patterns */
-  .neo-grid {
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .bg-warning {
+    background-color: hsl(var(--warning));
+  }
+
+  .text-solar-flare {
+    color: hsl(var(--solar-flare));
+  }
+
+  .bg-solar-flare {
+    background-color: hsl(var(--solar-flare));
+  }
+
+  /* Geometric patterns and tech-inspired backgrounds */
+  .circuit-pattern {
     background-image: 
-      linear-gradient(rgba(124, 58, 237, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124, 58, 237, 0.1) 1px, transparent 1px);
-    background-size: 40px 40px;
+      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
+    background-size: 20px 20px;
+    opacity: 0.05;
   }
 
-  .glow-dots {
+  .data-grid {
     background-image: 
-      radial-gradient(circle at 2px 2px, rgba(0, 255, 138, 0.3) 1px, transparent 0);
-    background-size: 30px 30px;
+      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.1;
   }
 
-  .cyber-mesh {
-    background-image: 
-      conic-gradient(from 0deg at 50% 50%, 
-        rgba(124, 58, 237, 0.1), 
-        rgba(0, 255, 138, 0.1), 
-        rgba(255, 51, 102, 0.1), 
-        rgba(124, 58, 237, 0.1));
-    background-size: 100px 100px;
+  /* Sophisticated card styling */
+  .elite-card {
+    @apply bg-card border border-border/50 rounded-lg shadow-sm;
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
   }
 
-  /* Ultra Modern Card Styling */
-  .neo-card {
-    background: linear-gradient(145deg, 
-      rgba(26, 26, 53, 0.8), 
-      rgba(42, 42, 74, 0.4));
-    border: 1px solid rgba(124, 58, 237, 0.2);
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  .elite-card-hover {
+    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
   }
 
-  .neo-card-hover {
-    @apply neo-card transition-all duration-300;
+  /* Premium badge styling */
+  .elite-badge {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+    color: hsl(var(--primary));
   }
 
-  .neo-card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.3),
-      0 4px 20px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border-color: rgba(0, 255, 138, 0.4);
-  }
-
-  /* Futuristic Badge Styling */
-  .neo-badge {
-    background: var(--gradient-primary);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    color: hsl(var(--background));
-    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .neo-badge-secondary {
-    background: var(--gradient-secondary);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
+  .elite-badge-secondary {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
     color: white;
-    box-shadow: 0 4px 15px rgba(0, 187, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  .neo-badge-accent {
-    background: var(--gradient-accent);
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider;
-    color: hsl(var(--background));
-    box-shadow: 0 4px 15px rgba(0, 255, 138, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+  /* Futuristic button styles */
+  .cta-primary {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
+    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
   }
 
-  /* Ultra Modern Button Styles */
-  .neo-primary {
-    background: var(--gradient-primary);
-    @apply text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
-    box-shadow: 
-      0 4px 20px rgba(124, 58, 237, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  .cta-primary:hover {
+    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
+    transform: translateY(-1px);
   }
 
-  .neo-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  /* Progress and status indicators */
+  .progress-cyber {
+    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
   }
 
-  .neo-secondary {
-    background: linear-gradient(135deg, 
-      rgba(42, 42, 74, 0.8), 
-      rgba(26, 26, 53, 0.8));
-    @apply text-white font-bold py-3 px-6 rounded-xl transition-all duration-300;
-    box-shadow: 
-      0 4px 20px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(124, 58, 237, 0.3);
+  /* Focus states with cyber teal */
+  .focus-cyber:focus {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
   }
 
-  .neo-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 8px 30px rgba(124, 58, 237, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border-color: rgba(0, 255, 138, 0.5);
+  /* Subtle animations for micro-interactions */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
   }
 
-  /* Glow Effects */
-  .glow-purple {
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5);
+  .glow-accent {
+    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
   }
 
-  .glow-green {
-    box-shadow: 0 0 30px rgba(0, 255, 138, 0.5);
-  }
-
-  .glow-pink {
-    box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
-  }
-
-  .glow-blue {
-    box-shadow: 0 0 30px rgba(0, 187, 255, 0.5);
-  }
-
-  /* Advanced Animations */
-  .pulse-glow {
-    animation: pulse-glow 3s ease-in-out infinite;
-  }
-
-  .floating {
-    animation: floating 6s ease-in-out infinite;
-  }
-
-  .gradient-shift {
-    background-size: 200% 200%;
-    animation: gradient-shift 4s ease infinite;
-  }
-
-  @keyframes floating {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-
-  @keyframes pulse-glow {
-    0%, 100% { 
-      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
-    }
-    50% { 
-      box-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
-    }
-  }
-
-  @keyframes gradient-shift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  /* Modern Grid System */
-  .neo-grid {
+  /* Grid system for structured layouts */
+  .elite-grid {
     display: grid;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
-  .neo-grid-auto {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  .elite-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 
-  /* Professional Spacing */
+  /* Professional spacing system */
   .section-spacing {
-    @apply py-20 lg:py-32;
+    @apply py-16 lg:py-24;
   }
 
   .content-spacing {
-    @apply space-y-12 lg:space-y-16;
-  }
-
-  /* Modern Focus States */
-  .focus-neo:focus {
-    @apply outline-none;
-    box-shadow: 
-      0 0 0 3px rgba(0, 255, 138, 0.3),
-      0 4px 20px rgba(124, 58, 237, 0.2);
-  }
-
-  /* Hover Lift Effect */
-  .hover-lift {
-    @apply transition-all duration-300;
-  }
-
-  .hover-lift:hover {
-    transform: translateY(-4px);
+    @apply space-y-8 lg:space-y-12;
   }
 }
 
-/* Ultra Modern Scrollbar */
+/* Scrollbar styling for a polished look */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, 
-    rgba(26, 26, 53, 0.5), 
-    rgba(42, 42, 74, 0.5));
+  background: hsl(var(--muted));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gradient-primary);
-  border-radius: 4px;
+  background: hsl(var(--accent));
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gradient-accent);
-}
-
-/* Selection Colors */
-::selection {
-  background: rgba(0, 255, 138, 0.3);
-  color: white;
-}
-
-::-moz-selection {
-  background: rgba(0, 255, 138, 0.3);
-  color: white;
+  background: hsl(var(--accent)/0.8);
 }
