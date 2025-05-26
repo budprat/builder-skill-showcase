@@ -1,0 +1,69 @@
+Create a modern AI challenge platform webpage with the following specifications:
+
+LAYOUT STRUCTURE:
+Build a dark-themed webpage with a fixed header (64px height, dark navy background #1a1b3a, no visible border) containing "Elite Builders" logo/text (18px, font-weight 600, white color) on the left, center navigation links (Challenges, Dashboard - 14px, font-weight 500, white color, 32px spacing), and a circular purple user avatar with "P" (40px diameter, purple gradient background) on the right.
+
+MAIN CONTENT:
+Dark gradient background (deep blue to purple). Container with max-width 1440px, centered with auto margins, 48px vertical padding. Page title "AI Building Challenges" (48px, font-weight 700, white color) followed by subtitle "Showcase your AI product development skills and compete for prizes" (18px, color #a8a9c0, 24px bottom margin).
+
+SEARCH AND FILTERS:
+Search bar spanning 40% width (48px height, dark background #2a2b4a, border 1px solid #3a3b5a, border-radius 8px, placeholder "Search challenges, companies, or technologies...", white text). Two dropdown filters on the right: "All Domains" and "All Statuses" (dark background #2a2b4a, white text, padding 12px 24px, border-radius 8px).
+
+STATUS INDICATOR:
+"Showing 4 challenges" text (14px, color #a8a9c0, margin-top 24px).
+
+CHALLENGE CARD GRID:
+CSS Grid with 2 columns, 24px gap. Each card has dark background #2a2b4a, subtle border 1px solid #3a3b5a, 16px border-radius, padding 24px, hover effect with slight glow.
+
+CHALLENGE CARD STRUCTURE:
+Card 1 (Top Left):
+- Active badge (green background, 8px padding, border-radius 4px, 12px font)
+- Prize amount "$2" (32px, font-weight 700, white, right-aligned)
+- Title "Diagnostic Assistant" (20px, font-weight 600, white)
+- Sponsor "by Diagnostic Assistant" (14px, color #a8a9c0)
+- Gray tag "Diagnostic Assistant" (background #3a3b5a, padding 6px 12px, border-radius 6px)
+- Due date icon + "Due: Jun 6, 2025" and clock icon + "11 days left" (14px, color #a8a9c0)
+- "Join Challenge" button (full width, gradient blue background, white text, 40px height, border-radius 8px)
+- Toggle switch (right side, gray background)
+
+Card 2 (Top Right):
+- Active badge (green)
+- Prize "$1,500,000" with "First place winner" subtitle (orange/gold color)
+- Title "Healthcare AI Diagnostic Assistant" 
+- Sponsor "by MedTech Innovations"
+- Description "Build an AI-powered diagnostic tool that can analyze medical images and provide preliminary assessments. This challenge focuses on computer vision techniques applied to medical imaging."
+- Tags: "Computer Vision", "Healthcare AI", "Deep Learning" (purple/blue gradient backgrounds)
+- Due date "Jun 24, 2025" and "29 days left"
+- "Join Challenge" button and toggle
+
+Card 3 (Bottom Left):
+- Active badge
+- Prize "$1,200,000"
+- Partial content visible
+
+Card 4 (Bottom Right):
+- Completed badge (different color)
+- Prize "$200"
+- Partial content visible
+
+TYPOGRAPHY:
+Primary font stack: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif. Sizes: 12px (badges/labels), 14px (body/meta), 16px (descriptions), 18px (subtitle), 20px (card titles), 32px (prize amounts), 48px (page title).
+
+COLOR SYSTEM:
+Background: Dark gradient #0f1028 to #1a1b3a
+Card background: #2a2b4a
+Borders: #3a3b5a
+Text primary: #ffffff
+Text secondary: #a8a9c0
+Active badge: #10b981 (green)
+Purple accent: #8b5cf6
+Blue gradient: #3b82f6 to #8b5cf6
+Tag backgrounds: #3a3b5a to gradient colors
+
+INTERACTIVE ELEMENTS:
+Buttons with gradient backgrounds (blue to purple), smooth hover transitions, glow effects on cards, toggle switches with smooth slide animation. All transitions 0.3s ease.
+
+RESPONSIVE BEHAVIOR:
+Maintain 2-column grid on desktop, switch to single column on tablet/mobile. Ensure readable contrast ratios for dark theme.
+
+Implement with semantic HTML5, modern CSS including gradients and backdrop filters for glassmorphic effects, smooth animations, and proper dark theme accessibility.
