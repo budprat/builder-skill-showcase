@@ -71,16 +71,18 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
         # First check if the bucket exists and create it if it doesn't
         try:
-            supabase.storage.get_bucket("submissions")
+            bucket_info = supabase.storage.get_bucket("submissions")
+            print(f"Bucket exists: {bucket_info}")
         except Exception as bucket_error:
             print(f"Storage bucket error: {bucket_error}")
-            # Try to create the bucket
+            # Try to create the bucket with correct syntax
             try:
-                supabase.storage.create_bucket("submissions", {"public": False})
-                print("Created 'submissions' bucket")
+                result = supabase.storage.create_bucket("submissions")
+                print(f"Created 'submissions' bucket: {result}")
             except Exception as create_error:
                 print(f"Failed to create bucket: {create_error}")
-                return "Error: Storage bucket not available"
+                # If bucket creation fails, try without creating bucket (bucket might exist but get_bucket failed)
+                print("Attempting to download file anyway...")
         
         # Download and extract PDF
         file_data = supabase.storage.from_("submissions").download(supabase_path)
