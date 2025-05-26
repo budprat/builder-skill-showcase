@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Trophy, Users, Zap, Target, Star, Award, Code2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Star, Trophy, Users, Zap, Code, Brain, Rocket, Shield, Target, Award, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { SampleDataCreator } from "@/components/admin/SampleDataCreator";
-import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { user } = useAuth();
@@ -19,179 +20,189 @@ const Index = () => {
     }
   }, [user]);
 
+  const features = [
+    {
+      icon: Brain,
+      title: "AI-Powered Challenges",
+      description: "Cutting-edge AI problems that push the boundaries of what's possible",
+      color: "text-electric-purple"
+    },
+    {
+      icon: Trophy,
+      title: "Premium Rewards",
+      description: "Substantial prizes and recognition for outstanding innovations",
+      color: "text-electric-orange"
+    },
+    {
+      icon: Code,
+      title: "Real-World Impact",
+      description: "Build solutions that matter and shape the future of technology",
+      color: "text-neon-green"
+    },
+    {
+      icon: Users,
+      title: "Elite Community",
+      description: "Connect with top-tier AI builders and industry leaders",
+      color: "text-electric-blue"
+    }
+  ];
+
+  const stats = [
+    { number: "10K+", label: "Elite Builders", icon: Users },
+    { number: "$500K+", label: "Total Prizes", icon: Trophy },
+    { number: "95%", label: "Success Rate", icon: Target },
+    { number: "24/7", label: "AI Support", icon: Shield }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-deep-space via-primary/90 to-deep-space/80 relative overflow-hidden">
-      {/* Subtle tech pattern overlay */}
-      <div className="absolute inset-0 circuit-pattern opacity-5"></div>
-      <div className="absolute inset-0 data-grid opacity-3"></div>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 neo-grid opacity-20"></div>
+      <div className="absolute inset-0 glow-dots opacity-10"></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-electric-purple rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-neon-green rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-hot-pink rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
       
       <Header />
       
-      {/* Hero Section - Foundry of Future AI Leaders */}
+      {/* Hero Section */}
       <section className="relative section-spacing px-4">
         <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-5xl mx-auto content-spacing">
+          <div className="max-w-6xl mx-auto content-spacing">
             {/* Elite Badge */}
-            <div className="inline-flex items-center gap-2 elite-badge mb-6 animate-fade-in">
-              <Star className="w-4 h-4" />
-              <span>The Foundry of Future AI Leaders</span>
+            <div className="inline-flex items-center gap-3 neo-badge mb-8 floating">
+              <Star className="w-5 h-5" />
+              <span>The Future of AI Innovation</span>
+              <Zap className="w-5 h-5" />
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-fade-in">
-              Build the Future of{" "}
-              <span className="bg-gradient-to-r from-cyber-teal to-nebula-purple bg-clip-text text-transparent">
-                AI Products
+            <h1 className="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">
+              Build Tomorrow's{" "}
+              <span className="block bg-gradient-to-r from-electric-purple via-neon-green to-electric-blue bg-clip-text text-transparent gradient-shift">
+                AI Revolution
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-white/80 mb-8 leading-relaxed max-w-4xl mx-auto animate-fade-in">
-              Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
-              build cutting-edge prototypes, and shape the next generation of AI applications in our 
-              prestigious innovation accelerator.
+            <p className="text-2xl md:text-3xl text-white/90 mb-12 leading-relaxed max-w-5xl mx-auto font-medium">
+              Join the most exclusive AI builders community. Compete in cutting-edge challenges, 
+              earn substantial rewards, and build the future of artificial intelligence.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
               <Button 
                 size="lg" 
-                className="cta-primary text-lg px-8 py-4 hover-lift"
+                className="neo-primary text-xl px-10 py-6 hover-lift group"
                 onClick={() => navigate(user ? "/challenges" : "/auth")}
               >
-                {user ? "Explore Challenges" : "Join as Builder"}
-                <ArrowRight className="ml-2 h-5 w-5" />
+                {user ? "Explore Challenges" : "Join Elite Builders"}
+                <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button 
                 size="lg" 
-                variant="outline" 
-                className="border-2 border-white/20 text-white hover:bg-white/10 text-lg px-8 py-4 hover-lift backdrop-blur-sm"
+                className="neo-secondary text-xl px-10 py-6 hover-lift group"
                 onClick={() => navigate("/challenges")}
               >
-                View Challenges
+                View Live Challenges
+                <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+              {stats.map((stat, index) => (
+                <Card key={index} className="neo-card-hover text-center">
+                  <CardContent className="p-6">
+                    <stat.icon className="h-8 w-8 mx-auto mb-3 text-neon-green" />
+                    <div className="text-3xl font-black text-white mb-2">{stat.number}</div>
+                    <div className="text-white/70 font-semibold">{stat.label}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section - Why Elite Builders */}
-      <section className="section-spacing px-4 bg-white/5 backdrop-blur-sm">
+      {/* Features Section */}
+      <section className="relative py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Why Elite Builders?</h2>
-            <p className="text-xl text-white/80">The premier platform for AI product development challenges</p>
-          </div>
-          
-          <div className="elite-grid elite-grid-auto">
-            <div className="text-center group hover-lift">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyber-teal to-nebula-purple rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse-glow transition-all duration-300">
-                <Trophy className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Compete for Prizes</h3>
-              <p className="text-white/70 leading-relaxed">Win substantial cash prizes and recognition from top companies in the AI industry</p>
-            </div>
-            
-            <div className="text-center group hover-lift">
-              <div className="w-16 h-16 bg-gradient-to-r from-nebula-purple to-solar-flare rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse-glow transition-all duration-300">
-                <Zap className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Build Real Solutions</h3>
-              <p className="text-white/70 leading-relaxed">Work on actual problems facing companies and organizations worldwide</p>
-            </div>
-            
-            <div className="text-center group hover-lift">
-              <div className="w-16 h-16 bg-gradient-to-r from-solar-flare to-cyber-teal rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse-glow transition-all duration-300">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Elite Community</h3>
-              <p className="text-white/70 leading-relaxed">Connect with top AI developers and researchers from around the globe</p>
-            </div>
-            
-            <div className="text-center group hover-lift">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyber-teal to-nebula-purple rounded-full flex items-center justify-center mx-auto mb-4 group-hover:animate-pulse-glow transition-all duration-300">
-                <Target className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-3">Skill Development</h3>
-              <p className="text-white/70 leading-relaxed">Advance your AI product development capabilities through real challenges</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section - Process Flow */}
-      <section className="section-spacing px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">How It Works</h2>
-            <p className="text-xl text-white/80">Simple steps to start building and competing</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            <div className="text-center elite-card-hover p-8 bg-white/5 backdrop-blur-sm">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyber-teal to-nebula-purple rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                1
-              </div>
-              <div className="flex justify-center mb-4">
-                <Code2 className="w-8 h-8 text-cyber-teal" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-4">Choose a Challenge</h3>
-              <p className="text-white/70 leading-relaxed">Browse available challenges from leading companies and select one that matches your expertise and interests</p>
-            </div>
-            
-            <div className="text-center elite-card-hover p-8 bg-white/5 backdrop-blur-sm">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyber-teal to-nebula-purple rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                2
-              </div>
-              <div className="flex justify-center mb-4">
-                <Zap className="w-8 h-8 text-cyber-teal" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-4">Build Your Solution</h3>
-              <p className="text-white/70 leading-relaxed">Develop a working prototype, create a compelling pitch deck, and record a demonstration video</p>
-            </div>
-            
-            <div className="text-center elite-card-hover p-8 bg-white/5 backdrop-blur-sm">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyber-teal to-nebula-purple rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                3
-              </div>
-              <div className="flex justify-center mb-4">
-                <Award className="w-8 h-8 text-cyber-teal" />
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-4">Win & Get Recognized</h3>
-              <p className="text-white/70 leading-relaxed">Submit your solution for expert judging and compete for prizes and career opportunities</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section - Call to Action */}
-      <section className="section-spacing px-4 bg-gradient-to-r from-cyber-teal/10 via-nebula-purple/10 to-cyber-teal/10">
-        <div className="container mx-auto text-center">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl font-bold text-white mb-6">Ready to Build the Future?</h2>
-            <p className="text-xl text-white/80 mb-8 leading-relaxed">
-              Join thousands of elite AI builders competing in cutting-edge challenges. 
-              Where innovation meets opportunity and potential becomes reality.
+            <Badge className="neo-badge-secondary mb-6">
+              <Rocket className="w-4 h-4 mr-2" />
+              Revolutionary Platform
+            </Badge>
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
+              Why Elite Builders Choose Us
+            </h2>
+            <p className="text-xl text-white/80 max-w-3xl mx-auto">
+              Experience the most advanced AI challenge platform designed for tomorrow's innovators
             </p>
-            <Button 
-              size="lg" 
-              className="cta-primary text-lg px-8 py-6 hover-lift animate-pulse-glow"
-              onClick={() => navigate(user ? "/challenges" : "/auth")}
-            >
-              {user ? "Start Building" : "Get Started Today"}
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+          </div>
+
+          <div className="neo-grid neo-grid-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className="neo-card-hover group">
+                <CardHeader className="text-center pb-4">
+                  <div className="mx-auto mb-4 p-4 rounded-2xl bg-gradient-to-br from-electric-purple/20 to-neon-green/20 w-fit">
+                    <feature.icon className={`h-8 w-8 ${feature.color}`} />
+                  </div>
+                  <CardTitle className="text-2xl text-white group-hover:text-neon-green transition-colors">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-center text-white/70 text-lg leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Admin Tools (only visible to admin users) */}
-      {showAdminTools && (
-        <section className="py-10 px-4 border-t border-white/10 bg-black/20">
-          <div className="container mx-auto">
-            <div className="flex justify-center">
-              <SampleDataCreator />
-            </div>
-          </div>
-        </section>
-      )}
+      {/* CTA Section */}
+      <section className="relative py-20 px-4">
+        <div className="container mx-auto text-center">
+          <Card className="neo-card max-w-4xl mx-auto glow-purple">
+            <CardContent className="p-12">
+              <div className="flex justify-center mb-6">
+                <Badge className="neo-badge-accent">
+                  <Award className="w-4 h-4 mr-2" />
+                  Limited Access
+                </Badge>
+              </div>
+              <h3 className="text-4xl md:text-5xl font-black text-white mb-6">
+                Ready to Build the Future?
+              </h3>
+              <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+                Join thousands of elite AI builders who are already shaping tomorrow's technology. 
+                Your next breakthrough starts here.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  size="lg" 
+                  className="neo-primary text-lg px-8 py-4 hover-lift"
+                  onClick={() => navigate(user ? "/dashboard" : "/auth")}
+                >
+                  {user ? "Go to Dashboard" : "Start Building Now"}
+                  <Rocket className="ml-2 h-5 w-5" />
+                </Button>
+                {showAdminTools && (
+                  <Button 
+                    size="lg" 
+                    className="neo-secondary text-lg px-8 py-4 hover-lift"
+                    onClick={() => navigate("/admin")}
+                  >
+                    Admin Panel
+                    <Shield className="ml-2 h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 };
