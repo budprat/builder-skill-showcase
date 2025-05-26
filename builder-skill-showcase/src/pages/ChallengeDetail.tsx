@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar, Clock, Trophy, FileText, Video, Github, ArrowLeft, Upload, X, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Header } from "@/components/layout/Header";
+import Header from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
 
 interface Challenge {
