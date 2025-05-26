@@ -289,8 +289,8 @@ async def poll_submissions():
         except Exception as e:
             print(f"Error in polling loop: {e}")
             
-        print("Waiting 60 seconds before next poll...")
-        await asyncio.sleep(60)
+        print("Waiting 10 seconds before next poll...")
+        await asyncio.sleep(10)
 
 if __name__ == "__main__":
     asyncio.run(poll_submissions())
