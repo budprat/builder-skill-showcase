@@ -105,9 +105,16 @@ async def pre_screen_submission(submission: dict) -> dict:
         repo.get_contents("README.md")
         submission["pre_screening_score"] = 5.0
         submission["status"] = "prescreened"
-    except GithubException:
+        print(f"Pre-screening PASSED for submission {submission['id']}: Repository exists and has README.md")
+    except GithubException as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
+        print(f"Pre-screening FAILED for submission {submission['id']}: {str(e)}")
+        print(f"Failure reason: Unable to access repository or README.md not found at {submission['repository_url']}")
+    except Exception as e:
+        submission["pre_screening_score"] = 0.0
+        submission["status"] = "prescreening_failed"
+        print(f"Pre-screening FAILED for submission {submission['id']}: Unexpected error - {str(e)}")
     return submission
 
 async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
@@ -194,7 +201,7 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
     print(f"Generating feedback for submission {submission['id']}")
-    
+
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
 
@@ -224,18 +231,30 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
         print(f"Error updating score record: {e}")
 
     try:
-        user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
-        message = Mail(
-            from_email="no-reply@elitebuilders.com",
-            to_emails=user["email"],
-            subject="Provisional Score Available",
-            html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
-        )
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        #sg.send(message)
-        #print(f"Sent notification email for submission {submission['id']}")
+        # Get user email using participant_id from submission
+        user = supabase.table("profiles").select("id").eq("id", submission["participant_id"]).single().execute().data
+        if user:
+            # Get the auth user's email from auth.users table
+            auth_user = supabase.auth.admin.get_user_by_id(submission["participant_id"])
+            user_email = auth_user.user.email if auth_user and auth_user.user else None
+            
+            if user_email:
+                message = Mail(
+                    from_email="no-reply@elitebuilders.com",
+                    to_emails=user_email,
+                    subject="Provisional Score Available",
+                    html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
+                )
+                sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                #sg.send(message)
+                print(f"Email notification prepared for submission {submission['id']} to {user_email}")
+            else:
+                print(f"Could not get email for user {submission['participant_id']}")
+        else:
+            print(f"User profile not found for participant_id {submission['participant_id']}")
     except Exception as e:
         print(f"Notification error: {e}")
+        print(f"Failed to send notification for submission {submission['id']} to participant {submission['participant_id']}")
 
     submission["status"] = "reviewed"
     print(f"Set submission {submission['id']} status to 'reviewed'")
@@ -243,17 +262,17 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
 
 async def process_submission(submission: dict, supabase: Client):
     print(f"Processing submission {submission['id']} with initial status: {submission['status']}")
-    
+
     submission = await pre_screen_submission(submission)
     print(f"Pre-screening completed for submission {submission['id']}, status: {submission['status']}")
-    
+
     if submission["status"] == "prescreened":
         submission = await evaluate_rubric(submission, supabase)
         print(f"Rubric evaluation completed for submission {submission['id']}, status: {submission['status']}")
-        
+
         submission = await aggregate_score(submission, supabase)
         print(f"Score aggregation completed for submission {submission['id']}, status: {submission['status']}")
-        
+
         submission = await generate_feedback_and_notify(submission, supabase)
         print(f"Feedback generation completed for submission {submission['id']}, status: {submission['status']}")
 
@@ -280,15 +299,15 @@ async def poll_submissions():
         try:
             submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
             print(f"Found {len(submissions)} submissions with 'submitted' status")
-            
+
             for submission in submissions:
                 print(f"Processing submission ID: {submission['id']}")
                 await process_submission(submission, supabase)
                 print(f"Completed processing submission ID: {submission['id']}")
-                
+
         except Exception as e:
             print(f"Error in polling loop: {e}")
-            
+
         print("Waiting 10 seconds before next poll...")
         await asyncio.sleep(10)
 

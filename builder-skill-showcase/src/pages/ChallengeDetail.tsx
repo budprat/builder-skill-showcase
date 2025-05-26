@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +50,7 @@ const ChallengeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
-  
+
   const [submissionForm, setSubmissionForm] = useState({
     repository_url: '',
     pitch_deck_url: '',
@@ -91,7 +90,10 @@ const ChallengeDetail = () => {
       if (user) {
         const { data: submissionData, error: submissionError } = await supabase
           .from('submissions')
-          .select('*')
+          .select(`
+              *,
+              scores (total_score, pre_screening_score, llm_scores, feedback, status)
+            `)
           .eq('challenge_id', id)
           .eq('participant_id', user.id)
           .maybeSingle();
@@ -422,7 +424,7 @@ const ChallengeDetail = () => {
                 <CardTitle className="text-white">Your Submission</CardTitle>
               </CardHeader>
               <CardContent>
-                {submission ? (
+                {submission && submission.scores ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-white/70">Status:</span>
@@ -433,12 +435,27 @@ const ChallengeDetail = () => {
                     <div className="text-white/70 text-sm">
                       Submitted on {new Date(submission.created_at).toLocaleDateString()}
                     </div>
-                    {submission.provisional_score && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-white/70">Provisional Score:</span>
-                        <span className="text-white font-bold">{submission.provisional_score}</span>
-                      </div>
-                    )}
+
+                    <div>
+                                      <h4 className="font-semibold mb-2">Overall Score</h4>
+                                      <p className="text-2xl font-bold">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
+                                    </div>
+
+                                    <div>
+                                      <h4 className="font-semibold mb-2">GitHub Repository Analysis</h4>
+                                      <div className="border p-3 rounded bg-muted/50">
+                                        <div className="flex justify-between items-center mb-2">
+                                          <span className="font-medium">Repository Validation</span>
+                                          <span className="font-bold">{submission.scores[0].pre_screening_score}/5</span>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                          {submission.scores[0].pre_screening_score === 5 
+                                            ? "✅ Repository exists and contains README.md" 
+                                            : "❌ Repository validation failed - missing repository or README.md"}
+                                        </p>
+                                      </div>
+                                    </div>
+                    
                     {submission.final_score && (
                       <div className="flex items-center justify-between">
                         <span className="text-white/70">Final Score:</span>
@@ -566,7 +583,7 @@ const ChallengeDetail = () => {
                         />
                       </div>
                     </div>
-                    
+
                     {useFileUpload ? (
                       <div className="space-y-2">
                         {!uploadedPitchDeck ? (
