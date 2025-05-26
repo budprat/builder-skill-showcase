@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Clock, Trophy, FileText, Video, Github, ArrowLeft } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Calendar, Clock, Trophy, FileText, Video, Github, ArrowLeft, Upload, X, File } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -58,6 +59,10 @@ const ChallengeDetail = () => {
     readme_notes: ''
   });
 
+  const [uploadingPitchDeck, setUploadingPitchDeck] = useState(false);
+  const [uploadedPitchDeck, setUploadedPitchDeck] = useState<string | null>(null);
+  const [useFileUpload, setUseFileUpload] = useState(false);
+
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -107,6 +112,76 @@ const ChallengeDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePitchDeckUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploadingPitchDeck(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        return;
+      }
+
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to upload files",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/pitch_deck_${Date.now()}.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('user-files')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      if (!uploadData) {
+        throw new Error('Upload failed - no data returned');
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('user-files')
+        .getPublicUrl(fileName);
+
+      console.log('Pitch deck uploaded successfully:', {
+        fileName,
+        uploadPath: uploadData.path,
+        publicUrl
+      });
+
+      setUploadedPitchDeck(publicUrl);
+      setSubmissionForm({...submissionForm, pitch_deck_url: publicUrl});
+
+      toast({
+        title: "Success",
+        description: "Pitch deck uploaded successfully",
+      });
+
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload pitch deck",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPitchDeck(false);
+    }
+  };
+
+  const removePitchDeck = () => {
+    setUploadedPitchDeck(null);
+    setSubmissionForm({...submissionForm, pitch_deck_url: ''});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -468,17 +543,75 @@ const ChallengeDetail = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      Pitch Deck URL
-                    </label>
-                    <Input
-                      type="url"
-                      required
-                      value={submissionForm.pitch_deck_url}
-                      onChange={(e) => setSubmissionForm({...submissionForm, pitch_deck_url: e.target.value})}
-                      placeholder="https://drive.google.com/... or https://slides.google.com/..."
-                      className="bg-white/10 border-white/20 text-white"
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                      <Label className="text-white/80 text-sm font-medium">
+                        Pitch Deck
+                      </Label>
+                      <div className="flex items-center space-x-2">
+                        <Label htmlFor="upload-toggle" className="text-white/60 text-xs">
+                          Upload file
+                        </Label>
+                        <input
+                          id="upload-toggle"
+                          type="checkbox"
+                          checked={useFileUpload}
+                          onChange={(e) => {
+                            setUseFileUpload(e.target.checked);
+                            if (!e.target.checked) {
+                              setUploadedPitchDeck(null);
+                              setSubmissionForm({...submissionForm, pitch_deck_url: ''});
+                            }
+                          }}
+                          className="w-4 h-4"
+                        />
+                      </div>
+                    </div>
+                    
+                    {useFileUpload ? (
+                      <div className="space-y-2">
+                        {!uploadedPitchDeck ? (
+                          <div className="space-y-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.ppt,.pptx"
+                              onChange={handlePitchDeckUpload}
+                              disabled={uploadingPitchDeck}
+                              className="bg-white/10 border-white/20 text-white file:bg-white/10 file:border-0 file:text-white/80"
+                            />
+                            {uploadingPitchDeck && (
+                              <p className="text-sm text-white/60">Uploading...</p>
+                            )}
+                            <p className="text-xs text-white/60">
+                              Supported formats: PDF, PPT, PPTX
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5">
+                            <div className="flex items-center gap-2">
+                              <File className="h-4 w-4 text-white/60" />
+                              <span className="text-sm text-white/80">Pitch deck uploaded successfully</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={removePitchDeck}
+                              className="text-white/60 hover:text-white hover:bg-white/10"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <Input
+                        type="url"
+                        required
+                        value={submissionForm.pitch_deck_url}
+                        onChange={(e) => setSubmissionForm({...submissionForm, pitch_deck_url: e.target.value})}
+                        placeholder="https://drive.google.com/... or https://slides.google.com/..."
+                        className="bg-white/10 border-white/20 text-white"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-white/80 text-sm font-medium mb-2">
