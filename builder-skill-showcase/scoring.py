@@ -240,7 +240,7 @@ async def process_submission(submission: dict, supabase: Client):
         submission = await generate_feedback_and_notify(submission, supabase)
 
     # Only update status if it's a valid value
-    valid_statuses = ["submitted", "reviewed", "pending"]
+    valid_statuses = ["submitted", "reviewed", "pending", "prescreened", "evaluated", "scored"]
     if submission["status"] in valid_statuses:
         supabase.table("submissions").update(
             {"status": submission["status"]}
