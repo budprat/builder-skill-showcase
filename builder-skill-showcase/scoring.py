@@ -193,6 +193,8 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
     return submission
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
+    print(f"Generating feedback for submission {submission['id']}")
+    
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
 
@@ -208,13 +210,18 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
             generation_config={"max_output_tokens": 500}
         )
         feedback = response.text
+        print(f"Generated feedback for submission {submission['id']}")
     except Exception as e:
         print(f"Feedback generation error: {e}")
         feedback = "Thank you for your submission. Detailed feedback will be available soon."
 
-    supabase.table("scores").update(
-        {"feedback": feedback, "status": "notified"}
-    ).eq("submission_id", submission["id"]).execute()
+    try:
+        supabase.table("scores").update(
+            {"feedback": feedback, "status": "final"}
+        ).eq("submission_id", submission["id"]).execute()
+        print(f"Updated score record with feedback for submission {submission['id']}")
+    except Exception as e:
+        print(f"Error updating score record: {e}")
 
     try:
         user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
@@ -226,36 +233,63 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
         )
         sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
         sg.send(message)
+        print(f"Sent notification email for submission {submission['id']}")
     except Exception as e:
         print(f"Notification error: {e}")
 
     submission["status"] = "reviewed"
+    print(f"Set submission {submission['id']} status to 'reviewed'")
     return submission
 
 async def process_submission(submission: dict, supabase: Client):
+    print(f"Processing submission {submission['id']} with initial status: {submission['status']}")
+    
     submission = await pre_screen_submission(submission)
+    print(f"Pre-screening completed for submission {submission['id']}, status: {submission['status']}")
+    
     if submission["status"] == "prescreened":
         submission = await evaluate_rubric(submission, supabase)
+        print(f"Rubric evaluation completed for submission {submission['id']}, status: {submission['status']}")
+        
         submission = await aggregate_score(submission, supabase)
+        print(f"Score aggregation completed for submission {submission['id']}, status: {submission['status']}")
+        
         submission = await generate_feedback_and_notify(submission, supabase)
+        print(f"Feedback generation completed for submission {submission['id']}, status: {submission['status']}")
 
-    # Only update status if it's a valid value
-    valid_statuses = ["submitted", "reviewed", "pending", "prescreened", "evaluated", "scored"]
-    if submission["status"] in valid_statuses:
+    # Update the submission status in the database
+    try:
         supabase.table("submissions").update(
             {"status": submission["status"]}
         ).eq("id", submission["id"]).execute()
-    else:
-        # Use 'reviewed' as the final status instead of 'notified'
-        supabase.table("submissions").update(
-            {"status": "reviewed"}
-        ).eq("id", submission["id"]).execute()
+        print(f"Successfully updated submission {submission['id']} status to '{submission['status']}' in database")
+    except Exception as e:
+        print(f"Error updating submission {submission['id']} status: {e}")
+        # Try to set to reviewed as fallback
+        try:
+            supabase.table("submissions").update(
+                {"status": "reviewed"}
+            ).eq("id", submission["id"]).execute()
+            print(f"Fallback: Set submission {submission['id']} status to 'reviewed'")
+        except Exception as fallback_error:
+            print(f"Fallback failed for submission {submission['id']}: {fallback_error}")
 
 async def poll_submissions():
+    print("Starting submission polling service...")
     while True:
-        submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
-        for submission in submissions:
-            await process_submission(submission, supabase)
+        try:
+            submissions = supabase.table("submissions").select("*").eq("status", "submitted").execute().data
+            print(f"Found {len(submissions)} submissions with 'submitted' status")
+            
+            for submission in submissions:
+                print(f"Processing submission ID: {submission['id']}")
+                await process_submission(submission, supabase)
+                print(f"Completed processing submission ID: {submission['id']}")
+                
+        except Exception as e:
+            print(f"Error in polling loop: {e}")
+            
+        print("Waiting 60 seconds before next poll...")
         await asyncio.sleep(60)
 
 if __name__ == "__main__":
