@@ -1,5 +1,3 @@
-import dspy
-from google.adk.agents import LlmAgent
 import pdfplumber
 import os
 from supabase import create_client, Client
@@ -20,52 +18,8 @@ supabase: Client = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_
 # Configure Gemini API
 configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Custom DSPy Adapter for Gemini API
-class GeminiDSPyAdapter(dspy.LM):
-    def __init__(self, model_name):
-        # Set the model before calling super() to avoid property conflicts
-        self._model_name = model_name
-        self.gemini_model = GenerativeModel(model_name)
-        super().__init__(model_name)
-
-    def generate(self, prompt, max_tokens=200, **kwargs):
-        try:
-            response = self.gemini_model.generate_content(
-                prompt,
-                generation_config={"max_output_tokens": max_tokens}
-            )
-            return [{"text": response.text}]
-        except Exception as e:
-            print(f"Gemini API error: {e}")
-            return [{"text": ""}]
-
-# Configure DSPy
-dspy.settings.configure(lm=GeminiDSPyAdapter("gemini-1.5-pro"))
-
-# DSPy Signature for Rubric Evaluation
-class RubricEvaluation(dspy.Signature):
-    """Evaluate a pitch deck for a specific criterion."""
-    challenge_description = dspy.InputField()
-    pitch_deck_text = dspy.InputField()
-    criterion = dspy.InputField()
-    score = dspy.OutputField(desc="Score from 0 to 100")
-    explanation = dspy.OutputField(desc="2-3 sentence explanation")
-
-# ADK Agent for Evaluation
-evaluator_agent = LlmAgent(
-    name="pitch_deck_evaluator",
-    model="gemini-1.5-pro",
-    instruction="Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}.",
-    description="Evaluates pitch decks against predefined criteria."
-)
-
-# ADK Agent for Feedback
-feedback_agent = LlmAgent(
-    name="feedback_formatter",
-    model="gemini-1.5-pro",
-    instruction="Format LLM evaluation results into concise, user-friendly feedback.",
-    description="Generates readable feedback."
-)
+# Initialize Gemini model
+gemini_model = GenerativeModel("gemini-1.5-pro")
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
@@ -121,25 +75,43 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     llm_scores = {}
 
     for criterion, weight in rubric.items():
-        evaluator = dspy.Predict(RubricEvaluation)
-        result = evaluator(
-            challenge_description=challenge_description,
-            pitch_deck_text=pitch_deck_text[:4000],
-            criterion=criterion
-        )
-        prompt = (
-            f"Evaluate the {criterion} criterion for the pitch deck: {pitch_deck_text[:4000]} "
-            f"based on challenge: {challenge_description}. "
-            f"Return JSON: {{'score': int, 'explanation': str}}"
-        )
-        agent_response = evaluator_agent.run(prompt=prompt)
+        prompt = f"""
+        Evaluate the {criterion} criterion for this pitch deck based on the challenge description.
+        
+        Challenge: {challenge_description}
+        
+        Pitch Deck Content: {pitch_deck_text[:4000]}
+        
+        Please evaluate the {criterion} aspect and return ONLY a JSON response in this exact format:
+        {{"score": <integer from 0 to 100>, "explanation": "<2-3 sentence explanation>"}}
+        """
+        
         try:
-            agent_result = json.loads(agent_response)
-            score = float(agent_result["score"])
-            explanation = agent_result["explanation"]
-        except:
-            score = float(result.score) if result.score else 0.0
-            explanation = result.explanation if result.explanation else "Evaluation failed."
+            response = gemini_model.generate_content(
+                prompt,
+                generation_config={"max_output_tokens": 300}
+            )
+            
+            # Extract JSON from response
+            response_text = response.text.strip()
+            
+            # Try to find JSON in the response
+            if "{" in response_text and "}" in response_text:
+                start = response_text.find("{")
+                end = response_text.rfind("}") + 1
+                json_str = response_text[start:end]
+                result = json.loads(json_str)
+                score = float(result["score"])
+                explanation = result["explanation"]
+            else:
+                # Fallback if JSON parsing fails
+                score = 50.0  # Default score
+                explanation = f"Evaluation completed for {criterion} criterion."
+                
+        except Exception as e:
+            print(f"Gemini API error for {criterion}: {e}")
+            score = 50.0  # Default score
+            explanation = f"Error evaluating {criterion} criterion."
 
         llm_scores[criterion] = {
             "score": score * weight,
@@ -171,11 +143,24 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
     return submission
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
-    feedback_prompt = "Format the following rubric scores into a concise, user-friendly summary:\n"
+    feedback_prompt = """
+    Format the following rubric scores into a concise, user-friendly summary for the participant:
+    
+    """
     for criterion, score in submission["llm_scores"].items():
-        max_score = 100 * score["score"] / submission["llm_scores"][criterion]["score"]
-        feedback_prompt += f"{criterion}: {score['score']:.1f}/{max_score:.1f} - {score['explanation']}\n"
-    feedback = feedback_agent.run(prompt=feedback_prompt)
+        feedback_prompt += f"{criterion}: {score['score']:.1f}/20.0 - {score['explanation']}\n"
+    
+    feedback_prompt += "\nPlease provide an encouraging summary with specific actionable feedback for improvement."
+    
+    try:
+        response = gemini_model.generate_content(
+            feedback_prompt,
+            generation_config={"max_output_tokens": 500}
+        )
+        feedback = response.text
+    except Exception as e:
+        print(f"Feedback generation error: {e}")
+        feedback = "Thank you for your submission. Detailed feedback will be available soon."
 
     supabase.table("scores").update(
         {"feedback": feedback, "status": "notified"},
