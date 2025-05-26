@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,7 +50,7 @@ const ChallengeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showSubmissionForm, setShowSubmissionForm] = useState(false);
-  
+
   const [submissionForm, setSubmissionForm] = useState({
     repository_url: '',
     pitch_deck_url: '',
@@ -91,7 +90,10 @@ const ChallengeDetail = () => {
       if (user) {
         const { data: submissionData, error: submissionError } = await supabase
           .from('submissions')
-          .select('*')
+          .select(`
+              *,
+              scores (total_score, pre_screening_score, llm_scores, feedback, status)
+            `)
           .eq('challenge_id', id)
           .eq('participant_id', user.id)
           .maybeSingle();
@@ -566,7 +568,7 @@ const ChallengeDetail = () => {
                         />
                       </div>
                     </div>
-                    
+
                     {useFileUpload ? (
                       <div className="space-y-2">
                         {!uploadedPitchDeck ? (

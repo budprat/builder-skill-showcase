@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { User, FileText, Trophy, Upload, Trash2, Edit } from "lucide-react";
+import { User, FileText, Trophy, Upload, Trash2, Edit, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
@@ -93,7 +93,8 @@ const Dashboard = () => {
         .from('submissions')
         .select(`
           *,
-          challenges (title, company_name)
+          challenges (title, company_name),
+          scores (total_score, pre_screening_score, llm_scores, feedback, status)
         `)
         .eq('participant_id', user.id)
         .order('created_at', { ascending: false });
@@ -425,8 +426,13 @@ const Dashboard = () => {
                             </p>
                             <div className="flex items-center gap-2 mt-2">
                               <Badge variant="outline">{submission.status}</Badge>
+                              {submission.scores && submission.scores.length > 0 && (
+                                <Badge variant="secondary">
+                                  AI Score: {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+                                </Badge>
+                              )}
                               {submission.final_score && (
-                                <Badge>Score: {submission.final_score}/100</Badge>
+                                <Badge>Final Score: {submission.final_score}/100</Badge>
                               )}
                             </div>
                             
@@ -458,6 +464,53 @@ const Dashboard = () => {
                                 >
                                   Demo Video
                                 </Button>
+                              )}
+                              {submission.scores && submission.scores.length > 0 && (
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      View Score Details
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle>Your Score & Feedback</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="font-semibold mb-2">Overall Score</h4>
+                                        <p className="text-2xl font-bold">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
+                                      </div>
+                                      
+                                      {submission.scores[0].llm_scores && (
+                                        <div>
+                                          <h4 className="font-semibold mb-2">Detailed Rubric Scores</h4>
+                                          <div className="space-y-2">
+                                            {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                              <div key={criterion} className="border p-2 rounded">
+                                                <div className="flex justify-between items-center mb-1">
+                                                  <span className="font-medium">{criterion}</span>
+                                                  <span className="font-bold">{scoreData.score?.toFixed(1)}/20</span>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">{scoreData.explanation}</p>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {submission.scores[0].feedback && (
+                                        <div>
+                                          <h4 className="font-semibold mb-2">Feedback</h4>
+                                          <div className="bg-muted p-3 rounded text-sm">
+                                            {submission.scores[0].feedback}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </DialogContent>
+                                </Dialog>
                               )}
                             </div>
                           </div>
