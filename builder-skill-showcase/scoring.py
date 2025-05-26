@@ -229,7 +229,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
     except Exception as e:
         print(f"Notification error: {e}")
 
-    submission["status"] = "notified"
+    submission["status"] = "reviewed"
     return submission
 
 async def process_submission(submission: dict, supabase: Client):
@@ -239,9 +239,17 @@ async def process_submission(submission: dict, supabase: Client):
         submission = await aggregate_score(submission, supabase)
         submission = await generate_feedback_and_notify(submission, supabase)
 
-    supabase.table("submissions").update(
-        {"status": submission["status"]}
-    ).eq("id", submission["id"]).execute()
+    # Only update status if it's a valid value
+    valid_statuses = ["submitted", "reviewed", "pending"]
+    if submission["status"] in valid_statuses:
+        supabase.table("submissions").update(
+            {"status": submission["status"]}
+        ).eq("id", submission["id"]).execute()
+    else:
+        # Use 'reviewed' as the final status instead of 'notified'
+        supabase.table("submissions").update(
+            {"status": "reviewed"}
+        ).eq("id", submission["id"]).execute()
 
 async def poll_submissions():
     while True:
