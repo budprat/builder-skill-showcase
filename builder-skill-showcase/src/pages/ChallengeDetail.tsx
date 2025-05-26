@@ -424,37 +424,41 @@ const ChallengeDetail = () => {
                 <CardTitle className="text-white">Your Submission</CardTitle>
               </CardHeader>
               <CardContent>
-                {submission && submission.scores ? (
+                {submission ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-white/70">Status:</span>
-                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                        Submitted
+                      <Badge className={submission.status === 'reviewed' ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"}>
+                        {submission.status === 'reviewed' ? 'Reviewed' : submission.status === 'submitted' ? 'Under Review' : submission.status}
                       </Badge>
                     </div>
                     <div className="text-white/70 text-sm">
                       Submitted on {new Date(submission.created_at).toLocaleDateString()}
                     </div>
 
-                    <div>
-                                      <h4 className="font-semibold mb-2">Overall Score</h4>
-                                      <p className="text-2xl font-bold">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
-                                    </div>
+                    {submission.scores && submission.scores.length > 0 && (
+                      <>
+                        <div>
+                          <h4 className="text-white/70 font-semibold mb-2">Overall Score</h4>
+                          <p className="text-2xl font-bold text-white">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
+                        </div>
 
-                                    <div>
-                                      <h4 className="font-semibold mb-2">GitHub Repository Analysis</h4>
-                                      <div className="border p-3 rounded bg-muted/50">
-                                        <div className="flex justify-between items-center mb-2">
-                                          <span className="font-medium">Repository Validation</span>
-                                          <span className="font-bold">{submission.scores[0].pre_screening_score}/5</span>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">
-                                          {submission.scores[0].pre_screening_score === 5 
-                                            ? "✅ Repository exists and contains README.md" 
-                                            : "❌ Repository validation failed - missing repository or README.md"}
-                                        </p>
-                                      </div>
-                                    </div>
+                        <div>
+                          <h4 className="text-white/70 font-semibold mb-2">GitHub Repository Analysis</h4>
+                          <div className="border border-white/20 p-3 rounded bg-white/5">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="font-medium text-white/80">Repository Validation</span>
+                              <span className="font-bold text-white">{submission.scores[0].pre_screening_score}/5</span>
+                            </div>
+                            <p className="text-sm text-white/60">
+                              {submission.scores[0].pre_screening_score === 5 
+                                ? "✅ Repository exists and contains README.md" 
+                                : "❌ Repository validation failed - missing repository or README.md"}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    )}
                     
                     {submission.final_score && (
                       <div className="flex items-center justify-between">
