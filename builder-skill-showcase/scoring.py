@@ -231,18 +231,30 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
         print(f"Error updating score record: {e}")
 
     try:
-        user = supabase.table("users").select("email").eq("id", submission["user_id"]).single().execute().data
-        message = Mail(
-            from_email="no-reply@elitebuilders.com",
-            to_emails=user["email"],
-            subject="Provisional Score Available",
-            html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
-        )
-        sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-        #sg.send(message)
-        #print(f"Sent notification email for submission {submission['id']}")
+        # Get user email using participant_id from submission
+        user = supabase.table("profiles").select("id").eq("id", submission["participant_id"]).single().execute().data
+        if user:
+            # Get the auth user's email from auth.users table
+            auth_user = supabase.auth.admin.get_user_by_id(submission["participant_id"])
+            user_email = auth_user.user.email if auth_user and auth_user.user else None
+            
+            if user_email:
+                message = Mail(
+                    from_email="no-reply@elitebuilders.com",
+                    to_emails=user_email,
+                    subject="Provisional Score Available",
+                    html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
+                )
+                sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                #sg.send(message)
+                print(f"Email notification prepared for submission {submission['id']} to {user_email}")
+            else:
+                print(f"Could not get email for user {submission['participant_id']}")
+        else:
+            print(f"User profile not found for participant_id {submission['participant_id']}")
     except Exception as e:
         print(f"Notification error: {e}")
+        print(f"Failed to send notification for submission {submission['id']} to participant {submission['participant_id']}")
 
     submission["status"] = "reviewed"
     print(f"Set submission {submission['id']} status to 'reviewed'")
