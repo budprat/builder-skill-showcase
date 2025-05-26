@@ -25,13 +25,14 @@ export const Header = () => {
   };
 
   return (
-    <header className="relative z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
+    <header className="relative z-50 quantum-header">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div 
-            className="text-xl font-bold text-white cursor-pointer"
+            className="text-xl font-bold text-white cursor-pointer gradient-quantum chromatic-aberration"
             onClick={() => navigate("/")}
+            data-text="Elite Builders"
           >
             Elite Builders
           </div>
