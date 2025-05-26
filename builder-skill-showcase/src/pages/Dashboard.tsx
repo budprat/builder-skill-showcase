@@ -239,6 +239,7 @@ const Dashboard = () => {
           pitch_deck_url: editFormData.pitch_deck_url,
           demo_video_url: editFormData.demo_video_url,
           readme_notes: editFormData.readme_notes,
+          status: 'submitted',
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingSubmissionId)
