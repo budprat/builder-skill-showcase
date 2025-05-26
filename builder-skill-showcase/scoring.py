@@ -83,25 +83,53 @@ evaluator_agent = LlmAgent(
     description="Evaluates pitch decks against predefined criteria."
 )
 
-def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
-    with open("/tmp/pitch_deck.pdf", "wb") as f:
-        f.write(supabase.storage.from_("submissions").download(supabase_path))
-    with pdfplumber.open("/tmp/pitch_deck.pdf") as pdf:
-        return "\n".join(page.extract_text() or "" for page in pdf.pages)
+def extract_pdf_text(pitch_deck_url: str, supabase: Client) -> str:
+    import requests
+    
+    try:
+        # Check if it's a direct URL (starts with http)
+        if pitch_deck_url.startswith("http"):
+            print(f"Downloading PDF from URL: {pitch_deck_url}")
+            response = requests.get(pitch_deck_url)
+            response.raise_for_status()
+            
+            with open("/tmp/pitch_deck.pdf", "wb") as f:
+                f.write(response.content)
+        else:
+            # Assume it's a storage path
+            print(f"Downloading PDF from storage: {pitch_deck_url}")
+            with open("/tmp/pitch_deck.pdf", "wb") as f:
+                f.write(supabase.storage.from_("submissions").download(pitch_deck_url))
+        
+        # Extract text from PDF
+        with pdfplumber.open("/tmp/pitch_deck.pdf") as pdf:
+            return "\n".join(page.extract_text() or "" for page in pdf.pages)
+            
+    except Exception as e:
+        print(f"Error extracting PDF text: {e}")
+        # Return placeholder text if PDF extraction fails
+        return "Unable to extract text from pitch deck. Manual review required."
 
 async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
-    pitch_deck_text = extract_pdf_text(submission["pitch_deck_url"], supabase)
-    challenge = supabase.table("challenges").select("description").eq("id", submission["challenge_id"]).single().execute().data
-    challenge_description = challenge.get("description", "Build an AI-powered app...")
+    try:
+        pitch_deck_text = extract_pdf_text(submission["pitch_deck_url"], supabase)
+        print(f"Extracted {len(pitch_deck_text)} characters from pitch deck")
+        
+        challenge = supabase.table("challenges").select("description").eq("id", submission["challenge_id"]).single().execute().data
+        challenge_description = challenge.get("description", "Build an AI-powered app...")
 
-    rubric = {
-        "Innovation": 0.2,
-        "Technical": 0.3,
-        "UX": 0.2,
-        "Business": 0.2,
-        "Demo": 0.1
-    }
-    llm_scores = {}
+        rubric = {
+            "Innovation": 0.2,
+            "Technical": 0.3,
+            "UX": 0.2,
+            "Business": 0.2,
+            "Demo": 0.1
+        }
+        llm_scores = {}
+    except Exception as e:
+        print(f"Error in evaluate_rubric setup: {e}")
+        submission["status"] = "evaluation_failed"
+        return submission
 
 
     for criterion, weight in rubric.items():
@@ -190,15 +218,37 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
 
 
 async def process_submission(submission: dict, supabase: Client):
-    submission = await pre_screen_submission(submission)
-    if submission["status"] == "prescreened":
-        submission = await evaluate_rubric(submission, supabase)
-        submission = await aggregate_score(submission, supabase)
-        submission = await generate_feedback_and_notify(submission, supabase)
+    try:
+        print(f"Starting processing for submission: {submission['id']}")
+        submission = await pre_screen_submission(submission)
+        print(f"Pre-screening result: {submission['status']}")
+        
+        if submission["status"] == "prescreened":
+            submission = await evaluate_rubric(submission, supabase)
+            print(f"Evaluation result: {submission['status']}")
+            
+            if submission["status"] == "evaluated":
+                submission = await aggregate_score(submission, supabase)
+                print(f"Scoring result: {submission['status']}")
+                
+                submission = await generate_feedback_and_notify(submission, supabase)
+                print(f"Feedback result: {submission['status']}")
 
-    supabase.table("submissions").update(
-        {"status": submission["status"]}
-    ).eq("id", submission["id"]).execute()
+        supabase.table("submissions").update(
+            {"status": submission["status"]}
+        ).eq("id", submission["id"]).execute()
+        
+        print(f"Successfully processed submission {submission['id']} with final status: {submission['status']}")
+        
+    except Exception as e:
+        print(f"Error processing submission {submission['id']}: {e}")
+        # Update status to indicate error
+        try:
+            supabase.table("submissions").update(
+                {"status": "processing_error"}
+            ).eq("id", submission["id"]).execute()
+        except Exception as update_error:
+            print(f"Failed to update submission status after error: {update_error}")
 
 
 async def poll_submissions():
