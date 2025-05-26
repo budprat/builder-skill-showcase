@@ -192,8 +192,18 @@ export const SubmissionManager = () => {
                           </div>
                           
                           <div>
-                            <h4 className="font-semibold mb-2">Pre-screening Score</h4>
-                            <p>{submission.scores[0].pre_screening_score}/5</p>
+                            <h4 className="font-semibold mb-2">GitHub Repository Analysis</h4>
+                            <div className="border p-3 rounded bg-muted/50">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium">Repository Validation</span>
+                                <span className="font-bold">{submission.scores[0].pre_screening_score}/5</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {submission.scores[0].pre_screening_score === 5 
+                                  ? "✅ Repository exists and contains README.md" 
+                                  : "❌ Repository validation failed - missing repository or README.md"}
+                              </p>
+                            </div>
                           </div>
 
                           {submission.scores[0].llm_scores && (
