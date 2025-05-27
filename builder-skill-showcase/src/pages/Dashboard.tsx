@@ -58,15 +58,23 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
+      console.log('Fetching profile for user:', user.id);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      console.log('Profile fetch response:', { data, error });
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Profile fetch error:', error);
+        throw error;
+      }
 
       if (data) {
+        console.log('Profile data found:', data);
         setProfile(data);
         setProfileData({
           full_name: data.full_name || "",
@@ -79,9 +87,29 @@ const Dashboard = () => {
           experience_level: data.experience_level || "",
           skills: data.skills || [],
         });
+      } else {
+        console.log('No profile data found, will create new profile on update');
+        // Initialize with empty data if no profile exists
+        setProfile(null);
+        setProfileData({
+          full_name: "",
+          username: "",
+          bio: "",
+          location: "",
+          github_url: "",
+          linkedin_url: "",
+          portfolio_url: "",
+          experience_level: "",
+          skills: [],
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching profile:', error);
+      toast({
+        title: "Warning",
+        description: "Could not load profile data. You can still update your profile.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -111,15 +139,38 @@ const Dashboard = () => {
 
     setUpdating(true);
     try {
-      const { error } = await supabase
+      console.log('Updating profile for user:', user.id);
+      console.log('Profile data:', profileData);
+
+      // Clean the profile data to ensure no undefined values
+      const cleanProfileData = {
+        id: user.id,
+        full_name: profileData.full_name || null,
+        username: profileData.username || null,
+        bio: profileData.bio || null,
+        location: profileData.location || null,
+        github_url: profileData.github_url || null,
+        linkedin_url: profileData.linkedin_url || null,
+        portfolio_url: profileData.portfolio_url || null,
+        experience_level: profileData.experience_level || null,
+        skills: profileData.skills || [],
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('Clean profile data:', cleanProfileData);
+
+      const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id,
-          ...profileData,
-          updated_at: new Date().toISOString(),
+        .upsert(cleanProfileData, {
+          onConflict: 'id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
+
+      console.log('Profile update response:', data);
 
       toast({
         title: "Success",
@@ -128,9 +179,10 @@ const Dashboard = () => {
 
       fetchProfile();
     } catch (error: any) {
+      console.error('Profile update failed:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to update profile",
+        description: error.message || "Failed to update profile. Please check your connection and try again.",
         variant: "destructive",
       });
     } finally {
