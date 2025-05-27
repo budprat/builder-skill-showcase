@@ -145,7 +145,6 @@ const Index = () => {
         <div className="container mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Featured Challenges</h2>
-            <p className="text-lg text-gray-600">Discover the most exciting AI building opportunities</p>
           </div>
 
           {loadingChallenges ? (
