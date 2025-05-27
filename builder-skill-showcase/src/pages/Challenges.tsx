@@ -85,7 +85,7 @@ const Challenges = () => {
       domain.toLowerCase().includes(selectedDomain.toLowerCase())
     );
     const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
-    
+
     return matchesSearch && matchesDomain && matchesStatus;
   });
 
@@ -148,10 +148,10 @@ const Challenges = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50/30">
       <Header />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto section-padding py-8">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">AI Building Challenges</h1>
@@ -230,7 +230,7 @@ const Challenges = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-gray-700">{challenge.description}</p>
-                  
+
                   {challenge.domains && challenge.domains.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {challenge.domains.map((domain) => (

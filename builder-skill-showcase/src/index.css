@@ -6,12 +6,12 @@
 @layer base {
   :root {
     /* Primary Colors - Foundation & Trust */
-    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
-    --foreground: 215 25% 27%; /* Graphite #334155 */
+    --background: 0 0% 100%; /* Pure White */
+    --foreground: 220 26% 14%; /* Deep Charcoal #1f2937 */
 
     /* Card backgrounds */
-    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
-    --card-foreground: 215 25% 27%; /* Graphite */
+    --card: 0 0% 100%; /* Pure White */
+    --card-foreground: 220 26% 14%; /* Deep Charcoal */
 
     --popover: 0 0% 100%; /* Titanium White */
     --popover-foreground: 215 25% 27%; /* Graphite */
@@ -24,20 +24,20 @@
     --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
     --secondary-foreground: 215 25% 27%; /* Graphite */
 
-    --muted: 216 33% 97%; /* Light Lunar Grey */
-    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
+    --muted: 220 14% 96%; /* Very Light Gray */
+    --muted-foreground: 220 9% 46%; /* Medium Gray */
 
-    /* Accent - Cyber Teal */
-    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
-    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
+    /* Accent - Modern Blue */
+    --accent: 221 83% 53%; /* Modern Blue #3b82f6 */
+    --accent-foreground: 0 0% 100%; /* White */
 
     /* Destructive - Error Red */
     --destructive: 0 84% 60%; /* Error Red #EF4444 */
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 215 20% 82%; /* Light Stardust Silver */
-    --input: 215 20% 82%;
+    --border: 220 13% 91%; /* Light Border Gray */
+    --input: 220 13% 91%;
     --ring: 177 100% 48%; /* Cyber Teal for focus rings */
 
     --radius: 0.5rem;
@@ -292,6 +292,80 @@
 
   .content-spacing {
     @apply space-y-8 lg:space-y-12;
+  }
+
+  /* Subtle dividers and separators */
+  .section-divider {
+    @apply border-t border-gray-200/60 my-8;
+  }
+
+  .card-divider {
+    @apply border-t border-gray-100 my-4;
+  }
+
+  .content-divider {
+    @apply w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent my-6;
+  }
+
+  /* Enhanced spacing utilities */
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .content-padding {
+    @apply p-6 lg:p-8;
+  }
+
+  .tight-spacing {
+    @apply space-y-4;
+  }
+
+  .comfortable-spacing {
+    @apply space-y-6;
+  }
+
+  .generous-spacing {
+    @apply space-y-8;
+  }
+
+  /* Modern light theme card styling */
+  .modern-card {
+    @apply bg-white border border-gray-200/70 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300/80 transition-all duration-300;
+  }
+
+  .modern-card-subtle {
+    @apply bg-gray-50/50 border border-gray-150 rounded-lg hover:bg-gray-50 transition-colors duration-200;
+  }
+
+  /* Interactive element enhancements */
+  .interactive-hover {
+    @apply transition-all duration-200 hover:scale-[1.02] hover:shadow-sm;
+  }
+
+  .button-hover-lift {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+  }
+
+  /* Improved focus states */
+  .focus-ring-modern {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-white;
+  }
+
+  /* Text contrast improvements */
+  .text-primary-strong {
+    @apply text-gray-900;
+  }
+
+  .text-secondary-readable {
+    @apply text-gray-700;
+  }
+
+  .text-tertiary-accessible {
+    @apply text-gray-600;
+  }
+
+  .text-subtle-readable {
+    @apply text-gray-500;
   }
 }
 
