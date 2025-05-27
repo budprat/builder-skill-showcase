@@ -85,6 +85,19 @@ const Index = () => {
     return diffDays;
   };
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'completed':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'draft':
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -138,13 +151,13 @@ const Index = () => {
           {loadingChallenges ? (
             <div className="text-center text-gray-600">Loading challenges...</div>
           ) : featuredChallenges.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
               {featuredChallenges.map((challenge) => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
                   <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group" onClick={() => navigate(`/challenges/${challenge.id}`)}>
                 {challenge.image_url && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+                  <div className="aspect-[4/3] w-full overflow-hidden rounded-t-lg relative">
                     <img
                       src={challenge.image_url}
                       alt={challenge.title}
@@ -158,71 +171,62 @@ const Index = () => {
                         console.log('Featured challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
-                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200 text-xs">
-                      Active
+                    <Badge className={`absolute top-1 left-1 text-xs ${getStatusColor(challenge.status)}`}>
+                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                   </div>
                 )}
-                <CardHeader className="pb-3">
+                    <CardHeader className="pb-1 p-3">
                       <div className="flex items-start justify-between mb-1">
                         {!challenge.image_url && (
-                          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
-                            Active
+                          <Badge className={`text-xs ${getStatusColor(challenge.status)}`}>
+                            {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                           </Badge>
                         )}
                         <div className="text-right ml-auto">
-                          <div className="text-lg font-bold text-gray-900">
+                          <div className="text-sm font-bold text-gray-900">
                             {formatPrize(challenge.prize_amount)}
                           </div>
-                          {challenge.prize_description && (
-                            <div className="text-gray-600 text-xs">{challenge.prize_description}</div>
-                          )}
                         </div>
                       </div>
-                      <CardTitle className="text-gray-900 text-base mb-1 font-semibold group-hover:text-blue-600 transition-colors">
-                        {challenge.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-600 text-sm">
-                        by {challenge.company_name || 'Anonymous'}
+                      <CardTitle className="text-gray-900 text-sm mb-1 font-semibold line-clamp-2">{challenge.title}</CardTitle>
+                      <CardDescription className="text-gray-600 text-xs">
+                        {challenge.company_name || 'Anonymous'}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-3 pt-0">
+                    <CardContent className="space-y-2 pt-0 p-3">
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {challenge.domains.slice(0, 2).map((domain, index) => (
-                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-2 py-1">
+                          {challenge.domains.slice(0, 1).map((domain, index) => (
+                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-1 py-0">
                               {domain}
                             </Badge>
                           ))}
-                          {challenge.domains.length > 2 && (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs px-2 py-1">
-                              +{challenge.domains.length - 2} more
+                          {challenge.domains.length > 1 && (
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs px-1 py-0">
+                              +{challenge.domains.length - 1}
                             </Badge>
                           )}
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          Due: {formatDeadline(challenge.submission_deadline)}
-                        </div>
-                        <div className="flex items-center text-gray-600">
+                      <div className="text-xs text-gray-600">
+                        <div className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
+                          {daysLeft > 0 ? `${daysLeft} days left` : 'Ended'}
                         </div>
                       </div>
 
                       <div className="pt-1">
                         <Button 
                           size="sm"
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-1"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/challenges/${challenge.id}`);
                           }}
                         >
-                          View Challenge
+                          View
                         </Button>
                       </div>
                     </CardContent>
