@@ -192,12 +192,12 @@ const Index = () => {
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {challenge.domains.slice(0, 2).map((domain, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
                               {domain}
                             </Badge>
                           ))}
                           {challenge.domains.length > 2 && (
-                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
                               +{challenge.domains.length - 2} more
                             </Badge>
                           )}
