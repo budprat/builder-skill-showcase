@@ -287,28 +287,51 @@ const ChallengeDetail = () => {
           </Button>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content with Challenge Header */}
+        <div className="mb-6">
+          {/* Challenge Header */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Badge className={getStatusColor(challenge.status)}>
+                    {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+                  </Badge>
+                  {daysLeft > 0 && (
+                    <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
+                      {daysLeft} days left
+                    </Badge>
+                  )}
+                  {isExpired && (
+                    <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50">
+                      Deadline passed
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {formatPrize(challenge.prize_amount)}
+                  </div>
+                  {challenge.prize_description && (
+                    <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
+                  )}
+                </div>
+              </div>
+
+              <CardTitle className="text-3xl text-gray-900 font-bold mb-2">{challenge.title}</CardTitle>
+              <CardDescription className="text-lg text-gray-600">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  by {challenge.company_name || 'Anonymous'}
+                </div>
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Challenge Image on right side for larger screens, top for smaller screens */}
-            {challenge.image_url && (
-              <div className="lg:hidden mb-6">
-                <img 
-                  src={challenge.image_url} 
-                  alt={challenge.title}
-                  className="w-full h-64 object-cover rounded-lg border shadow-sm"
-                  onError={(e) => {
-                    console.error('Failed to load primary image:', challenge.image_url);
-                    const target = e.currentTarget as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                  onLoad={() => {
-                    console.log('Primary image loaded successfully:', challenge.image_url);
-                  }}
-                />
-              </div>
-            )}
 
             {/* Challenge Description */}
             <Card className="bg-white border-gray-200">
@@ -577,6 +600,27 @@ const ChallengeDetail = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Challenge Image for desktop */}
+            {challenge.image_url && (
+              <Card className="bg-white border-gray-200">
+                <CardContent className="p-0">
+                  <img 
+                    src={challenge.image_url} 
+                    alt={challenge.title}
+                    className="w-full h-64 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.error('Failed to load primary image:', challenge.image_url);
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                    onLoad={() => {
+                      console.log('Primary image loaded successfully:', challenge.image_url);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Quick Info */}
             <Card className="bg-white border-gray-200">
               <CardHeader>
