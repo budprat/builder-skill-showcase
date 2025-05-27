@@ -127,22 +127,26 @@ const Index = () => {
                 {user ? "Explore Challenges" : "Join as Builder"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button 
-                size="lg" 
-                className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
-                onClick={() => navigate("/auth")}
-              >
-                Join as Sponsor
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button 
-                size="lg" 
-                className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
-                onClick={() => navigate("/auth")}
-              >
-                Join as Evaluator
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              {!user && (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join as Sponsor
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join as Evaluator
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </>
+              )}
               <Button 
                 size="lg" 
                 variant="outline" 
