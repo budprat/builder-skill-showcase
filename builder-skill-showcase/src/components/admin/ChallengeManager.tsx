@@ -45,6 +45,11 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     evaluation_innovation: "",
     evaluation_presentation: "",
     evaluation_practicality: "",
+    rules_participation: "",
+    rules_original_work: "",
+    rules_code_accessibility: "",
+    rules_deadline: "",
+    rules_judging_period: "",
   });
 
   useEffect(() => {
@@ -114,33 +119,107 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
       if (editingChallenge) {
         console.log('Updating challenge with ID:', editingChallenge.id);
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('challenges')
           .update(challengeData)
-          .eq('id', editingChallenge.id);
+          .eq('id', editingChallenge.id)
+          .select();
 
         if (error) {
-          console.error('Update error:', error);
+          console.error('Supabase error:', error);
           throw error;
         }
-        toast({ title: "Success", description: "Challenge updated successfully" });
+
+        console.log('Challenge saved successfully:', data);
+
+        onStatsUpdate();
+        setIsDialogOpen(false);
+        resetForm();
+        fetchChallenges();
+
+        toast({
+          title: "Success",
+          description: editingChallenge ? "Challenge updated successfully" : "Challenge created successfully",
+        });
       } else {
         console.log('Creating new challenge');
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('challenges')
-          .insert([challengeData]);
+          .insert([challengeData])
+          .select();
 
         if (error) {
-          console.error('Insert error:', error);
+          console.error('Supabase error:', error);
           throw error;
         }
-        toast({ title: "Success", description: "Challenge created successfully" });
-      }
 
-      setIsDialogOpen(false);
-      resetForm();
-      fetchChallenges();
-      onStatsUpdate();
+        console.log('Challenge saved successfully:', data);
+
+        // Create rules and guidelines for new challenges
+        if (!editingChallenge && data && data.length > 0) {
+          const challengeId = data[0].id;
+          const rulesData = [
+            {
+              challenge_id: challengeId,
+              rule_type: 'participation',
+              title: 'Solo/Team Participation',
+              description: formData.rules_participation,
+              is_mandatory: true,
+              order_index: 1
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'submission',
+              title: 'Original Work Required',
+              description: formData.rules_original_work,
+              is_mandatory: true,
+              order_index: 2
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'technical',
+              title: 'Code Accessibility',
+              description: formData.rules_code_accessibility,
+              is_mandatory: true,
+              order_index: 3
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'submission',
+              title: 'Deadline Compliance',
+              description: formData.rules_deadline,
+              is_mandatory: true,
+              order_index: 4
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'judging',
+              title: 'Judging Period',
+              description: formData.rules_judging_period,
+              is_mandatory: false,
+              order_index: 5
+            }
+          ];
+
+          const { error: rulesError } = await supabase
+            .from('rules_guidelines')
+            .insert(rulesData);
+
+          if (rulesError) {
+            console.error('Error creating rules:', rulesError);
+          }
+        }
+
+        onStatsUpdate();
+        setIsDialogOpen(false);
+        resetForm();
+        fetchChallenges();
+
+        toast({
+          title: "Success",
+          description: editingChallenge ? "Challenge updated successfully" : "Challenge created successfully",
+        });
+      }
     } catch (error: any) {
       console.error('Error saving challenge:', error);
       toast({
@@ -171,6 +250,11 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       evaluation_innovation: "",
       evaluation_presentation: "",
       evaluation_practicality: "",
+      rules_participation: "",
+      rules_original_work: "",
+      rules_code_accessibility: "",
+      rules_deadline: "",
+      rules_judging_period: "",
     });
     setEditingChallenge(null);
   };
@@ -197,6 +281,11 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       evaluation_innovation: evaluation.innovation?.toString() || "",
       evaluation_presentation: evaluation.presentation?.toString() || "",
       evaluation_practicality: evaluation.practicality?.toString() || "",
+      rules_participation: "",
+      rules_original_work: "",
+      rules_code_accessibility: "",
+      rules_deadline: "",
+      rules_judging_period: "",
     });
     setIsDialogOpen(true);
   };
@@ -501,6 +590,57 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                           value={formData.evaluation_practicality}
                           onChange={(e) => setFormData({...formData, evaluation_practicality: e.target.value})}
                           placeholder="15"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Rules and Guidelines</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <Label htmlFor="rules_participation">Solo/Team Participation</Label>
+                        <Textarea
+                          id="rules_participation"
+                          value={formData.rules_participation}
+                          onChange={(e) => setFormData({...formData, rules_participation: e.target.value})}
+                          placeholder="Specify if solo or team participation is allowed, and team size limit"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_original_work">Original Work Required</Label>
+                        <Textarea
+                          id="rules_original_work"
+                          value={formData.rules_original_work}
+                          onChange={(e) => setFormData({...formData, rules_original_work: e.target.value})}
+                          placeholder="State that only original work is accepted"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_code_accessibility">Code Must Be Publicly Accessible</Label>
+                        <Textarea
+                          id="rules_code_accessibility"
+                          value={formData.rules_code_accessibility}
+                          onChange={(e) => setFormData({...formData, rules_code_accessibility: e.target.value})}
+                          placeholder="Specify that code must be publicly accessible"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_deadline">All Deliverables Must Be Submitted By Deadline</Label>
+                        <Textarea
+                          id="rules_deadline"
+                          value={formData.rules_deadline}
+                          onChange={(e) => setFormData({...formData, rules_deadline: e.target.value})}
+                          placeholder="State that all deliverables must be submitted by the deadline"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_judging_period">Judging Period: 1-2 weeks after deadline</Label>
+                        <Textarea
+                          id="rules_judging_period"
+                          value={formData.rules_judging_period}
+                          onChange={(e) => setFormData({...formData, rules_judging_period: e.target.value})}
+                          placeholder="Specify the judging period"
                         />
                       </div>
                     </div>

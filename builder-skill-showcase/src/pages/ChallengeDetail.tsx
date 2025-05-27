@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, User, Trophy, ArrowLeft, Upload, ExternalLink, Github, Play, FileText } from "lucide-react";
+import { Calendar, User, Trophy, ArrowLeft, Upload, ExternalLink, Github, Play, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -49,6 +49,15 @@ interface Submission {
   };
 }
 
+interface RuleGuideline {
+  id: string;
+  rule_type: string;
+  title: string;
+  description: string;
+  is_mandatory: boolean;
+  order_index: number;
+}
+
 const ChallengeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -57,6 +66,7 @@ const ChallengeDetail = () => {
 
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [rulesGuidelines, setRulesGuidelines] = useState<RuleGuideline[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -73,6 +83,7 @@ const ChallengeDetail = () => {
     if (id) {
       fetchChallenge();
       fetchSubmissions();
+      fetchRulesGuidelines();
     }
   }, [id, user]);
 
@@ -125,6 +136,21 @@ const ChallengeDetail = () => {
       setSubmissions(data || []);
     } catch (error) {
       console.error('Error fetching submissions:', error);
+    }
+  };
+
+  const fetchRulesGuidelines = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('rules_guidelines')
+        .select('*')
+        .eq('challenge_id', id)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      setRulesGuidelines(data || []);
+    } catch (error) {
+      console.error('Error fetching rules and guidelines:', error);
     }
   };
 
@@ -436,57 +462,79 @@ const ChallengeDetail = () => {
             )}
 
             {/* Rules and Guidelines */}
-            {(challenge.requirements || challenge.submission_guidelines) && (
-              <Card className="bg-white border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-gray-900">Rules and Guidelines</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {challenge.requirements && challenge.requirements.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Competition Rules</h4>
-                      <ul className="space-y-2">
-                        {challenge.requirements.map((rule, index) => (
-                          <li key={index} className="flex items-start gap-2 text-gray-700">
-                            <span className="text-blue-600 mt-1">•</span>
-                            {rule}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {challenge.submission_guidelines && (
-                    <div className="pt-4 border-t border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-2">Submission Guidelines</h4>
-                      <p className="text-gray-700 leading-relaxed">{challenge.submission_guidelines}</p>
-                    </div>
-                  )}
-
-                  <div className="pt-4 border-t border-gray-200">
-                    <h4 className="font-semibold text-gray-900 mb-3">General Guidelines</h4>
-                    <ul className="space-y-2 text-gray-700">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-1">•</span>
-                        All submissions must be original work
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-1">•</span>
-                        Code must be well-documented and include a README
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-1">•</span>
-                        Submissions must be completed by the deadline
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-600 mt-1">•</span>
-                        Any external APIs or libraries used must be clearly documented
-                      </li>
-                    </ul>
+            <Card className="bg-white border-gray-200">
+              <CardHeader>
+                <CardTitle className="text-gray-900">Rules and Guidelines</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {rulesGuidelines.length > 0 ? (
+                  <div className="space-y-4">
+                    {rulesGuidelines.map((rule) => (
+                      <div key={rule.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {rule.is_mandatory ? (
+                            <AlertCircle className="h-5 w-5 text-red-500" />
+                          ) : (
+                            <CheckCircle className="h-5 w-5 text-green-500" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-gray-900 mb-1">{rule.title}</h4>
+                          <p className="text-gray-700 text-sm">{rule.description}</p>
+                          {rule.is_mandatory && (
+                            <Badge variant="destructive" className="mt-2 text-xs">
+                              Mandatory
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Solo/Team Participation</h4>
+                        <p className="text-gray-700 text-sm">Solo participants or teams with maximum 5 members are allowed</p>
+                        <Badge variant="destructive" className="mt-2 text-xs">Mandatory</Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Original Work Required</h4>
+                        <p className="text-gray-700 text-sm">All submissions must be original work created specifically for this challenge</p>
+                        <Badge variant="destructive" className="mt-2 text-xs">Mandatory</Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Code Accessibility</h4>
+                        <p className="text-gray-700 text-sm">Code must be publicly accessible via GitHub or similar platform</p>
+                        <Badge variant="destructive" className="mt-2 text-xs">Mandatory</Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                      <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Deadline Compliance</h4>
+                        <p className="text-gray-700 text-sm">All deliverables must be submitted by the specified deadline</p>
+                        <Badge variant="destructive" className="mt-2 text-xs">Mandatory</Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                      <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Judging Period</h4>
+                        <p className="text-gray-700 text-sm">Judging period: 1-2 weeks after submission deadline</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Submissions */}
             {submissions.length > 0 && (
