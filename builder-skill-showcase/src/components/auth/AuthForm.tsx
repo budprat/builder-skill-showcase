@@ -106,6 +106,17 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
         if (signUpError) {
           console.error("Signup error:", signUpError);
+          
+          // If user already exists, provide a more helpful message
+          if (signUpError.message.includes("User already registered")) {
+            toast({
+              title: "Account exists",
+              description: "An account with this email already exists. Please sign in instead or use a different email.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           throw signUpError;
         }
 
