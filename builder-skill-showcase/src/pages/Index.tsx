@@ -151,7 +151,7 @@ const Index = () => {
                 return (
                   <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group" onClick={() => navigate(`/challenges/${challenge.id}`)}>
                 {challenge.image_url && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
                     <img
                       src={challenge.image_url}
                       alt={challenge.title}
@@ -165,14 +165,19 @@ const Index = () => {
                         console.log('Featured challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
+                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200">
+                      Active
+                    </Badge>
                   </div>
                 )}
                 <CardHeader>
                       <div className="flex items-start justify-between mb-2">
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          Active
-                        </Badge>
-                        <div className="text-right">
+                        {!challenge.image_url && (
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            Active
+                          </Badge>
+                        )}
+                        <div className="text-right ml-auto">
                           <div className="text-xl font-bold text-gray-900">
                             {formatPrize(challenge.prize_amount)}
                           </div>
