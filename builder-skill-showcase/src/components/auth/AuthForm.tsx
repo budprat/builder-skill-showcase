@@ -133,22 +133,82 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           console.log("User created and signed in automatically");
           console.log("User ID:", authData.user.id);
 
-          // Ensure role is assigned (fallback if trigger doesn't work)
+          // Create profile first
           try {
-            const { error: roleError } = await (supabase as any)
-              .from('user_roles')
+            const { error: profileError } = await supabase
+              .from('profiles')
               .insert({
-                user_id: authData.user.id,
-                role: data.role
+                id: authData.user.id,
+                full_name: data.fullName,
+                username: data.email.split('@')[0], // Generate username from email
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
               });
             
-            if (roleError && !roleError.message.includes('duplicate')) {
-              console.error("Error assigning role:", roleError);
+            if (profileError && !profileError.message.includes('duplicate')) {
+              console.error("Error creating profile:", profileError);
             } else {
-              console.log("Role assigned successfully:", data.role);
+              console.log("Profile created successfully");
             }
-          } catch (roleAssignError) {
-            console.error("Role assignment error:", roleAssignError);
+          } catch (profileError) {
+            console.error("Profile creation error:", profileError);
+          }
+
+          // Ensure role is assigned (with retry logic)
+          let roleAssigned = false;
+          let retries = 3;
+          
+          while (!roleAssigned && retries > 0) {
+            try {
+              const { data: existingRole, error: checkError } = await supabase
+                .from('user_roles')
+                .select('*')
+                .eq('user_id', authData.user.id)
+                .eq('role', data.role)
+                .single();
+
+              if (existingRole) {
+                console.log("Role already exists:", data.role);
+                roleAssigned = true;
+                break;
+              }
+
+              const { error: roleError } = await supabase
+                .from('user_roles')
+                .insert({
+                  user_id: authData.user.id,
+                  role: data.role
+                });
+              
+              if (!roleError) {
+                console.log("Role assigned successfully:", data.role);
+                roleAssigned = true;
+              } else if (roleError.message.includes('duplicate')) {
+                console.log("Role already exists (duplicate key)");
+                roleAssigned = true;
+              } else {
+                console.error(`Role assignment attempt ${4 - retries} failed:`, roleError);
+                retries--;
+                if (retries > 0) {
+                  await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+                }
+              }
+            } catch (roleAssignError) {
+              console.error(`Role assignment error (attempt ${4 - retries}):`, roleAssignError);
+              retries--;
+              if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+              }
+            }
+          }
+
+          if (!roleAssigned) {
+            console.error("Failed to assign role after all retries");
+            toast({
+              title: "Account created with warning",
+              description: "Your account was created but there was an issue assigning your role. Please contact support.",
+              variant: "destructive",
+            });
           }
 
           toast({
