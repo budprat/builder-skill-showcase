@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -58,7 +59,7 @@ const Dashboard = () => {
 
     try {
       console.log('Fetching profile for user:', user.id);
-
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -330,21 +331,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
-      <div className="container mx-auto section-padding py-8">
-        {/* Welcome Section */}
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-3 text-primary-strong">
-            Welcome back, {profile?.full_name || profile?.username || 'Builder'}!
-          </h1>
-          <p className="text-secondary-readable text-lg">
-            Track your progress and manage your challenge submissions
-          </p>
-          <div className="section-divider"></div>
-        </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
       <Header />
-
+      
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Tabs defaultValue="profile" className="space-y-8">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -363,7 +352,7 @@ const Dashboard = () => {
                       @{profileData.username || "username"}
                     </p>
                   </div>
-
+                  
                   <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 space-y-1">
                     <TabsTrigger 
                       value="profile" 
@@ -415,7 +404,7 @@ const Dashboard = () => {
                             {profileData.full_name || "Not provided"}
                           </p>
                         </div>
-
+                        
                         <div>
                           <Label className="text-white/70 text-sm font-medium">Username</Label>
                           <p className="text-white text-lg font-medium mt-1">
@@ -547,7 +536,7 @@ const Dashboard = () => {
                           className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-
+                      
                       <div>
                         <Label htmlFor="username" className="text-white">Username</Label>
                         <Input
@@ -580,7 +569,7 @@ const Dashboard = () => {
                           className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-
+                      
                       <div>
                         <Label htmlFor="experience_level" className="text-white">Experience Level</Label>
                         <select
@@ -682,7 +671,7 @@ const Dashboard = () => {
                                     </Badge>
                                   )}
                                 </div>
-
+                                
                                 <div className="flex items-center gap-2 mt-4">
                                   {submission.repository_url && (
                                     <Button
@@ -731,7 +720,7 @@ const Dashboard = () => {
                                             <h4 className="font-semibold mb-2 text-white">Overall Score</h4>
                                             <p className="text-2xl font-bold text-blue-400">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
                                           </div>
-
+                                          
                                           <div>
                                             <h4 className="font-semibold mb-2 text-white">GitHub Repository Analysis</h4>
                                             <div className="border border-slate-600 p-3 rounded bg-slate-800">
@@ -746,7 +735,7 @@ const Dashboard = () => {
                                               </p>
                                             </div>
                                           </div>
-
+                                          
                                           {submission.scores[0].llm_scores && (
                                             <div>
                                               <h4 className="font-semibold mb-2 text-white">Detailed Rubric Scores</h4>
@@ -778,7 +767,7 @@ const Dashboard = () => {
                                   )}
                                 </div>
                               </div>
-
+                              
                               <div className="flex items-center gap-2 ml-4">
                                 <div className="text-sm text-white/60">
                                   {new Date(submission.created_at).toLocaleDateString()}
@@ -806,11 +795,11 @@ const Dashboard = () => {
                                       <Trash2 className="h-4 w-4 mr-1" />
                                       Delete
                                     </>
-)}
+                                  )}
                                 </Button>
                               </div>
                             </div>
-
+                            
                             {submission.readme_notes && (
                               <div className="mt-4 p-3 bg-white/5 rounded text-sm border border-white/10">
                                 <strong className="text-white">Notes:</strong> 
@@ -841,7 +830,7 @@ const Dashboard = () => {
                           className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-
+                      
                       <div>
                         <Label htmlFor="edit_pitch_deck_url" className="text-white">Pitch Deck URL</Label>
                         <Input
@@ -872,7 +861,7 @@ const Dashboard = () => {
                           }}
                         />
                       </div>
-
+                      
                       <div>
                         <Label htmlFor="edit_demo_video_url" className="text-white">Demo Video URL</Label>
                         <Input
@@ -883,7 +872,7 @@ const Dashboard = () => {
                           className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-
+                      
                       <div>
                         <Label htmlFor="edit_readme_notes" className="text-white">Additional Notes</Label>
                         <Textarea
@@ -895,7 +884,7 @@ const Dashboard = () => {
                           className="mt-1 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-
+                      
                       <div className="flex justify-end space-x-2 pt-4">
                         <Button 
                           variant="outline" 
@@ -907,7 +896,7 @@ const Dashboard = () => {
                         <Button 
                           onClick={updateSubmission} 
                           disabled={updating}
-                          className="bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+                          className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                         >
                           {updating ? "Updating..." : "Update Submission"}
                         </Button>
@@ -934,7 +923,7 @@ const Dashboard = () => {
                         acceptedTypes=".pdf,.doc,.docx"
                         onUploadComplete={handleFileUploaded}
                       />
-
+                      
                       <FileUpload
                         fileType="document"
                         title="Upload Portfolio Documents"

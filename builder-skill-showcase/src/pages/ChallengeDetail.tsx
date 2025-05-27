@@ -499,7 +499,7 @@ const ChallengeDetail = () => {
                     <p className="text-white/70">Sign in to submit your solution.</p>
                     <Button 
                       onClick={() => navigate("/auth")}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors duration-200"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600"
                     >
                       Sign In
                     </Button>
