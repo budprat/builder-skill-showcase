@@ -44,11 +44,9 @@ DROP POLICY IF EXISTS "Admins can manage all roles" ON user_roles;
 -- Step 5: Create new policies
 CREATE POLICY "Users can read their own roles" ON user_roles FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own roles" ON user_roles FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Use hardcoded admin user ID to prevent infinite recursion
 CREATE POLICY "Admins can manage all roles" ON user_roles FOR ALL USING (
-  EXISTS (
-    SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = auth.uid() AND ur.role = 'admin'
-  )
+  auth.uid() = '3dde62f3-5045-4bc8-90b5-676d7ec368cc'::uuid
 );
 
 -- Step 6: Create indexes

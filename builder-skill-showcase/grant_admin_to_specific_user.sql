@@ -22,12 +22,9 @@ END $$;
 DROP POLICY IF EXISTS "Admins can manage all roles" ON user_roles;
 
 -- Create a simpler admin policy that doesn't reference itself
+-- Use hardcoded admin user ID to prevent infinite recursion
 CREATE POLICY "Admins can manage all roles" ON user_roles FOR ALL USING (
-  user_id IN (
-    SELECT ur.user_id 
-    FROM user_roles ur 
-    WHERE ur.role = 'admin'
-  )
+  auth.uid() = '3dde62f3-5045-4bc8-90b5-676d7ec368cc'::uuid
 );
 
 -- Verify the admin user was created
