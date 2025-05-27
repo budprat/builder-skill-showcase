@@ -1,0 +1,86 @@
+Webpage Redesign Prompt: Convert Dark Theme to Light Theme
+Transform the current dark blue/purple themed "Elite Builders - AI Building Challenges" webpage into a clean, modern white/light themed design following these specifications:
+Background Changes:
+
+Replace the dark blue gradient background (#1a1a3e to #2d2d5e) with a clean white (#FFFFFF) or very light gray (#F8F9FA) background
+Remove all dark overlays and gradient effects
+
+Navigation Bar Updates:
+
+Convert the dark navigation bar to a white/light header with:
+
+Black or dark gray text (#333333) for "Elite Builders" logo/text
+Navigation links in dark gray with subtle hover effects
+Maintain the user avatar icon but ensure it contrasts well with the light background
+Add a subtle bottom border (1px solid #E5E5E5) for separation
+
+
+
+Main Content Area:
+
+Change the page title "AI Building Challenges" from white to dark text (#1A1A1A)
+Update the subtitle text to dark gray (#666666)
+Ensure all text has proper contrast ratios for accessibility on white backgrounds
+
+Search and Filter Components:
+
+Convert the dark search bar to a white/light gray input field with:
+
+Light gray border (#D1D5DB)
+Dark placeholder text
+White background
+
+
+Update dropdown filters to have white backgrounds with subtle borders
+
+Challenge Cards Transformation:
+
+Replace dark blue/purple card backgrounds with white cards
+Add subtle box shadows (0 2px 4px rgba(0,0,0,0.1)) for depth
+Convert all white text to dark text (#333333)
+Update status badges:
+
+Keep "Active" badges with green background but ensure text contrast
+Adjust "Completed" badges to work on light backgrounds
+
+
+Prize amounts should be in dark text with appropriate emphasis
+Dates and metadata in medium gray (#666666)
+
+Button Styling:
+
+Convert purple/blue gradient buttons to either:
+
+Solid colored buttons with good contrast
+Or outlined buttons with colored borders
+
+
+Ensure all buttons have clear hover states
+
+Color Scheme Adjustments:
+
+Primary accent: Replace purple with a professional blue (#0066CC) or keep minimal color usage
+Success states: Maintain green but adjust for light backgrounds
+Text hierarchy: Black for headers, dark gray for body text, medium gray for metadata
+
+Typography Updates:
+
+Ensure all fonts remain readable with proper weight adjustments for light backgrounds
+Increase font weights slightly if needed for better readability on white
+
+Additional Refinements:
+
+Add subtle dividers between sections if needed
+Ensure proper spacing and padding throughout
+Maintain the same layout structure but with cleaner, more minimal styling
+Add subtle hover effects on interactive elements
+Ensure the design follows modern light theme best practices
+
+Technical Requirements:
+
+Maintain all functionality and interactive elements
+Ensure smooth transitions if theme switching is implemented
+Test all color contrasts for WCAG AA compliance
+Preserve responsive design behaviors
+
+The final result should be a clean, professional, and modern light-themed interface that maintains the same information architecture but with improved readability and a more contemporary aesthetic similar to popular platforms like GitHub, Linear, or Notion's light themes.
