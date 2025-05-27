@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Storage Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; }
+        img { max-width: 200px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Supabase Storage Debug Tool</h1>
+    <div id="results"></div>
+    
+    <script>
+        const supabaseUrl = 'https://udjwjoymlofdocclufxv.supabase.co';
+        const bucketName = 'user-files';
+        
+        async function runTests() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<h2>Running Storage Tests...</h2>';
+            
+            // Test 1: Check if bucket exists
+            await testBucketAccess();
+            
+            // Test 2: Try to list files in bucket
+            await testListFiles();
+            
+            // Test 3: Test specific failing URLs
+            await testSpecificImages();
+            
+            // Test 4: Test bucket policies
+            await testBucketPolicies();
+        }
+        
+        async function testBucketAccess() {
+            const results = document.getElementById('results');
+            try {
+                const response = await fetch(`${supabaseUrl}/storage/v1/bucket/${bucketName}`);
+                const result = document.createElement('div');
+                result.className = response.ok ? 'test-result success' : 'test-result error';
+                result.innerHTML = `<strong>Bucket Access Test:</strong> ${response.status} - ${response.ok ? 'Bucket accessible' : 'Bucket not accessible'}`;
+                results.appendChild(result);
+                
+                if (response.ok) {
+                    const data = await response.text();
+                    console.log('Bucket data:', data);
+                }
+            } catch (error) {
+                const result = document.createElement('div');
+                result.className = 'test-result error';
+                result.innerHTML = `<strong>Bucket Access Test:</strong> Error - ${error.message}`;
+                results.appendChild(result);
+            }
+        }
+        
+        async function testListFiles() {
+            const results = document.getElementById('results');
+            try {
+                const response = await fetch(`${supabaseUrl}/storage/v1/object/list/${bucketName}/challenges`);
+                const result = document.createElement('div');
+                result.className = response.ok ? 'test-result success' : 'test-result warning';
+                
+                if (response.ok) {
+                    const files = await response.json();
+                    result.innerHTML = `<strong>List Files Test:</strong> Found ${files.length} files in challenges folder`;
+                    console.log('Files found:', files);
+                } else {
+                    result.innerHTML = `<strong>List Files Test:</strong> ${response.status} - Could not list files`;
+                }
+                results.appendChild(result);
+            } catch (error) {
+                const result = document.createElement('div');
+                result.className = 'test-result error';
+                result.innerHTML = `<strong>List Files Test:</strong> Error - ${error.message}`;
+                results.appendChild(result);
+            }
+        }
+        
+        async function testSpecificImages() {
+            const results = document.getElementById('results');
+            const testUrls = [
+                `${supabaseUrl}/storage/v1/object/public/${bucketName}/challenges/1748354793428_0.42799349336644954.jpg`,
+                `${supabaseUrl}/storage/v1/object/public/${bucketName}/challenges/1748354747824_0.9398986148034683.jpg`,
+                `${supabaseUrl}/storage/v1/object/public/${bucketName}/challenges/1748354770444_0.2245157640751605.jpg`
+            ];
+            
+            for (const url of testUrls) {
+                try {
+                    const response = await fetch(url);
+                    const result = document.createElement('div');
+                    result.className = response.ok ? 'test-result success' : 'test-result error';
+                    result.innerHTML = `<strong>Image Test:</strong> ${url.split('/').pop()} - Status: ${response.status}`;
+                    
+                    if (response.ok) {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = 'Test image';
+                        result.appendChild(img);
+                    }
+                    
+                    results.appendChild(result);
+                } catch (error) {
+                    const result = document.createElement('div');
+                    result.className = 'test-result error';
+                    result.innerHTML = `<strong>Image Test:</strong> ${url.split('/').pop()} - Error: ${error.message}`;
+                    results.appendChild(result);
+                }
+            }
+        }
+        
+        async function testBucketPolicies() {
+            const results = document.getElementById('results');
+            const result = document.createElement('div');
+            result.className = 'test-result warning';
+            result.innerHTML = `
+                <strong>Bucket Policies Check:</strong><br>
+                - Bucket should be public for images to load<br>
+                - RLS policies should allow public SELECT access<br>
+                - Files should be uploaded with correct paths<br>
+                <br>
+                <strong>Next Steps:</strong><br>
+                1. Check if files actually exist in storage<br>
+                2. Verify bucket is set to public<br>
+                3. Ensure RLS policies allow public access
+            `;
+            results.appendChild(result);
+        }
+        
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

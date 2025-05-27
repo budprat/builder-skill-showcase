@@ -344,8 +344,15 @@ const ChallengeDetail = () => {
                         className="w-full max-w-md h-64 object-cover rounded-lg border shadow-sm"
                         onError={(e) => {
                           console.error('Failed to load primary image:', challenge.image_url);
+                          console.error('Primary image URL parts:', {
+                            fullUrl: challenge.image_url,
+                            containsUserFiles: challenge.image_url?.includes('user-files'),
+                            containsChallenges: challenge.image_url?.includes('challenges'),
+                            isHttps: challenge.image_url?.startsWith('https://')
+                          });
                           const target = e.currentTarget as HTMLImageElement;
-                          target.style.display = 'none';
+                          target.src = '/placeholder.svg';
+                          target.alt = 'Challenge image not available';
                         }}
                         onLoad={() => {
                           console.log('Primary image loaded successfully:', challenge.image_url);
@@ -367,8 +374,15 @@ const ChallengeDetail = () => {
                             onClick={() => window.open(url, '_blank')}
                             onError={(e) => {
                               console.error('Failed to load additional image:', url);
+                              console.error('Additional image URL parts:', {
+                                fullUrl: url,
+                                containsUserFiles: url?.includes('user-files'),
+                                containsChallenges: url?.includes('challenges'),
+                                isHttps: url?.startsWith('https://')
+                              });
                               const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
+                              target.src = '/placeholder.svg';
+                              target.alt = 'Additional image not available';
                             }}
                             onLoad={() => {
                               console.log('Additional image loaded successfully:', url);
