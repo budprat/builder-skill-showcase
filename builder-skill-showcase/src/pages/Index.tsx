@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,7 +87,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Hero Section - Foundry of Future AI Leaders */}
       <section className="relative section-spacing px-4">
         <div className="container mx-auto text-center relative z-10">
@@ -105,13 +104,13 @@ const Index = () => {
                 AI Products
               </span>
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-4xl mx-auto animate-fade-in">
               Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
               build cutting-edge prototypes, and shape the next generation of AI applications in our 
               prestigious innovation accelerator.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
               <Button 
                 size="lg" 
@@ -134,103 +133,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Features Section - Why Elite Builders */}
-      <section className="section-spacing px-4 bg-white border-t border-gray-200">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Elite Builders?</h2>
-            <p className="text-xl text-gray-600">The premier platform for AI product development challenges</p>
-          </div>
-          
-          <div className="elite-grid elite-grid-auto">
-            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                <Trophy className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Compete for Prizes</h3>
-              <p className="text-gray-600 leading-relaxed">Win substantial cash prizes and recognition from top companies in the AI industry</p>
-            </div>
-            
-            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                <Zap className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Build Real Solutions</h3>
-              <p className="text-gray-600 leading-relaxed">Work on actual problems facing companies and organizations worldwide</p>
-            </div>
-            
-            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                <Users className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Elite Community</h3>
-              <p className="text-gray-600 leading-relaxed">Connect with top AI developers and researchers from around the globe</p>
-            </div>
-            
-            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                <Target className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Skill Development</h3>
-              <p className="text-gray-600 leading-relaxed">Advance your AI product development capabilities through real challenges</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section - Process Flow */}
-      <section className="section-spacing px-4 bg-gray-50">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
-            <p className="text-xl text-gray-600">Simple steps to start building and competing</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                1
-              </div>
-              <div className="flex justify-center mb-4">
-                <Code2 className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Choose a Challenge</h3>
-              <p className="text-gray-600 leading-relaxed">Browse available challenges from leading companies and select one that matches your expertise and interests</p>
-            </div>
-            
-            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                2
-              </div>
-              <div className="flex justify-center mb-4">
-                <Zap className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Build Your Solution</h3>
-              <p className="text-gray-600 leading-relaxed">Develop a working prototype, create a compelling pitch deck, and record a demonstration video</p>
-            </div>
-            
-            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
-                3
-              </div>
-              <div className="flex justify-center mb-4">
-                <Award className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Win & Get Recognized</h3>
-              <p className="text-gray-600 leading-relaxed">Submit your solution for expert judging and compete for prizes and career opportunities</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Challenges Section */}
+      {/* Featured Challenges Section - Moved here */}
       <section className="section-spacing px-4 bg-white border-t border-gray-200">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Challenges</h2>
             <p className="text-xl text-gray-600">Discover the most exciting AI building opportunities</p>
           </div>
-          
+
           {loadingChallenges ? (
             <div className="text-center text-gray-600">Loading challenges...</div>
           ) : featuredChallenges.length > 0 ? (
@@ -307,7 +217,7 @@ const Index = () => {
           ) : (
             <div className="text-center text-gray-600">No active challenges available at the moment.</div>
           )}
-          
+
           <div className="text-center">
             <Button 
               variant="outline" 
@@ -318,6 +228,95 @@ const Index = () => {
               View All Challenges
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Why Elite Builders */}
+      <section className="section-spacing px-4 bg-white border-t border-gray-200">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Elite Builders?</h2>
+            <p className="text-xl text-gray-600">The premier platform for AI product development challenges</p>
+          </div>
+
+          <div className="elite-grid elite-grid-auto">
+            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                <Trophy className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Compete for Prizes</h3>
+              <p className="text-gray-600 leading-relaxed">Win substantial cash prizes and recognition from top companies in the AI industry</p>
+            </div>
+
+            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Build Real Solutions</h3>
+              <p className="text-gray-600 leading-relaxed">Work on actual problems facing companies and organizations worldwide</p>
+            </div>
+
+            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Elite Community</h3>
+              <p className="text-gray-600 leading-relaxed">Connect with top AI developers and researchers from around the globe</p>
+            </div>
+
+            <div className="text-center group hover-lift p-6 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
+                <Target className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Skill Development</h3>
+              <p className="text-gray-600 leading-relaxed">Advance your AI product development capabilities through real challenges</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section - Process Flow */}
+      <section className="section-spacing px-4 bg-gray-50">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-xl text-gray-600">Simple steps to start building and competing</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
+                1
+              </div>
+              <div className="flex justify-center mb-4">
+                <Code2 className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Choose a Challenge</h3>
+              <p className="text-gray-600 leading-relaxed">Browse available challenges from leading companies and select one that matches your expertise and interests</p>
+            </div>
+
+            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
+                2
+              </div>
+              <div className="flex justify-center mb-4">
+                <Zap className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Build Your Solution</h3>
+              <p className="text-gray-600 leading-relaxed">Develop a working prototype, create a compelling pitch deck, and record a demonstration video</p>
+            </div>
+
+            <div className="text-center p-8 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white font-bold text-2xl">
+                3
+              </div>
+              <div className="flex justify-center mb-4">
+                <Award className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Win & Get Recognized</h3>
+              <p className="text-gray-600 leading-relaxed">Submit your solution for expert judging and compete for prizes and career opportunities</p>
+            </div>
           </div>
         </div>
       </section>
