@@ -2,17 +2,38 @@
 -- Function to handle user role assignment after signup
 CREATE OR REPLACE FUNCTION handle_new_user_role()
 RETURNS TRIGGER AS $$
+DECLARE
+  user_role_text TEXT;
+  user_role app_role;
 BEGIN
-  -- Get the role from user metadata
-  INSERT INTO user_roles (user_id, role)
-  VALUES (
-    NEW.id,
-    COALESCE(
-      (NEW.raw_user_meta_data->>'role')::app_role,
-      'participant'::app_role
-    )
-  )
-  ON CONFLICT (user_id, role) DO NOTHING;
+  -- Get the role from user metadata as text first
+  user_role_text := COALESCE(NEW.raw_user_meta_data->>'role', 'participant');
+  
+  -- Convert to enum with validation
+  BEGIN
+    user_role := user_role_text::app_role;
+  EXCEPTION 
+    WHEN invalid_text_representation THEN
+      -- If the role is invalid, default to participant
+      user_role := 'participant'::app_role;
+      RAISE WARNING 'Invalid role % provided for user %, defaulting to participant', user_role_text, NEW.id;
+  END;
+  
+  -- Log the role assignment attempt
+  RAISE NOTICE 'Assigning role % to user %', user_role, NEW.id;
+  
+  -- Insert the role with error handling
+  BEGIN
+    INSERT INTO user_roles (user_id, role)
+    VALUES (NEW.id, user_role)
+    ON CONFLICT (user_id, role) DO NOTHING;
+    
+    RAISE NOTICE 'Role % assigned successfully to user %', user_role, NEW.id;
+  EXCEPTION 
+    WHEN others THEN
+      RAISE WARNING 'Failed to assign role % to user %: %', user_role, NEW.id, SQLERRM;
+      -- Don't fail the user creation, just log the error
+  END;
   
   RETURN NEW;
 END;
