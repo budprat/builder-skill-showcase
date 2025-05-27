@@ -1,4 +1,3 @@
-
 -- Drop existing tables if they exist (be careful with this in production)
 DROP TABLE IF EXISTS user_badges CASCADE;
 DROP TABLE IF EXISTS badges CASCADE;

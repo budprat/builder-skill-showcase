@@ -212,7 +212,6 @@ export const AdminPanel = () => {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={awardMissingFirstSubmissionBadges}
               variant="outline"
               className="w-full"
             >

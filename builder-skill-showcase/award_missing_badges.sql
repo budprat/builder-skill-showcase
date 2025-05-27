@@ -1,4 +1,3 @@
-
 -- Script to award missing "First Steps" badges to users who have submitted but don't have the badge
 
 -- First, let's see who has submissions but no "First Steps" badge
