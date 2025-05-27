@@ -21,6 +21,8 @@ interface Challenge {
   submission_deadline: string;
   status: string;
   created_at: string;
+  image_url?: string;
+  image_urls?: any;
 }
 
 const Challenges = () => {
@@ -85,20 +87,20 @@ const Challenges = () => {
       domain.toLowerCase().includes(selectedDomain.toLowerCase())
     );
     const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
-    
+
     return matchesSearch && matchesDomain && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-500/20 text-green-300 border-green-500/30";
+        return "bg-green-100 text-green-800 border-green-200";
       case "judging":
-        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "completed":
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+        return "bg-gray-100 text-gray-700 border-gray-200";
       default:
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
+        return "bg-gray-100 text-gray-700 border-gray-200";
     }
   };
 
@@ -138,45 +140,45 @@ const Challenges = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center">
-          <div className="text-white text-lg">Loading challenges...</div>
+          <div className="text-gray-700 text-lg">Loading challenges...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">AI Building Challenges</h1>
-          <p className="text-white/80 text-lg">Showcase your AI product development skills and compete for prizes</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">AI Building Challenges</h1>
+          <p className="text-gray-600 text-lg">Showcase your AI product development skills and compete for prizes</p>
         </div>
 
         {/* Filters */}
         <div className="mb-8 space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-white/60" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search challenges, companies, or technologies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-blue-500"
               />
             </div>
             <select
               value={selectedDomain}
               onChange={(e) => setSelectedDomain(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+              className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:border-blue-500"
             >
               {domains.map(domain => (
-                <option key={domain.value} value={domain.value} className="bg-slate-900">
+                <option key={domain.value} value={domain.value} className="bg-white">
                   {domain.label}
                 </option>
               ))}
@@ -184,10 +186,10 @@ const Challenges = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white"
+              className="bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-900 focus:border-blue-500"
             >
               {statuses.map(status => (
-                <option key={status.value} value={status.value} className="bg-slate-900">
+                <option key={status.value} value={status.value} className="bg-white">
                   {status.label}
                 </option>
               ))}
@@ -197,7 +199,7 @@ const Challenges = () => {
 
         {/* Results Summary */}
         <div className="mb-6">
-          <p className="text-white/80">
+          <p className="text-gray-600">
             Showing {filteredChallenges.length} challenge{filteredChallenges.length !== 1 ? 's' : ''}
             {searchTerm && ` for "${searchTerm}"`}
           </p>
@@ -208,33 +210,50 @@ const Challenges = () => {
           {filteredChallenges.map((challenge) => {
             const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
-              <Card key={challenge.id} className="bg-white/10 border-white/20 hover:bg-white/15 transition-all cursor-pointer">
+              <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md">
+                {challenge.image_url && (
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                    <img
+                      src={challenge.image_url}
+                      alt={challenge.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load challenge image:', challenge.image_url);
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Challenge image loaded successfully:', challenge.image_url);
+                      }}
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <Badge className={getStatusColor(challenge.status)}>
                       {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-white">
+                      <div className="text-2xl font-bold text-gray-900">
                         {formatPrize(challenge.prize_amount)}
                       </div>
                       {challenge.prize_description && (
-                        <div className="text-white/60 text-sm">{challenge.prize_description}</div>
+                        <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
                       )}
                     </div>
                   </div>
-                  <CardTitle className="text-white text-xl mb-2">{challenge.title}</CardTitle>
-                  <CardDescription className="text-white/70">
+                  <CardTitle className="text-gray-900 text-xl mb-2 font-semibold">{challenge.title}</CardTitle>
+                  <CardDescription className="text-gray-600">
                     by {challenge.company_name || 'Anonymous'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-white/80">{challenge.description}</p>
-                  
+                  <p className="text-gray-700">{challenge.description}</p>
+
                   {challenge.domains && challenge.domains.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {challenge.domains.map((domain) => (
-                        <Badge key={domain} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                        <Badge key={domain} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
                           {domain}
                         </Badge>
                       ))}
@@ -242,11 +261,11 @@ const Challenges = () => {
                   )}
 
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center text-white/60">
+                    <div className="flex items-center text-gray-600">
                       <Calendar className="h-4 w-4 mr-2" />
                       Due: {formatDeadline(challenge.submission_deadline)}
                     </div>
-                    <div className="flex items-center text-white/60">
+                    <div className="flex items-center text-gray-600">
                       <Clock className="h-4 w-4 mr-2" />
                       {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
                     </div>
@@ -254,7 +273,7 @@ const Challenges = () => {
 
                   <div className="flex gap-2 pt-2">
                     <Button 
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
                       onClick={() => handleJoinChallenge(challenge.id)}
                     >
@@ -270,7 +289,7 @@ const Challenges = () => {
 
         {filteredChallenges.length === 0 && (
           <div className="text-center py-12">
-            <div className="text-white/60 text-lg">No challenges found matching your criteria.</div>
+            <div className="text-gray-600 text-lg">No challenges found matching your criteria.</div>
             <Button 
               onClick={() => {
                 setSearchTerm("");
@@ -278,7 +297,7 @@ const Challenges = () => {
                 setSelectedStatus("all");
               }}
               variant="outline" 
-              className="mt-4 border-white/20 text-white hover:bg-white/10"
+              className="mt-4 border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               Clear Filters
             </Button>

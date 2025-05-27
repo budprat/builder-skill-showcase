@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +26,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -38,6 +39,20 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     status: "active" as "active" | "draft" | "judging" | "completed",
     company_name: "",
     domains: "",
+    deliverables_repository: "",
+    deliverables_pitch_deck: "",
+    deliverables_demo_video: "",
+    evaluation_technical: "",
+    evaluation_innovation: "",
+    evaluation_presentation: "",
+    evaluation_practicality: "",
+    rules_participation: "",
+    rules_original_work: "",
+    rules_code_accessibility: "",
+    rules_deadline: "",
+    rules_judging_period: "",
+    image_url: "",
+    image_urls: [] as string[],
   });
 
   useEffect(() => {
@@ -55,6 +70,19 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       if (error) throw error;
       console.log('Fetched challenges count:', data?.length || 0);
       console.log('Challenge IDs:', data?.map(c => c.id) || []);
+      
+      // Log image URLs for debugging
+      data?.forEach(challenge => {
+        if (challenge.image_url || challenge.image_urls) {
+          console.log(`Challenge "${challenge.title}" images:`, {
+            image_url: challenge.image_url,
+            image_urls: challenge.image_urls,
+            image_urls_type: typeof challenge.image_urls,
+            image_urls_is_array: Array.isArray(challenge.image_urls)
+          });
+        }
+      });
+      
       setChallenges(data || []);
     } catch (error) {
       console.error('Error fetching challenges:', error);
@@ -70,51 +98,146 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setSubmitting(true);
+
     try {
       console.log('=== SUBMITTING CHALLENGE ===');
       console.log('Form data status:', formData.status);
-      
+
+      const deliverables = {
+        repository: formData.deliverables_repository,
+        pitch_deck: formData.deliverables_pitch_deck,
+        demo_video: formData.deliverables_demo_video,
+      };
+
+      const evaluation_rubric = {
+        technical_implementation: formData.evaluation_technical ? parseInt(formData.evaluation_technical) : null,
+        innovation: formData.evaluation_innovation ? parseInt(formData.evaluation_innovation) : null,
+        presentation: formData.evaluation_presentation ? parseInt(formData.evaluation_presentation) : null,
+        practicality: formData.evaluation_practicality ? parseInt(formData.evaluation_practicality) : null,
+      };
+
       const challengeData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        problem_statement: formData.problem_statement,
         prize_amount: formData.prize_amount ? parseInt(formData.prize_amount) : null,
-        domains: formData.domains.split(',').map(d => d.trim()).filter(Boolean),
-        deliverables: {},
-        evaluation_rubric: {},
-        status: formData.status, // Ensure status is explicitly set
+        prize_description: formData.prize_description,
+        submission_deadline: formData.submission_deadline,
+        status: formData.status,
+        company_name: formData.company_name,
+        domains: formData.domains.split(',').map(d => d.trim()).filter(d => d.length > 0),
+        deliverables: deliverables,
+        evaluation_rubric: evaluation_rubric,
+        image_url: formData.image_url || null,
+        image_urls: formData.image_urls,
       };
 
       console.log('Challenge data being sent:', challengeData);
 
       if (editingChallenge) {
         console.log('Updating challenge with ID:', editingChallenge.id);
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('challenges')
           .update(challengeData)
-          .eq('id', editingChallenge.id);
+          .eq('id', editingChallenge.id)
+          .select();
 
         if (error) {
-          console.error('Update error:', error);
+          console.error('Supabase error:', error);
           throw error;
         }
-        toast({ title: "Success", description: "Challenge updated successfully" });
+
+        console.log('Challenge saved successfully:', data);
+
+        onStatsUpdate();
+        setIsDialogOpen(false);
+        resetForm();
+        fetchChallenges();
+
+        toast({
+          title: "Success",
+          description: editingChallenge ? "Challenge updated successfully" : "Challenge created successfully",
+        });
       } else {
         console.log('Creating new challenge');
-        const { error } = await supabase
+        const { error, data } = await supabase
           .from('challenges')
-          .insert([challengeData]);
+          .insert([challengeData])
+          .select();
 
         if (error) {
-          console.error('Insert error:', error);
+          console.error('Supabase error:', error);
           throw error;
         }
-        toast({ title: "Success", description: "Challenge created successfully" });
-      }
 
-      setIsDialogOpen(false);
-      resetForm();
-      fetchChallenges();
-      onStatsUpdate();
+        console.log('Challenge saved successfully:', data);
+
+        // Create rules and guidelines for new challenges
+        if (!editingChallenge && data && data.length > 0) {
+          const challengeId = data[0].id;
+          const rulesData = [
+            {
+              challenge_id: challengeId,
+              rule_type: 'participation',
+              title: 'Solo/Team Participation',
+              description: formData.rules_participation,
+              is_mandatory: true,
+              order_index: 1
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'submission',
+              title: 'Original Work Required',
+              description: formData.rules_original_work,
+              is_mandatory: true,
+              order_index: 2
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'technical',
+              title: 'Code Accessibility',
+              description: formData.rules_code_accessibility,
+              is_mandatory: true,
+              order_index: 3
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'submission',
+              title: 'Deadline Compliance',
+              description: formData.rules_deadline,
+              is_mandatory: true,
+              order_index: 4
+            },
+            {
+              challenge_id: challengeId,
+              rule_type: 'judging',
+              title: 'Judging Period',
+              description: formData.rules_judging_period,
+              is_mandatory: false,
+              order_index: 5
+            }
+          ];
+
+          const { error: rulesError } = await supabase
+            .from('rules_guidelines')
+            .insert(rulesData);
+
+          if (rulesError) {
+            console.error('Error creating rules:', rulesError);
+          }
+        }
+
+        onStatsUpdate();
+        setIsDialogOpen(false);
+        resetForm();
+        fetchChallenges();
+
+        toast({
+          title: "Success",
+          description: editingChallenge ? "Challenge updated successfully" : "Challenge created successfully",
+        });
+      }
     } catch (error: any) {
       console.error('Error saving challenge:', error);
       toast({
@@ -122,7 +245,87 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
         description: error.message || "Failed to save challenge",
         variant: "destructive",
       });
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    setUploadingImage(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Must be logged in to upload images');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `challenges/${Date.now()}_${Math.random()}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('user-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('user-files')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error: any) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload image",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handlePrimaryImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const imageUrl = await handleImageUpload(file);
+      setFormData(prev => ({ ...prev, image_url: imageUrl }));
+      toast({
+        title: "Success",
+        description: "Primary image uploaded successfully",
+      });
+    } catch (error) {
+      // Error already handled in handleImageUpload
+    }
+  };
+
+  const handleAdditionalImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    try {
+      const uploadPromises = files.map(file => handleImageUpload(file));
+      const imageUrls = await Promise.all(uploadPromises);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        image_urls: [...prev.image_urls, ...imageUrls] 
+      }));
+      
+      toast({
+        title: "Success",
+        description: `${files.length} additional image(s) uploaded successfully`,
+      });
+    } catch (error) {
+      // Error already handled in handleImageUpload
+    }
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      image_urls: prev.image_urls.filter((_, i) => i !== index)
+    }));
   };
 
   const resetForm = () => {
@@ -133,25 +336,56 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       prize_amount: "",
       prize_description: "",
       submission_deadline: "",
-      status: "active" as "active" | "draft" | "judging" | "completed",
+      status: "active",
       company_name: "",
       domains: "",
+      deliverables_repository: "",
+      deliverables_pitch_deck: "",
+      deliverables_demo_video: "",
+      evaluation_technical: "",
+      evaluation_innovation: "",
+      evaluation_presentation: "",
+      evaluation_practicality: "",
+      rules_participation: "",
+      rules_original_work: "",
+      rules_code_accessibility: "",
+      rules_deadline: "",
+      rules_judging_period: "",
+      image_url: "",
+      image_urls: [],
     });
     setEditingChallenge(null);
   };
 
   const handleEdit = (challenge: Challenge) => {
     setEditingChallenge(challenge);
+    const deliverables = challenge.deliverables || {};
+    const evaluation = challenge.evaluation_rubric || {};
+
     setFormData({
       title: challenge.title,
       description: challenge.description,
-      problem_statement: challenge.problem_statement,
+      problem_statement: challenge.problem_statement || "",
       prize_amount: challenge.prize_amount?.toString() || "",
       prize_description: challenge.prize_description || "",
-      submission_deadline: challenge.submission_deadline.split('T')[0],
-      status: (challenge.status || "active") as "active" | "draft" | "judging" | "completed",
+      submission_deadline: challenge.submission_deadline.split('T')[0], // Format for date input
+      status: challenge.status as "active" | "draft" | "judging" | "completed",
       company_name: challenge.company_name || "",
-      domains: challenge.domains?.join(', ') || "",
+      domains: Array.isArray(challenge.domains) ? challenge.domains.join(", ") : "",
+      deliverables_repository: deliverables.repository || "",
+      deliverables_pitch_deck: deliverables.pitch_deck || "",
+      deliverables_demo_video: deliverables.demo_video || "",
+      evaluation_technical: evaluation.technical_implementation?.toString() || "",
+      evaluation_innovation: evaluation.innovation?.toString() || "",
+      evaluation_presentation: evaluation.presentation?.toString() || "",
+      evaluation_practicality: evaluation.practicality?.toString() || "",
+      rules_participation: "",
+      rules_original_work: "",
+      rules_code_accessibility: "",
+      rules_deadline: "",
+      rules_judging_period: "",
+      image_url: challenge.image_url || "",
+      image_urls: Array.isArray(challenge.image_urls) ? challenge.image_urls : [],
     });
     setIsDialogOpen(true);
   };
@@ -160,13 +394,13 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     console.log('*** DELETE BUTTON CLICKED ***');
     console.log('Challenge ID from click:', challengeId);
     console.log('Current deletingId state:', deletingId);
-    
+
     // Don't proceed if already deleting
     if (deletingId === challengeId) {
       console.log('Already deleting this challenge, ignoring click');
       return;
     }
-    
+
     console.log('Proceeding with deletion...');
     handleDelete(challengeId);
   };
@@ -175,9 +409,9 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     console.log('=== STARTING CHALLENGE DELETION ===');
     console.log('Challenge ID to delete:', id);
     console.log('Supabase client exists:', !!supabase);
-    
+
     setDeletingId(id);
-    
+
     try {
       // Step 1: Check current user session
       console.log('Step 1: Checking authentication...');
@@ -243,13 +477,13 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
         console.error('Error deleting challenge:', challengeDeleteError);
         throw new Error('Failed to delete challenge: ' + challengeDeleteError.message);
       }
-      
+
       console.log('=== CHALLENGE DELETION SUCCESSFUL ===');
       toast({ 
         title: "Success", 
         description: "Challenge and related submissions deleted successfully" 
       });
-      
+
       console.log('=== REFRESHING UI ===');
       await fetchChallenges();
       console.log('=== CALLING STATS UPDATE ===');
@@ -310,23 +544,13 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="problem_statement">Problem Statement</Label>
-                  <Textarea
-                    id="problem_statement"
-                    value={formData.problem_statement}
-                    onChange={(e) => setFormData({...formData, problem_statement: e.target.value})}
                     required
                   />
                 </div>
@@ -341,7 +565,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                       onChange={(e) => setFormData({...formData, prize_amount: e.target.value})}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="submission_deadline">Submission Deadline</Label>
                     <Input
@@ -369,39 +593,229 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                     id="domains"
                     value={formData.domains}
                     onChange={(e) => setFormData({...formData, domains: e.target.value})}
-                    placeholder="AI, Machine Learning, Data Science"
+                    placeholder="AI, Machine Learning, Computer Vision"
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select 
-                    value={formData.status} 
-                    onValueChange={(value: "active" | "draft" | "judging" | "completed") => {
-                      console.log('Status selected:', value);
-                      setFormData({...formData, status: value});
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="judging">Judging</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div>
+                    <Label htmlFor="problem_statement">Problem Statement</Label>
+                    <Textarea
+                      id="problem_statement"
+                      value={formData.problem_statement}
+                      onChange={(e) => setFormData({...formData, problem_statement: e.target.value})}
+                      placeholder="Describe the specific problem participants need to solve..."
+                      rows={4}
+                    />
+                  </div>
 
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingChallenge ? 'Update' : 'Create'}
-                  </Button>
-                </div>
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Required Deliverables</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <Label htmlFor="deliverables_repository">Repository Requirements</Label>
+                        <Input
+                          id="deliverables_repository"
+                          value={formData.deliverables_repository}
+                          onChange={(e) => setFormData({...formData, deliverables_repository: e.target.value})}
+                          placeholder="Complete source code with training scripts"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="deliverables_pitch_deck">Pitch Deck Requirements</Label>
+                        <Input
+                          id="deliverables_pitch_deck"
+                          value={formData.deliverables_pitch_deck}
+                          onChange={(e) => setFormData({...formData, deliverables_pitch_deck: e.target.value})}
+                          placeholder="5-10 slide presentation"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="deliverables_demo_video">Demo Video Requirements</Label>
+                        <Input
+                          id="deliverables_demo_video"
+                          value={formData.deliverables_demo_video}
+                          onChange={(e) => setFormData({...formData, deliverables_demo_video: e.target.value})}
+                          placeholder="3-5 minute demonstration"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Evaluation Criteria (percentages must add up to 100)</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="evaluation_technical">Technical Implementation (%)</Label>
+                        <Input
+                          id="evaluation_technical"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.evaluation_technical}
+                          onChange={(e) => setFormData({...formData, evaluation_technical: e.target.value})}
+                          placeholder="40"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="evaluation_innovation">Innovation (%)</Label>
+                        <Input
+                          id="evaluation_innovation"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.evaluation_innovation}
+                          onChange={(e) => setFormData({...formData, evaluation_innovation: e.target.value})}
+                          placeholder="25"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="evaluation_presentation">Presentation (%)</Label>
+                        <Input
+                          id="evaluation_presentation"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.evaluation_presentation}
+                          onChange={(e) => setFormData({...formData, evaluation_presentation: e.target.value})}
+                          placeholder="20"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="evaluation_practicality">Practicality (%)</Label>
+                        <Input
+                          id="evaluation_practicality"
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={formData.evaluation_practicality}
+                          onChange={(e) => setFormData({...formData, evaluation_practicality: e.target.value})}
+                          placeholder="15"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Challenge Images</Label>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label htmlFor="primary_image">Primary Challenge Image</Label>
+                        <Input
+                          id="primary_image"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePrimaryImageChange}
+                          disabled={uploadingImage}
+                        />
+                        {formData.image_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={formData.image_url} 
+                              alt="Primary challenge" 
+                              className="w-32 h-32 object-cover rounded border"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="additional_images">Additional Images (Optional)</Label>
+                        <Input
+                          id="additional_images"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleAdditionalImageChange}
+                          disabled={uploadingImage}
+                        />
+                        {formData.image_urls.length > 0 && (
+                          <div className="mt-2 grid grid-cols-4 gap-2">
+                            {formData.image_urls.map((url, index) => (
+                              <div key={index} className="relative">
+                                <img 
+                                  src={url} 
+                                  alt={`Additional ${index + 1}`} 
+                                  className="w-20 h-20 object-cover rounded border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                  onClick={() => removeAdditionalImage(index)}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {uploadingImage && (
+                      <p className="text-sm text-blue-600">Uploading image(s)...</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Rules and Guidelines</Label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div>
+                        <Label htmlFor="rules_participation">Solo/Team Participation</Label>
+                        <Textarea
+                          id="rules_participation"
+                          value={formData.rules_participation}
+                          onChange={(e) => setFormData({...formData, rules_participation: e.target.value})}
+                          placeholder="Specify if solo or team participation is allowed, and team size limit"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_original_work">Original Work Required</Label>
+                        <Textarea
+                          id="rules_original_work"
+                          value={formData.rules_original_work}
+                          onChange={(e) => setFormData({...formData, rules_original_work: e.target.value})}
+                          placeholder="State that only original work is accepted"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_code_accessibility">Code Must Be Publicly Accessible</Label>
+                        <Textarea
+                          id="rules_code_accessibility"
+                          value={formData.rules_code_accessibility}
+                          onChange={(e) => setFormData({...formData, rules_code_accessibility: e.target.value})}
+                          placeholder="Specify that code must be publicly accessible"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_deadline">All Deliverables Must Be Submitted By Deadline</Label>
+                        <Textarea
+                          id="rules_deadline"
+                          value={formData.rules_deadline}
+                          onChange={(e) => setFormData({...formData, rules_deadline: e.target.value})}
+                          placeholder="State that all deliverables must be submitted by the deadline"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="rules_judging_period">Judging Period: 1-2 weeks after deadline</Label>
+                        <Textarea
+                          id="rules_judging_period"
+                          value={formData.rules_judging_period}
+                          onChange={(e) => setFormData({...formData, rules_judging_period: e.target.value})}
+                          placeholder="Specify the judging period"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={submitting}>
+                      {submitting ? "Saving..." : editingChallenge ? "Update Challenge" : "Create Challenge"}
+                    </Button>
+                  </div>
               </form>
             </DialogContent>
           </Dialog>

@@ -49,6 +49,8 @@ export type Database = {
           domains: string[]
           evaluation_rubric: Json
           id: string
+          image_url: string | null
+          image_urls: Json | null
           prize_amount: number | null
           prize_description: string | null
           problem_statement: string
@@ -69,6 +71,8 @@ export type Database = {
           domains: string[]
           evaluation_rubric?: Json
           id?: string
+          image_url?: string | null
+          image_urls?: Json | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement: string
@@ -89,6 +93,8 @@ export type Database = {
           domains?: string[]
           evaluation_rubric?: Json
           id?: string
+          image_url?: string | null
+          image_urls?: Json | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement?: string
@@ -211,6 +217,50 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      rules_guidelines: {
+        Row: {
+          id: string
+          challenge_id: string
+          rule_type: string
+          title: string
+          description: string
+          is_mandatory: boolean
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          challenge_id: string
+          rule_type: string
+          title: string
+          description: string
+          is_mandatory?: boolean
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          challenge_id?: string
+          rule_type?: string
+          title?: string
+          description?: string
+          is_mandatory?: boolean
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rules_guidelines_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       submissions: {
         Row: {
