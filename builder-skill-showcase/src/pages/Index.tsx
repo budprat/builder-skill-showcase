@@ -90,7 +90,7 @@ const Index = () => {
       <Header />
 
       {/* Hero Section - Foundry of Future AI Leaders */}
-      <section className="relative py-8 md:py-12 px-4">
+      <section className="relative py-6 md:py-8 px-4">
         <div className="container mx-auto text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3 leading-tight animate-fade-in">
@@ -100,7 +100,7 @@ const Index = () => {
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 mb-5 leading-relaxed max-w-3xl mx-auto animate-fade-in">
+            <p className="text-lg md:text-xl text-gray-600 mb-4 leading-relaxed max-w-3xl mx-auto animate-fade-in">
               Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
               build cutting-edge prototypes, and shape the next generation of AI applications.
             </p>
@@ -128,17 +128,17 @@ const Index = () => {
       </section>
 
       {/* Featured Challenges Section - Moved here */}
-      <section className="section-spacing px-4 bg-white border-t border-gray-200">
+      <section className="py-8 md:py-12 px-4 bg-white border-t border-gray-200">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Challenges</h2>
-            <p className="text-xl text-gray-600">Discover the most exciting AI building opportunities</p>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Featured Challenges</h2>
+            <p className="text-lg text-gray-600">Discover the most exciting AI building opportunities</p>
           </div>
 
           {loadingChallenges ? (
             <div className="text-center text-gray-600">Loading challenges...</div>
           ) : featuredChallenges.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {featuredChallenges.map((challenge) => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
@@ -158,20 +158,20 @@ const Index = () => {
                         console.log('Featured challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
-                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200">
+                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200 text-xs">
                       Active
                     </Badge>
                   </div>
                 )}
-                <CardHeader>
-                      <div className="flex items-start justify-between mb-2">
+                <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between mb-1">
                         {!challenge.image_url && (
-                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                          <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
                             Active
                           </Badge>
                         )}
                         <div className="text-right ml-auto">
-                          <div className="text-xl font-bold text-gray-900">
+                          <div className="text-lg font-bold text-gray-900">
                             {formatPrize(challenge.prize_amount)}
                           </div>
                           {challenge.prize_description && (
@@ -179,43 +179,44 @@ const Index = () => {
                           )}
                         </div>
                       </div>
-                      <CardTitle className="text-gray-900 text-lg mb-2 font-semibold group-hover:text-blue-600 transition-colors">
+                      <CardTitle className="text-gray-900 text-base mb-1 font-semibold group-hover:text-blue-600 transition-colors">
                         {challenge.title}
                       </CardTitle>
-                      <CardDescription className="text-gray-600">
+                      <CardDescription className="text-gray-600 text-sm">
                         by {challenge.company_name || 'Anonymous'}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-3 pt-0">
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {challenge.domains.slice(0, 2).map((domain, index) => (
-                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-2 py-1">
                               {domain}
                             </Badge>
                           ))}
                           {challenge.domains.length > 2 && (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs px-2 py-1">
                               +{challenge.domains.length - 2} more
                             </Badge>
                           )}
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-2 gap-3 text-xs">
                         <div className="flex items-center text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2" />
+                          <Calendar className="h-3 w-3 mr-1" />
                           Due: {formatDeadline(challenge.submission_deadline)}
                         </div>
                         <div className="flex items-center text-gray-600">
-                          <Clock className="h-4 w-4 mr-2" />
+                          <Clock className="h-3 w-3 mr-1" />
                           {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
                         </div>
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-1">
                         <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                          size="sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/challenges/${challenge.id}`);
