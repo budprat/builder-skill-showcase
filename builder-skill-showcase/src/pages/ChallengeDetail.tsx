@@ -32,6 +32,8 @@ interface Challenge {
   problem_statement?: string;
   evaluation_rubric?: any;
   deliverables?: any;
+  image_url?: string;
+  image_urls?: any;
 }
 
 interface Submission {
@@ -328,7 +330,7 @@ const ChallengeDetail = () => {
             </Card>
 
             {/* Challenge Images */}
-            {(challenge.image_url || (challenge.image_urls && challenge.image_urls.length > 0)) && (
+            {(challenge.image_url || (challenge.image_urls && Array.isArray(challenge.image_urls) && challenge.image_urls.length > 0)) && (
               <Card className="bg-white border-gray-200">
                 <CardHeader>
                   <CardTitle className="text-gray-900">Challenge Images</CardTitle>
@@ -340,11 +342,15 @@ const ChallengeDetail = () => {
                         src={challenge.image_url} 
                         alt={challenge.title}
                         className="w-full max-w-md h-64 object-cover rounded-lg border shadow-sm"
+                        onError={(e) => {
+                          console.error('Failed to load primary image:', challenge.image_url);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}
                   
-                  {challenge.image_urls && challenge.image_urls.length > 0 && (
+                  {challenge.image_urls && Array.isArray(challenge.image_urls) && challenge.image_urls.length > 0 && (
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-2">Additional Images</h4>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -355,6 +361,10 @@ const ChallengeDetail = () => {
                             alt={`${challenge.title} - Image ${index + 1}`}
                             className="w-full h-32 object-cover rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-shadow"
                             onClick={() => window.open(url, '_blank')}
+                            onError={(e) => {
+                              console.error('Failed to load additional image:', url);
+                              e.currentTarget.style.display = 'none';
+                            }}
                           />
                         ))}
                       </div>

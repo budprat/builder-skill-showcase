@@ -72,7 +72,7 @@ export type Database = {
           evaluation_rubric?: Json
           id?: string
           image_url?: string | null
-          image_urls?: string[] | null
+          image_urls?: Json | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement: string
@@ -94,7 +94,7 @@ export type Database = {
           evaluation_rubric?: Json
           id?: string
           image_url?: string | null
-          image_urls?: string[] | null
+          image_urls?: Json | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement?: string

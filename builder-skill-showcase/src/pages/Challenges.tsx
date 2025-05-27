@@ -22,6 +22,7 @@ interface Challenge {
   status: string;
   created_at: string;
   image_url?: string;
+  image_urls?: any;
 }
 
 const Challenges = () => {
@@ -216,6 +217,10 @@ const Challenges = () => {
                       src={challenge.image_url} 
                       alt={challenge.title}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load challenge image:', challenge.image_url);
+                        e.currentTarget.parentElement!.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
