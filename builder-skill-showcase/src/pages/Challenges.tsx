@@ -206,7 +206,7 @@ const Challenges = () => {
         </div>
 
         {/* Challenge Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredChallenges.map((challenge) => {
             const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
@@ -228,52 +228,57 @@ const Challenges = () => {
                     />
                   </div>
                 )}
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between mb-2">
                     <Badge className={getStatusColor(challenge.status)}>
                       {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">
+                      <div className="text-lg font-bold text-gray-900">
                         {formatPrize(challenge.prize_amount)}
                       </div>
                       {challenge.prize_description && (
-                        <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
+                        <div className="text-gray-600 text-xs">{challenge.prize_description}</div>
                       )}
                     </div>
                   </div>
-                  <CardTitle className="text-gray-900 text-xl mb-2 font-semibold">{challenge.title}</CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardTitle className="text-gray-900 text-lg mb-1 font-semibold line-clamp-2">{challenge.title}</CardTitle>
+                  <CardDescription className="text-gray-600 text-sm">
                     by {challenge.company_name || 'Anonymous'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-gray-700">{challenge.description}</p>
+                <CardContent className="space-y-3 pt-0">
+                  <p className="text-gray-700 text-sm line-clamp-3">{challenge.description}</p>
 
                   {challenge.domains && challenge.domains.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {challenge.domains.map((domain) => (
-                        <Badge key={domain} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                    <div className="flex flex-wrap gap-1">
+                      {challenge.domains.slice(0, 3).map((domain) => (
+                        <Badge key={domain} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
                           {domain}
                         </Badge>
                       ))}
+                      {challenge.domains.length > 3 && (
+                        <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
+                          +{challenge.domains.length - 3}
+                        </Badge>
+                      )}
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-2 text-xs">
                     <div className="flex items-center text-gray-600">
-                      <Calendar className="h-4 w-4 mr-2" />
+                      <Calendar className="h-3 w-3 mr-1" />
                       Due: {formatDeadline(challenge.submission_deadline)}
                     </div>
                     <div className="flex items-center text-gray-600">
-                      <Clock className="h-4 w-4 mr-2" />
+                      <Clock className="h-3 w-3 mr-1" />
                       {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-2">
+                  <div className="pt-2">
                     <Button 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
                       onClick={() => handleJoinChallenge(challenge.id)}
                     >
