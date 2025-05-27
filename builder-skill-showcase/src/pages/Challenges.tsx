@@ -21,6 +21,7 @@ interface Challenge {
   submission_deadline: string;
   status: string;
   created_at: string;
+  image_url?: string;
 }
 
 const Challenges = () => {
@@ -85,7 +86,7 @@ const Challenges = () => {
       domain.toLowerCase().includes(selectedDomain.toLowerCase())
     );
     const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
-    
+
     return matchesSearch && matchesDomain && matchesStatus;
   });
 
@@ -209,6 +210,15 @@ const Challenges = () => {
             const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
               <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md">
+                {challenge.image_url && (
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                    <img 
+                      src={challenge.image_url} 
+                      alt={challenge.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <Badge className={getStatusColor(challenge.status)}>
@@ -230,7 +240,7 @@ const Challenges = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-gray-700">{challenge.description}</p>
-                  
+
                   {challenge.domains && challenge.domains.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {challenge.domains.map((domain) => (

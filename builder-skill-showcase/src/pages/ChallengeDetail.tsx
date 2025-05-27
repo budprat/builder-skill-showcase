@@ -327,6 +327,43 @@ const ChallengeDetail = () => {
               </CardHeader>
             </Card>
 
+            {/* Challenge Images */}
+            {(challenge.image_url || (challenge.image_urls && challenge.image_urls.length > 0)) && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Challenge Images</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {challenge.image_url && (
+                    <div>
+                      <img 
+                        src={challenge.image_url} 
+                        alt={challenge.title}
+                        className="w-full max-w-md h-64 object-cover rounded-lg border shadow-sm"
+                      />
+                    </div>
+                  )}
+                  
+                  {challenge.image_urls && challenge.image_urls.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-2">Additional Images</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {challenge.image_urls.map((url: string, index: number) => (
+                          <img 
+                            key={index}
+                            src={url} 
+                            alt={`${challenge.title} - Image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => window.open(url, '_blank')}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Challenge Description */}
             <Card className="bg-white border-gray-200">
               <CardHeader>

@@ -49,6 +49,8 @@ export type Database = {
           domains: string[]
           evaluation_rubric: Json
           id: string
+          image_url: string | null
+          image_urls: string[] | null
           prize_amount: number | null
           prize_description: string | null
           problem_statement: string
@@ -69,6 +71,8 @@ export type Database = {
           domains: string[]
           evaluation_rubric?: Json
           id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement: string
@@ -89,6 +93,8 @@ export type Database = {
           domains?: string[]
           evaluation_rubric?: Json
           id?: string
+          image_url?: string | null
+          image_urls?: string[] | null
           prize_amount?: number | null
           prize_description?: string | null
           problem_statement?: string

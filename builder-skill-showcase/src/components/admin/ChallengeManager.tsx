@@ -27,6 +27,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -50,6 +51,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     rules_code_accessibility: "",
     rules_deadline: "",
     rules_judging_period: "",
+    image_url: "",
+    image_urls: [] as string[],
   });
 
   useEffect(() => {
@@ -113,6 +116,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
         domains: formData.domains.split(',').map(d => d.trim()).filter(d => d.length > 0),
         deliverables: deliverables,
         evaluation_rubric: evaluation_rubric,
+        image_url: formData.image_url || null,
+        image_urls: formData.image_urls,
       };
 
       console.log('Challenge data being sent:', challengeData);
@@ -232,6 +237,84 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     }
   };
 
+  const handleImageUpload = async (file: File): Promise<string> => {
+    setUploadingImage(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Must be logged in to upload images');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `challenges/${Date.now()}_${Math.random()}.${fileExt}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('user-files')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('user-files')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error: any) {
+      console.error('Image upload error:', error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload image",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handlePrimaryImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const imageUrl = await handleImageUpload(file);
+      setFormData(prev => ({ ...prev, image_url: imageUrl }));
+      toast({
+        title: "Success",
+        description: "Primary image uploaded successfully",
+      });
+    } catch (error) {
+      // Error already handled in handleImageUpload
+    }
+  };
+
+  const handleAdditionalImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
+
+    try {
+      const uploadPromises = files.map(file => handleImageUpload(file));
+      const imageUrls = await Promise.all(uploadPromises);
+      
+      setFormData(prev => ({ 
+        ...prev, 
+        image_urls: [...prev.image_urls, ...imageUrls] 
+      }));
+      
+      toast({
+        title: "Success",
+        description: `${files.length} additional image(s) uploaded successfully`,
+      });
+    } catch (error) {
+      // Error already handled in handleImageUpload
+    }
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      image_urls: prev.image_urls.filter((_, i) => i !== index)
+    }));
+  };
+
   const resetForm = () => {
     setFormData({
       title: "",
@@ -255,6 +338,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       rules_code_accessibility: "",
       rules_deadline: "",
       rules_judging_period: "",
+      image_url: "",
+      image_urls: [],
     });
     setEditingChallenge(null);
   };
@@ -286,6 +371,8 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       rules_code_accessibility: "",
       rules_deadline: "",
       rules_judging_period: "",
+      image_url: challenge.image_url || "",
+      image_urls: Array.isArray(challenge.image_urls) ? challenge.image_urls : [],
     });
     setIsDialogOpen(true);
   };
@@ -593,6 +680,68 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-base font-semibold">Challenge Images</Label>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Label htmlFor="primary_image">Primary Challenge Image</Label>
+                        <Input
+                          id="primary_image"
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePrimaryImageChange}
+                          disabled={uploadingImage}
+                        />
+                        {formData.image_url && (
+                          <div className="mt-2">
+                            <img 
+                              src={formData.image_url} 
+                              alt="Primary challenge" 
+                              className="w-32 h-32 object-cover rounded border"
+                            />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="additional_images">Additional Images (Optional)</Label>
+                        <Input
+                          id="additional_images"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleAdditionalImageChange}
+                          disabled={uploadingImage}
+                        />
+                        {formData.image_urls.length > 0 && (
+                          <div className="mt-2 grid grid-cols-4 gap-2">
+                            {formData.image_urls.map((url, index) => (
+                              <div key={index} className="relative">
+                                <img 
+                                  src={url} 
+                                  alt={`Additional ${index + 1}`} 
+                                  className="w-20 h-20 object-cover rounded border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                  onClick={() => removeAdditionalImage(index)}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {uploadingImage && (
+                      <p className="text-sm text-blue-600">Uploading image(s)...</p>
+                    )}
                   </div>
 
                   <div className="space-y-4">
