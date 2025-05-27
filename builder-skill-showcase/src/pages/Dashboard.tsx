@@ -406,12 +406,20 @@ const Dashboard = () => {
                   
                   <div>
                     <Label htmlFor="experience_level">Experience Level</Label>
-                    <Input
+                    <select
                       id="experience_level"
                       value={profileData.experience_level}
                       onChange={(e) => setProfileData({...profileData, experience_level: e.target.value})}
-                      placeholder="e.g., Junior, Mid-level, Senior"
-                    />
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select experience level</option>
+                      <option value="entry">Entry Level</option>
+                      <option value="junior">Junior</option>
+                      <option value="mid">Mid Level</option>
+                      <option value="senior">Senior</option>
+                      <option value="lead">Lead</option>
+                      <option value="principal">Principal</option>
+                    </select>
                   </div>
                 </div>
 
