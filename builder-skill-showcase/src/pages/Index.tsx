@@ -20,6 +20,7 @@ interface Challenge {
   submission_deadline: string;
   status: string;
   created_at: string;
+  image_url: string;
 }
 
 const Index = () => {
@@ -149,7 +150,24 @@ const Index = () => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
                   <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
-                    <CardHeader>
+                {challenge.image_url && (
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                    <img
+                      src={challenge.image_url}
+                      alt={challenge.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load featured challenge image:', challenge.image_url);
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Featured challenge image loaded successfully:', challenge.image_url);
+                      }}
+                    />
+                  </div>
+                )}
+                <CardHeader>
                       <div className="flex items-start justify-between mb-2">
                         <Badge className="bg-green-100 text-green-800 border-green-200">
                           Active
