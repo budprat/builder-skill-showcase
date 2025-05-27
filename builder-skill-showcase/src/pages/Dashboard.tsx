@@ -14,6 +14,7 @@ import { User, FileText, Trophy, Upload, Trash2, Edit, Eye, Settings, MapPin, Gi
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
+import { BadgeCollection } from "@/components/badges/BadgeCollection";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -376,6 +377,13 @@ const Dashboard = () => {
                       Submissions ({submissions.length})
                     </TabsTrigger>
                     <TabsTrigger 
+                      value="badges" 
+                      className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
+                    >
+                      <Trophy className="h-4 w-4 mr-2" />
+                      Badges
+                    </TabsTrigger>
+                    <TabsTrigger 
                       value="files" 
                       className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
                     >
@@ -513,6 +521,11 @@ const Dashboard = () => {
                         </div>
                       </div>
                     )}
+
+                    {/* Recent Badges */}
+                    <div>
+                      <BadgeCollection userId={user.id} showTitle={true} compact={true} />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -904,6 +917,10 @@ const Dashboard = () => {
                     </div>
                   </DialogContent>
                 </Dialog>
+              </TabsContent>
+
+              <TabsContent value="badges" className="mt-0">
+                <BadgeCollection userId={user.id} />
               </TabsContent>
 
               <TabsContent value="files" className="mt-0">

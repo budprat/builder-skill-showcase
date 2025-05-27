@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
+import { useBadges } from "@/hooks/useBadges";
 
 interface Challenge {
   id: string;
@@ -65,6 +66,7 @@ const ChallengeDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkAndAwardBadges } = useBadges();
 
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -181,6 +183,18 @@ const ChallengeDetail = () => {
         description: "Your submission has been submitted successfully!",
       });
 
+      // Check if this is user's first submission
+      const { data: previousSubmissions } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('participant_id', user.id);
+
+      if (!previousSubmissions || previousSubmissions.length === 1) {
+        await checkAndAwardBadges(user.id, 'first_submission', {
+          challengeId: challenge.id
+        });
+      }
+
       setIsDialogOpen(false);
       setFormData({
         repository_url: "",
@@ -287,100 +301,51 @@ const ChallengeDetail = () => {
           </Button>
         </div>
 
+        {/* Main Content with Challenge Header */}
+        <div className="mb-6">
+          {/* Challenge Header */}
+          <Card className="bg-white border-gray-200">
+            <CardHeader>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Badge className={getStatusColor(challenge.status)}>
+                    {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+                  </Badge>
+                  {daysLeft > 0 && (
+                    <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
+                      {daysLeft} days left
+                    </Badge>
+                  )}
+                  {isExpired && (
+                    <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50">
+                      Deadline passed
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-gray-900">
+                    {formatPrize(challenge.prize_amount)}
+                  </div>
+                  {challenge.prize_description && (
+                    <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
+                  )}
+                </div>
+              </div>
+
+              <CardTitle className="text-3xl text-gray-900 font-bold mb-2">{challenge.title}</CardTitle>
+              <CardDescription className="text-lg text-gray-600">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  by {challenge.company_name || 'Anonymous'}
+                </div>
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Challenge Header */}
-            <Card className="bg-white border-gray-200">
-              <CardHeader>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Badge className={getStatusColor(challenge.status)}>
-                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
-                    </Badge>
-                    {daysLeft > 0 && (
-                      <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
-                        {daysLeft} days left
-                      </Badge>
-                    )}
-                    {isExpired && (
-                      <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50">
-                        Deadline passed
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-gray-900">
-                      {formatPrize(challenge.prize_amount)}
-                    </div>
-                    {challenge.prize_description && (
-                      <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
-                    )}
-                  </div>
-                </div>
-
-                <CardTitle className="text-3xl text-gray-900 font-bold mb-2">{challenge.title}</CardTitle>
-                <CardDescription className="text-lg text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    by {challenge.company_name || 'Anonymous'}
-                  </div>
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Challenge Images */}
-            {(challenge.image_url || (challenge.image_urls && Array.isArray(challenge.image_urls) && challenge.image_urls.length > 0)) && (
-              <Card className="bg-white border-gray-200">
-                <CardHeader>
-                  <CardTitle className="text-gray-900">Challenge Images</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {challenge.image_url && (
-                    <div>
-                      <img 
-                        src={challenge.image_url} 
-                        alt={challenge.title}
-                        className="w-full max-w-md h-64 object-cover rounded-lg border shadow-sm"
-                        onError={(e) => {
-                          console.error('Failed to load primary image:', challenge.image_url);
-                          const target = e.currentTarget as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                        onLoad={() => {
-                          console.log('Primary image loaded successfully:', challenge.image_url);
-                        }}
-                      />
-                    </div>
-                  )}
-                  
-                  {challenge.image_urls && Array.isArray(challenge.image_urls) && challenge.image_urls.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-2">Additional Images</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {challenge.image_urls.map((url: string, index: number) => (
-                          <img 
-                            key={index}
-                            src={url} 
-                            alt={`${challenge.title} - Image ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg border shadow-sm cursor-pointer hover:shadow-md transition-shadow"
-                            onClick={() => window.open(url, '_blank')}
-                            onError={(e) => {
-                              console.error('Failed to load additional image:', url);
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                            }}
-                            onLoad={() => {
-                              console.log('Additional image loaded successfully:', url);
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
             {/* Challenge Description */}
             <Card className="bg-white border-gray-200">
@@ -649,6 +614,27 @@ const ChallengeDetail = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Challenge Image for desktop */}
+            {challenge.image_url && (
+              <Card className="bg-white border-gray-200">
+                <CardContent className="p-0">
+                  <img 
+                    src={challenge.image_url} 
+                    alt={challenge.title}
+                    className="w-full h-64 object-cover rounded-lg"
+                    onError={(e) => {
+                      console.error('Failed to load primary image:', challenge.image_url);
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                    onLoad={() => {
+                      console.log('Primary image loaded successfully:', challenge.image_url);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
             {/* Quick Info */}
             <Card className="bg-white border-gray-200">
               <CardHeader>

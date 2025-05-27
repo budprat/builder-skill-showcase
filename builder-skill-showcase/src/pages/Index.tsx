@@ -20,6 +20,7 @@ interface Challenge {
   submission_deadline: string;
   status: string;
   created_at: string;
+  image_url: string;
 }
 
 const Index = () => {
@@ -148,13 +149,35 @@ const Index = () => {
               {featuredChallenges.map((challenge) => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
-                  <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
-                    <CardHeader>
+                  <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group" onClick={() => navigate(`/challenges/${challenge.id}`)}>
+                {challenge.image_url && (
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+                    <img
+                      src={challenge.image_url}
+                      alt={challenge.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load featured challenge image:', challenge.image_url);
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Featured challenge image loaded successfully:', challenge.image_url);
+                      }}
+                    />
+                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200">
+                      Active
+                    </Badge>
+                  </div>
+                )}
+                <CardHeader>
                       <div className="flex items-start justify-between mb-2">
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          Active
-                        </Badge>
-                        <div className="text-right">
+                        {!challenge.image_url && (
+                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                            Active
+                          </Badge>
+                        )}
+                        <div className="text-right ml-auto">
                           <div className="text-xl font-bold text-gray-900">
                             {formatPrize(challenge.prize_amount)}
                           </div>
@@ -171,19 +194,15 @@ const Index = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">
-                        {challenge.description}
-                      </p>
-
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {challenge.domains.slice(0, 2).map((domain, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
                               {domain}
                             </Badge>
                           ))}
                           {challenge.domains.length > 2 && (
-                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
                               +{challenge.domains.length - 2} more
                             </Badge>
                           )}
@@ -204,7 +223,10 @@ const Index = () => {
                       <div className="pt-2">
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                          onClick={() => navigate(`/challenges/${challenge.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/challenges/${challenge.id}`);
+                          }}
                         >
                           View Challenge
                         </Button>

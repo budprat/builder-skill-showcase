@@ -13,6 +13,7 @@ import { UserManager } from "./UserManager";
 import { SubmissionManager } from "./SubmissionManager";
 
 export const AdminPanel = () => {
+  const [activeTab, setActiveTab] = useState("challenges");
   const [stats, setStats] = useState({
     totalChallenges: 0,
     activeChallenges: 0,
@@ -151,27 +152,142 @@ export const AdminPanel = () => {
           </Card>
         </div>
 
-        {/* Management Tabs */}
-        <Tabs defaultValue="challenges" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="challenges">Challenge Management</TabsTrigger>
-            <TabsTrigger value="submissions">Submission Management</TabsTrigger>
-            <TabsTrigger value="users">User Management</TabsTrigger>
-          </TabsList>
+        {/* Management Content with Sidebar */}
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          <div className="w-64 shrink-0">
+            <Card className="bg-white border-gray-200">
+              <CardContent className="p-0">
+                <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="w-full">
+                  <TabsList className="flex flex-col h-auto w-full bg-transparent p-2 space-y-1">
+                    <TabsTrigger 
+                      value="challenges" 
+                      className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200 hover:bg-gray-50 border border-transparent"
+                    >
+                      <Trophy className="h-4 w-4 mr-3" />
+                      Challenge Management
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="submissions" 
+                      className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200 hover:bg-gray-50 border border-transparent"
+                    >
+                      <FileText className="h-4 w-4 mr-3" />
+                      Submission Management
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="users" 
+                      className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700 data-[state=active]:border-blue-200 hover:bg-gray-50 border border-transparent"
+                    >
+                      <Users className="h-4 w-4 mr-3" />
+                      User Management
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </div>
 
-          <TabsContent value="challenges">
-            <ChallengeManager onStatsUpdate={fetchStats} />
-          </TabsContent>
+          {/* Main Content */}
+          <div className="flex-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsContent value="challenges" className="mt-0">
+                <ChallengeManager onStatsUpdate={fetchStats} />
+              </TabsContent>
 
-          <TabsContent value="submissions">
-            <SubmissionManager />
-          </TabsContent>
+              <TabsContent value="submissions" className="mt-0">
+                <SubmissionManager />
+              </TabsContent>
 
-          <TabsContent value="users">
-            <UserManager />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="users" className="mt-0">
+                <UserManager />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Badge Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Badge Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              variant="outline"
+              className="w-full"
+              onClick={awardMissingFirstSubmissionBadges}
+            >
+              Award Missing "First Steps" Badges
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
+
+  async function awardMissingFirstSubmissionBadges() {
+    try {
+      // Get the "First Steps" badge
+      const { data: firstStepsBadge, error: badgeError } = await supabase
+        .from('badges')
+        .select('id')
+        .eq('badge_type', 'first_submission')
+        .single();
+
+      if (badgeError || !firstStepsBadge) {
+        console.error('Could not find First Steps badge:', badgeError);
+        return;
+      }
+
+      // Get all users who have submissions but don't have the First Steps badge
+      const { data: usersWithSubmissions, error: submissionError } = await supabase
+        .from('submissions')
+        .select('participant_id')
+        .not('participant_id', 'is', null);
+
+      if (submissionError) {
+        console.error('Error fetching submissions:', submissionError);
+        return;
+      }
+
+      const uniqueUserIds = [...new Set(usersWithSubmissions?.map(s => s.participant_id) || [])];
+
+      // Check which users already have the badge
+      const { data: usersWithBadge, error: badgeCheckError } = await supabase
+        .from('user_badges')
+        .select('user_id')
+        .eq('badge_id', firstStepsBadge.id);
+
+      if (badgeCheckError) {
+        console.error('Error checking existing badges:', badgeCheckError);
+        return;
+      }
+
+      const usersWithBadgeIds = usersWithBadge?.map(ub => ub.user_id) || [];
+      const usersMissingBadge = uniqueUserIds.filter(userId => !usersWithBadgeIds.includes(userId));
+
+      // Award badges to users who don't have them
+      if (usersMissingBadge.length > 0) {
+        const badgeInserts = usersMissingBadge.map(userId => ({
+          user_id: userId,
+          badge_id: firstStepsBadge.id,
+          earned_at: new Date().toISOString()
+        }));
+
+        const { error: insertError } = await supabase
+          .from('user_badges')
+          .insert(badgeInserts);
+
+        if (insertError) {
+          console.error('Error awarding badges:', insertError);
+          return;
+        }
+
+        console.log(`Awarded First Steps badge to ${usersMissingBadge.length} users`);
+      }
+
+      console.log('Badge check complete');
+    } catch (error) {
+      console.error('Error in badge awarding process:', error);
+    }
+  }
 };
