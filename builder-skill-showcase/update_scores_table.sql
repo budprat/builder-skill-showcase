@@ -46,6 +46,18 @@ BEGIN
                    WHERE table_name = 'scores' AND column_name = 'updated_at') THEN
         ALTER TABLE scores ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
     END IF;
+    
+    -- Add company_id column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'scores' AND column_name = 'company_id') THEN
+        ALTER TABLE scores ADD COLUMN company_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+    END IF;
+    
+    -- Add sponsor_id column if it doesn't exist
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'scores' AND column_name = 'sponsor_id') THEN
+        ALTER TABLE scores ADD COLUMN sponsor_id UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+    END IF;
 END $$;
 
 -- Enable RLS if not already enabled
@@ -53,6 +65,8 @@ ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if they exist and recreate them
 DROP POLICY IF EXISTS "Evaluators can manage scores" ON scores;
+DROP POLICY IF EXISTS "Sponsors can view scores for their challenges" ON scores;
+DROP POLICY IF EXISTS "Companies can view scores for their challenges" ON scores;
 DROP POLICY IF EXISTS "Participants can view their scores" ON scores;
 
 -- Create policies for scores
@@ -61,6 +75,22 @@ CREATE POLICY "Evaluators can manage scores" ON scores FOR ALL USING (
   EXISTS (
     SELECT 1 FROM user_roles ur 
     WHERE ur.user_id = auth.uid() AND ur.role IN ('evaluator', 'admin')
+  )
+);
+
+CREATE POLICY "Sponsors can view scores for their challenges" ON scores FOR SELECT USING (
+  sponsor_id = auth.uid() OR
+  EXISTS (
+    SELECT 1 FROM user_roles ur 
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('sponsor', 'admin')
+  )
+);
+
+CREATE POLICY "Companies can view scores for their challenges" ON scores FOR SELECT USING (
+  company_id = auth.uid() OR
+  EXISTS (
+    SELECT 1 FROM user_roles ur 
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('company', 'admin')
   )
 );
 
@@ -74,5 +104,7 @@ CREATE POLICY "Participants can view their scores" ON scores FOR SELECT USING (
 -- Create indexes if they don't exist
 CREATE INDEX IF NOT EXISTS idx_scores_submission_id ON scores(submission_id);
 CREATE INDEX IF NOT EXISTS idx_scores_evaluator_id ON scores(evaluator_id);
+CREATE INDEX IF NOT EXISTS idx_scores_company_id ON scores(company_id);
+CREATE INDEX IF NOT EXISTS idx_scores_sponsor_id ON scores(sponsor_id);
 
 COMMIT;
