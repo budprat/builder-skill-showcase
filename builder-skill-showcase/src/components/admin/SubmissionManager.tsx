@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,7 +77,19 @@ export const SubmissionManager = () => {
 
       toast({
         title: "Success",
-        description: "Submission score updated successfully",
+        description: "Submission scored successfully",
+      });
+
+      // Check and award badges based on score
+      if (parseFloat(finalScore) >= 90) {
+        await checkAndAwardBadges(selectedSubmission.profiles.id, 'high_score', {
+          challengeId: selectedSubmission.challenges.id,
+          score: finalScore
+        });
+      }
+
+      await checkAndAwardBadges(selectedSubmission.profiles.id, 'challenge_completion', {
+        challengeId: selectedSubmission.challenges.id
       });
 
       setIsScoreDialogOpen(false);
@@ -93,6 +104,81 @@ export const SubmissionManager = () => {
       });
     }
   };
+
+  const checkAndAwardBadges = async (userId: string, badgeType: string, context: any) => {
+    try {
+      // Fetch the badge definition based on the badgeType
+      const { data: badgeData, error: badgeError } = await supabase
+        .from('badges')
+        .select('*')
+        .eq('type', badgeType)
+        .single(); // Assuming badge types are unique
+
+      if (badgeError) {
+        console.error('Error fetching badge:', badgeError);
+        return;
+      }
+
+      if (!badgeData) {
+        console.warn(`No badge found for type: ${badgeType}`);
+        return;
+      }
+
+      // Check if the user already has the badge
+      const { data: existingBadge, error: existingBadgeError } = await supabase
+        .from('user_badges')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('badge_id', badgeData.id)
+        .single();
+
+      if (existingBadgeError && existingBadgeError.code !== '404') {
+        console.error('Error checking existing badge:', existingBadgeError);
+        return;
+      }
+
+      if (existingBadge) {
+        console.log(`User ${userId} already has badge ${badgeData.id}`);
+        return;
+      }
+
+      // Award the badge
+      const { error: awardError } = await supabase
+        .from('user_badges')
+        .insert([
+          {
+            user_id: userId,
+            badge_id: badgeData.id,
+            awarded_at: new Date().toISOString(),
+            context: context,
+          },
+        ]);
+
+      if (awardError) {
+        console.error('Error awarding badge:', awardError);
+        toast({
+          title: "Error",
+          description: `Failed to award badge: ${badgeData.name}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Badge Awarded!",
+        description: `You've earned the ${badgeData.name} badge!`,
+      });
+
+    } catch (error: any) {
+      console.error("Unexpected error awarding badge:", error);
+      toast({
+        title: "Unexpected Error",
+        description: "Failed to award badge due to an unexpected error.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -127,11 +213,11 @@ export const SubmissionManager = () => {
                       {submission.status || 'submitted'}
                     </Badge>
                   </div>
-                  
+
                   <p className="text-sm text-muted-foreground mb-2">
                     Participant: {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
                   </p>
-                  
+
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
                     <span>Submitted: {new Date(submission.created_at || '').toLocaleDateString()}</span>
                     {submission.scores && submission.scores.length > 0 && (
@@ -171,7 +257,7 @@ export const SubmissionManager = () => {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   {submission.scores && submission.scores.length > 0 && (
                     <Dialog>
@@ -190,7 +276,7 @@ export const SubmissionManager = () => {
                             <h4 className="font-semibold mb-2">Overall Score</h4>
                             <p className="text-2xl font-bold">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
                           </div>
-                          
+
                           <div>
                             <h4 className="font-semibold mb-2">GitHub Repository Analysis</h4>
                             <div className="border p-3 rounded bg-muted/50">
@@ -272,7 +358,7 @@ export const SubmissionManager = () => {
                             placeholder="Enter score"
                           />
                         </div>
-                        
+
                         <div>
                           <Label htmlFor="feedback">Feedback</Label>
                           <textarea
@@ -284,7 +370,7 @@ export const SubmissionManager = () => {
                             placeholder="Provide detailed feedback..."
                           />
                         </div>
-                        
+
                         <div className="flex justify-end space-x-2">
                           <Button variant="outline" onClick={() => setIsScoreDialogOpen(false)}>
                             Cancel
@@ -298,7 +384,7 @@ export const SubmissionManager = () => {
                   </Dialog>
                 </div>
               </div>
-              
+
               {submission.readme_notes && (
                 <div className="mt-3 p-2 bg-muted rounded text-sm">
                   <strong>Notes:</strong> {submission.readme_notes}

@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
+import { useBadges } from "@/hooks/useBadges";
 
 interface Challenge {
   id: string;
@@ -65,6 +66,7 @@ const ChallengeDetail = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { checkAndAwardBadges } = useBadges();
 
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -180,6 +182,18 @@ const ChallengeDetail = () => {
         title: "Success",
         description: "Your submission has been submitted successfully!",
       });
+
+      // Check if this is user's first submission
+      const { data: previousSubmissions } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('participant_id', user.id);
+
+      if (!previousSubmissions || previousSubmissions.length === 1) {
+        await checkAndAwardBadges(user.id, 'first_submission', {
+          challengeId: challenge.id
+        });
+      }
 
       setIsDialogOpen(false);
       setFormData({
@@ -800,6 +814,8 @@ const ChallengeDetail = () => {
                   </Button>
                 </CardContent>
               </Card>
+            ```text
+
             )}
           </div>
         </div>
