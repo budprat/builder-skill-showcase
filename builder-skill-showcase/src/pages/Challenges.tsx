@@ -254,7 +254,7 @@ const Challenges = () => {
 
                   <div className="flex gap-2 pt-2">
                     <Button 
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-200"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
                       onClick={() => handleJoinChallenge(challenge.id)}
                     >
