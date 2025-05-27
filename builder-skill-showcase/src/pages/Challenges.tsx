@@ -210,9 +210,9 @@ const Challenges = () => {
           {filteredChallenges.map((challenge) => {
             const daysLeft = getDaysLeft(challenge.submission_deadline);
             return (
-              <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md">
+              <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md" onClick={() => handleJoinChallenge(challenge.id)}>
                 {challenge.image_url && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
                     <img
                       src={challenge.image_url}
                       alt={challenge.title}
@@ -226,14 +226,19 @@ const Challenges = () => {
                         console.log('Challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
+                    <Badge className={`absolute top-2 left-2 ${getStatusColor(challenge.status)}`}>
+                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+                    </Badge>
                   </div>
                 )}
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between mb-2">
-                    <Badge className={getStatusColor(challenge.status)}>
-                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
-                    </Badge>
-                    <div className="text-right">
+                    {!challenge.image_url && (
+                      <Badge className={getStatusColor(challenge.status)}>
+                        {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
+                      </Badge>
+                    )}
+                    <div className="text-right ml-auto">
                       <div className="text-lg font-bold text-gray-900">
                         {formatPrize(challenge.prize_amount)}
                       </div>
@@ -280,7 +285,10 @@ const Challenges = () => {
                     <Button 
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
-                      onClick={() => handleJoinChallenge(challenge.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinChallenge(challenge.id);
+                      }}
                     >
                       {challenge.status === "active" ? "Join Challenge" : 
                        challenge.status === "judging" ? "View Results" : "View Details"}
