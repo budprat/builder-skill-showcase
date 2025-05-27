@@ -1,16 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { User, FileText, Trophy, Upload, Trash2, Edit, Eye, Settings, MapPin, Github, Linkedin, Globe, Mail, Plus, Gavel } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { User, Settings, Trophy, Upload, Plus, Edit, Trash2, ExternalLink, Star, FileText, Eye, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -83,7 +83,7 @@ const Dashboard = () => {
 
     try {
       console.log('Fetching profile for user:', user.id);
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -357,7 +357,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <Tabs defaultValue="profile" className="space-y-8">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -376,7 +376,7 @@ const Dashboard = () => {
                       @{profileData.username || "username"}
                     </p>
                   </div>
-                  
+
                   <TabsList className="flex flex-col h-auto w-full bg-gray-100 p-1 space-y-1">
                     <TabsTrigger 
                       value="profile" 
@@ -453,7 +453,7 @@ const Dashboard = () => {
                             {profileData.full_name || "Not provided"}
                           </p>
                         </div>
-                        
+
                         <div>
                           <Label className="text-gray-600 text-sm font-medium">Username</Label>
                           <p className="text-gray-900 text-lg font-medium mt-1">
@@ -590,7 +590,7 @@ const Dashboard = () => {
                           className="mt-1 border-gray-300 text-gray-900"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="username" className="text-gray-900">Username</Label>
                         <Input
@@ -623,7 +623,7 @@ const Dashboard = () => {
                           className="mt-1 border-gray-300 text-gray-900"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="experience_level" className="text-gray-900">Experience Level</Label>
                         <select
@@ -725,7 +725,7 @@ const Dashboard = () => {
                                     </Badge>
                                   )}
                                 </div>
-                                
+
                                 <div className="flex items-center gap-2 mt-4">
                                   {submission.repository_url && (
                                     <Button
@@ -774,7 +774,7 @@ const Dashboard = () => {
                                             <h4 className="font-semibold mb-2 text-gray-900">Overall Score</h4>
                                             <p className="text-2xl font-bold text-blue-600">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
                                           </div>
-                                          
+
                                           <div>
                                             <h4 className="font-semibold mb-2 text-gray-900">GitHub Repository Analysis</h4>
                                             <div className="border border-gray-300 p-3 rounded bg-gray-50">
@@ -789,7 +789,7 @@ const Dashboard = () => {
                                               </p>
                                             </div>
                                           </div>
-                                          
+
                                           {submission.scores[0].llm_scores && (
                                             <div>
                                               <h4 className="font-semibold mb-2 text-gray-900">Detailed Rubric Scores</h4>
@@ -821,7 +821,7 @@ const Dashboard = () => {
                                   )}
                                 </div>
                               </div>
-                              
+
                               <div className="flex items-center gap-2 ml-4">
                                 <div className="text-sm text-gray-600">
                                   {new Date(submission.created_at).toLocaleDateString()}
@@ -853,7 +853,7 @@ const Dashboard = () => {
                                 </Button>
                               </div>
                             </div>
-                            
+
                             {submission.readme_notes && (
                               <div className="mt-4 p-3 bg-white rounded text-sm border border-gray-200">
                                 <strong className="text-gray-900">Notes:</strong> 
@@ -884,7 +884,7 @@ const Dashboard = () => {
                           className="mt-1 border-gray-300 text-gray-900"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="edit_pitch_deck_url" className="text-gray-900">Pitch Deck URL</Label>
                         <Input
@@ -915,7 +915,7 @@ const Dashboard = () => {
                           }}
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="edit_demo_video_url" className="text-gray-900">Demo Video URL</Label>
                         <Input
@@ -926,7 +926,7 @@ const Dashboard = () => {
                           className="mt-1 border-gray-300 text-gray-900"
                         />
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="edit_readme_notes" className="text-gray-900">Additional Notes</Label>
                         <Textarea
@@ -938,7 +938,7 @@ const Dashboard = () => {
                           className="mt-1 border-gray-300 text-gray-900"
                         />
                       </div>
-                      
+
                       <div className="flex justify-end space-x-2 pt-4">
                         <Button 
                           variant="outline" 
@@ -981,7 +981,7 @@ const Dashboard = () => {
                         acceptedTypes=".pdf,.doc,.docx"
                         onUploadComplete={handleFileUploaded}
                       />
-                      
+
                       <FileUpload
                         fileType="document"
                         title="Upload Portfolio Documents"
