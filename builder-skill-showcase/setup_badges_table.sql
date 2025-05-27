@@ -40,6 +40,20 @@ INSERT INTO badges (name, description, badge_type, criteria, icon_url) VALUES
   null
 ),
 (
+  'Sponsor Favorite',
+  'Optimized Costs',
+  'cost_optimizer',
+  '{"event": "cost_optimizer", "description": "Awarded when a user makes Cost Optimization"}',
+  null
+),
+(
+  'Top 10%',
+  'In Top 10% of Competors',
+  'top_25',
+  '{"event": "top_25", "description": "Awarded when a user is in Top 10% of Competors"}',
+  null
+),
+(
   'Challenge Victor',
   'Won a coding challenge',
   'challenge_winner',
