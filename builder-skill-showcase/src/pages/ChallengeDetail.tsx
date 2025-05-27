@@ -29,6 +29,9 @@ interface Challenge {
   requirements?: string[];
   submission_guidelines?: string;
   judging_criteria?: string[];
+  problem_statement?: string;
+  evaluation_rubric?: any;
+  deliverables?: any;
 }
 
 interface Submission {
@@ -362,6 +365,128 @@ const ChallengeDetail = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Problem Statement */}
+            {challenge.problem_statement && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Problem Statement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-700 leading-relaxed">{challenge.problem_statement}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Required Deliverables */}
+            {challenge.deliverables && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Required Deliverables</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {typeof challenge.deliverables === 'object' ? (
+                      Object.entries(challenge.deliverables).map(([key, value]) => (
+                        <div key={key} className="flex items-start gap-3">
+                          <span className="text-blue-600 mt-1">•</span>
+                          <div>
+                            <h5 className="font-medium text-gray-900 capitalize">
+                              {key.replace(/_/g, ' ')}
+                            </h5>
+                            <p className="text-gray-700 text-sm">{value as string}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-700">{challenge.deliverables}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Evaluation Criteria */}
+            {challenge.evaluation_rubric && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Evaluation Criteria</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {typeof challenge.evaluation_rubric === 'object' ? (
+                      Object.entries(challenge.evaluation_rubric).map(([criterion, weight]) => (
+                        <div key={criterion} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <h5 className="font-medium text-gray-900 capitalize">
+                              {criterion.replace(/_/g, ' ')}
+                            </h5>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-blue-600">{weight}%</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-700">{challenge.evaluation_rubric}</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Rules and Guidelines */}
+            {(challenge.requirements || challenge.submission_guidelines) && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Rules and Guidelines</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {challenge.requirements && challenge.requirements.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">Competition Rules</h4>
+                      <ul className="space-y-2">
+                        {challenge.requirements.map((rule, index) => (
+                          <li key={index} className="flex items-start gap-2 text-gray-700">
+                            <span className="text-blue-600 mt-1">•</span>
+                            {rule}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {challenge.submission_guidelines && (
+                    <div className="pt-4 border-t border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2">Submission Guidelines</h4>
+                      <p className="text-gray-700 leading-relaxed">{challenge.submission_guidelines}</p>
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">General Guidelines</h4>
+                    <ul className="space-y-2 text-gray-700">
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        All submissions must be original work
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        Code must be well-documented and include a README
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        Submissions must be completed by the deadline
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-blue-600 mt-1">•</span>
+                        Any external APIs or libraries used must be clearly documented
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Submissions */}
             {submissions.length > 0 && (
