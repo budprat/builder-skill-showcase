@@ -204,7 +204,90 @@ export const AdminPanel = () => {
             </Tabs>
           </div>
         </div>
+
+        {/* Badge Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Badge Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={awardMissingFirstSubmissionBadges}
+              variant="outline"
+              className="w-full"
+            >
+              Award Missing "First Steps" Badges
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
+
+  async function awardMissingFirstSubmissionBadges() {
+    try {
+      // Get the "First Steps" badge
+      const { data: firstStepsBadge, error: badgeError } = await supabase
+        .from('badges')
+        .select('id')
+        .eq('badge_type', 'first_submission')
+        .single();
+
+      if (badgeError || !firstStepsBadge) {
+        console.error('Could not find First Steps badge:', badgeError);
+        return;
+      }
+
+      // Get all users who have submissions but don't have the First Steps badge
+      const { data: usersWithSubmissions, error: submissionError } = await supabase
+        .from('submissions')
+        .select('participant_id')
+        .not('participant_id', 'is', null);
+
+      if (submissionError) {
+        console.error('Error fetching submissions:', submissionError);
+        return;
+      }
+
+      const uniqueUserIds = [...new Set(usersWithSubmissions?.map(s => s.participant_id) || [])];
+
+      // Check which users already have the badge
+      const { data: usersWithBadge, error: badgeCheckError } = await supabase
+        .from('user_badges')
+        .select('user_id')
+        .eq('badge_id', firstStepsBadge.id);
+
+      if (badgeCheckError) {
+        console.error('Error checking existing badges:', badgeCheckError);
+        return;
+      }
+
+      const usersWithBadgeIds = usersWithBadge?.map(ub => ub.user_id) || [];
+      const usersMissingBadge = uniqueUserIds.filter(userId => !usersWithBadgeIds.includes(userId));
+
+      // Award badges to users who don't have them
+      if (usersMissingBadge.length > 0) {
+        const badgeInserts = usersMissingBadge.map(userId => ({
+          user_id: userId,
+          badge_id: firstStepsBadge.id,
+          earned_at: new Date().toISOString()
+        }));
+
+        const { error: insertError } = await supabase
+          .from('user_badges')
+          .insert(badgeInserts);
+
+        if (insertError) {
+          console.error('Error awarding badges:', insertError);
+          return;
+        }
+
+        console.log(`Awarded First Steps badge to ${usersMissingBadge.length} users`);
+      }
+
+      console.log('Badge check complete');
+    } catch (error) {
+      console.error('Error in badge awarding process:', error);
+    }
+  }
 };
