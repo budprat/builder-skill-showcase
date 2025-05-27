@@ -373,7 +373,7 @@ const ChallengeDetail = () => {
                   <div>
                     <h4 className="text-white font-semibold mb-2">Data Pack</h4>
                     <p className="text-white/80 mb-2">{challenge.data_pack_description}</p>
-                    <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                    <Button asChild variant="outline" className="border-white/20 text-white">
                       <a href={challenge.data_pack_url} target="_blank" rel="noopener noreferrer">
                         Download Data Pack
                       </a>
@@ -616,7 +616,7 @@ const ChallengeDetail = () => {
                               variant="ghost"
                               size="sm"
                               onClick={removePitchDeck}
-                              className="text-white/60 hover:text-white hover:bg-white/10"
+                              className="text-white/60 hover:text-white"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -671,7 +671,7 @@ const ChallengeDetail = () => {
                       type="button"
                       onClick={() => setShowSubmissionForm(false)}
                       variant="outline"
-                      className="border-white/20 text-white hover:bg-white/10"
+                      className="border-white/20 text-white"
                     >
                       Cancel
                     </Button>
