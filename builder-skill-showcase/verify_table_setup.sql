@@ -8,7 +8,15 @@ WHERE enumtypid = (SELECT oid FROM pg_type WHERE typname = 'app_role')
 ORDER BY enumsortorder;
 
 -- Check table structure
-\d user_roles;
+SELECT 
+    column_name, 
+    data_type, 
+    is_nullable, 
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'user_roles' 
+AND table_schema = 'public'
+ORDER BY ordinal_position;
 
 -- Verify constraints exist
 SELECT conname, contype 
