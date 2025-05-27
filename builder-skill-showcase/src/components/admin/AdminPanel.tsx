@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,14 +56,14 @@ export const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-4">
+    <div className="min-h-screen bg-gray-100 p-4">
       <div className="container mx-auto">
         {/* Navigation Header */}
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              className="text-white hover:text-white/80"
+              className="text-gray-700 hover:text-gray-900"
               onClick={() => navigate("/")}
             >
               <Home className="h-4 w-4 mr-2" />
@@ -72,23 +71,23 @@ export const AdminPanel = () => {
             </Button>
             <Button
               variant="ghost"
-              className="text-white hover:text-white/80"
+              className="text-gray-700 hover:text-gray-900"
               onClick={() => navigate("/challenges")}
             >
               Challenges
             </Button>
             <Button
               variant="ghost"
-              className="text-white hover:text-white/80"
+              className="text-gray-700 hover:text-gray-900"
               onClick={() => navigate("/dashboard")}
             >
               Dashboard
             </Button>
           </div>
-          
+
           <Button
             variant="outline"
-            className="text-white border-white/20 hover:bg-white/10"
+            className="text-gray-700 border-gray-300 hover:bg-gray-50"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -97,56 +96,56 @@ export const AdminPanel = () => {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Panel</h1>
-          <p className="text-white/80">Manage challenges, users, and platform settings</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Admin Panel</h1>
+          <p className="text-gray-600">Manage challenges, users, and platform settings</p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Challenges</p>
-                  <p className="text-2xl font-bold">{stats.totalChallenges}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Challenges</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalChallenges}</p>
                 </div>
-                <Trophy className="h-8 w-8 text-blue-500" />
+                <Trophy className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Challenges</p>
-                  <p className="text-2xl font-bold">{stats.activeChallenges}</p>
+                  <p className="text-sm font-medium text-gray-600">Active Challenges</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.activeChallenges}</p>
                 </div>
-                <Trophy className="h-8 w-8 text-green-500" />
+                <Settings className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Submissions</p>
-                  <p className="text-2xl font-bold">{stats.totalSubmissions}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Submissions</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalSubmissions}</p>
                 </div>
-                <FileText className="h-8 w-8 text-purple-500" />
+                <FileText className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Users</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
                 </div>
-                <Users className="h-8 w-8 text-orange-500" />
+                <Users className="h-8 w-8 text-orange-600" />
               </div>
             </CardContent>
           </Card>
