@@ -1,114 +1,93 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, Trophy, FileText, Video, Github, ArrowLeft, Upload, X, File } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar, User, Trophy, ArrowLeft, Upload, ExternalLink, Github, Play, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/files/FileUpload";
 
 interface Challenge {
   id: string;
   title: string;
   description: string;
-  problem_statement: string;
+  detailed_description?: string;
   company_name: string;
-  company_logo_url: string | null;
   domains: string[];
   prize_amount: number;
-  prize_description: string | null;
+  prize_description: string;
   submission_deadline: string;
   status: string;
-  deliverables: any;
-  evaluation_rubric: any;
-  data_pack_url: string | null;
-  data_pack_description: string | null;
   created_at: string;
+  requirements?: string[];
+  submission_guidelines?: string;
+  judging_criteria?: string[];
 }
 
 interface Submission {
   id: string;
-  repository_url: string;
-  pitch_deck_url: string;
-  demo_video_url: string;
-  readme_notes: string | null;
+  participant_id: string;
+  repository_url?: string;
+  pitch_deck_url?: string;
+  demo_video_url?: string;
+  readme_notes?: string;
   status: string;
-  provisional_score: number | null;
-  final_score: number | null;
   created_at: string;
+  profiles?: {
+    full_name: string;
+    username: string;
+  };
 }
 
 const ChallengeDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [submission, setSubmission] = useState<Submission | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
-
-  const [submissionForm, setSubmissionForm] = useState({
-    repository_url: '',
-    pitch_deck_url: '',
-    demo_video_url: '',
-    readme_notes: ''
-  });
-
-  const [uploadingPitchDeck, setUploadingPitchDeck] = useState(false);
-  const [uploadedPitchDeck, setUploadedPitchDeck] = useState<string | null>(null);
-  const [useFileUpload, setUseFileUpload] = useState(false);
-
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [formData, setFormData] = useState({
+    repository_url: "",
+    pitch_deck_url: "",
+    demo_video_url: "",
+    readme_notes: "",
+  });
 
   useEffect(() => {
     if (id) {
-      fetchChallengeDetails();
+      fetchChallenge();
+      fetchSubmissions();
     }
   }, [id, user]);
 
-  const fetchChallengeDetails = async () => {
-    if (!id) return;
-
+  const fetchChallenge = async () => {
     try {
-      // Fetch challenge details
-      const { data: challengeData, error: challengeError } = await supabase
+      const { data, error } = await supabase
         .from('challenges')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (challengeError) throw challengeError;
-      setChallenge(challengeData);
-
-      // Fetch user's submission if logged in
-      if (user) {
-        const { data: submissionData, error: submissionError } = await supabase
-          .from('submissions')
-          .select(`
-              *,
-              scores (total_score, pre_screening_score, llm_scores, feedback, status)
-            `)
-          .eq('challenge_id', id)
-          .eq('participant_id', user.id)
-          .maybeSingle();
-
-        if (submissionError && submissionError.code !== 'PGRST116') {
-          throw submissionError;
-        }
-
-        setSubmission(submissionData);
-      }
+      if (error) throw error;
+      setChallenge(data);
     } catch (error) {
-      console.error('Error fetching challenge details:', error);
+      console.error('Error fetching challenge:', error);
       toast({
         title: "Error",
-        description: "Failed to load challenge details. Please try again.",
+        description: "Failed to load challenge details",
         variant: "destructive",
       });
     } finally {
@@ -116,74 +95,34 @@ const ChallengeDetail = () => {
     }
   };
 
-  const handlePitchDeckUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const fetchSubmissions = async () => {
     try {
-      setUploadingPitchDeck(true);
+      if (user) {
+        const { data: userSubmission, error: userError } = await supabase
+          .from('submissions')
+          .select('*')
+          .eq('challenge_id', id)
+          .eq('participant_id', user.id);
 
-      if (!event.target.files || event.target.files.length === 0) {
-        return;
+        if (userError) throw userError;
+        setHasSubmitted(userSubmission && userSubmission.length > 0);
       }
 
-      if (!user) {
-        toast({
-          title: "Error",
-          description: "You must be logged in to upload files",
-          variant: "destructive",
-        });
-        return;
-      }
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          *,
+          profiles (full_name, username)
+        `)
+        .eq('challenge_id', id)
+        .eq('status', 'submitted')
+        .order('created_at', { ascending: false });
 
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/pitch_deck_${Date.now()}.${fileExt}`;
-
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('user-files')
-        .upload(fileName, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      if (!uploadData) {
-        throw new Error('Upload failed - no data returned');
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('user-files')
-        .getPublicUrl(fileName);
-
-      console.log('Pitch deck uploaded successfully:', {
-        fileName,
-        uploadPath: uploadData.path,
-        publicUrl
-      });
-
-      setUploadedPitchDeck(publicUrl);
-      setSubmissionForm({...submissionForm, pitch_deck_url: publicUrl});
-
-      toast({
-        title: "Success",
-        description: "Pitch deck uploaded successfully",
-      });
-
-    } catch (error: any) {
-      console.error('Upload error:', error);
-      toast({
-        title: "Upload failed",
-        description: error.message || "Failed to upload pitch deck",
-        variant: "destructive",
-      });
-    } finally {
-      setUploadingPitchDeck(false);
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
     }
-  };
-
-  const removePitchDeck = () => {
-    setUploadedPitchDeck(null);
-    setSubmissionForm({...submissionForm, pitch_deck_url: ''});
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,28 +136,33 @@ const ChallengeDetail = () => {
         .insert({
           challenge_id: challenge.id,
           participant_id: user.id,
-          repository_url: submissionForm.repository_url,
-          pitch_deck_url: submissionForm.pitch_deck_url,
-          demo_video_url: submissionForm.demo_video_url,
-          readme_notes: submissionForm.readme_notes,
-          status: 'submitted'
+          repository_url: formData.repository_url,
+          pitch_deck_url: formData.pitch_deck_url,
+          demo_video_url: formData.demo_video_url,
+          readme_notes: formData.readme_notes,
+          status: 'submitted',
         });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Your submission has been received!",
+        description: "Your submission has been submitted successfully!",
       });
 
-      // Refresh the page to show the submission
-      fetchChallengeDetails();
-      setShowSubmissionForm(false);
-    } catch (error) {
-      console.error('Error submitting:', error);
+      setIsDialogOpen(false);
+      setFormData({
+        repository_url: "",
+        pitch_deck_url: "",
+        demo_video_url: "",
+        readme_notes: "",
+      });
+
+      fetchSubmissions();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to submit. Please try again.",
+        description: error.message || "Failed to submit your solution",
         variant: "destructive",
       });
     } finally {
@@ -226,20 +170,33 @@ const ChallengeDetail = () => {
     }
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "judging":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "completed":
+        return "bg-gray-100 text-gray-700 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
   const formatPrize = (amount: number) => {
+    if (!amount) return 'TBD';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-    }).format(amount / 100);
+    }).format(amount);
   };
 
   const formatDeadline = (deadline: string) => {
     return new Date(deadline).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
       month: 'long',
       day: 'numeric',
+      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -253,25 +210,12 @@ const ChallengeDetail = () => {
     return diffDays;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500/20 text-green-300 border-green-500/30";
-      case "judging":
-        return "bg-yellow-500/20 text-yellow-300 border-yellow-500/30";
-      case "completed":
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
-      default:
-        return "bg-gray-500/20 text-gray-300 border-gray-500/30";
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-8 flex items-center justify-center">
-          <div className="text-white text-lg">Loading challenge...</div>
+          <div className="text-gray-700 text-lg">Loading challenge details...</div>
         </div>
       </div>
     );
@@ -279,11 +223,12 @@ const ChallengeDetail = () => {
 
   if (!challenge) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="container mx-auto px-4 py-8 text-center">
-          <div className="text-white text-lg mb-4">Challenge not found</div>
-          <Button onClick={() => navigate("/challenges")} variant="outline" className="border-white/20 text-white">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Challenge not found</h1>
+          <Button onClick={() => navigate("/challenges")} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Challenges
           </Button>
         </div>
@@ -292,395 +237,372 @@ const ChallengeDetail = () => {
   }
 
   const daysLeft = getDaysLeft(challenge.submission_deadline);
-  const canSubmit = user && challenge.status === 'active' && daysLeft > 0 && !submission;
+  const isExpired = daysLeft <= 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
-        <Button 
-          onClick={() => navigate("/challenges")} 
-          variant="ghost" 
-          className="text-white hover:bg-white/10 mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Challenges
-        </Button>
+        {/* Navigation */}
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/challenges")}
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Challenges
+          </Button>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Challenge Header */}
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white border-gray-200">
               <CardHeader>
                 <div className="flex items-start justify-between mb-4">
-                  <div>
+                  <div className="flex items-center gap-3">
                     <Badge className={getStatusColor(challenge.status)}>
                       {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
-                    <CardTitle className="text-white text-3xl mb-2">{challenge.title}</CardTitle>
-                    <CardDescription className="text-white/70 text-lg">
-                      by {challenge.company_name}
-                    </CardDescription>
+                    {daysLeft > 0 && (
+                      <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
+                        {daysLeft} days left
+                      </Badge>
+                    )}
+                    {isExpired && (
+                      <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50">
+                        Deadline passed
+                      </Badge>
+                    )}
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-white">
+                    <div className="text-3xl font-bold text-gray-900">
                       {formatPrize(challenge.prize_amount)}
                     </div>
                     {challenge.prize_description && (
-                      <div className="text-white/60">{challenge.prize_description}</div>
+                      <div className="text-gray-600 text-sm">{challenge.prize_description}</div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {challenge.domains.map((domain) => (
-                    <Badge key={domain} variant="secondary" className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                      {domain}
-                    </Badge>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center text-white/60">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Deadline: {formatDeadline(challenge.submission_deadline)}
+                <CardTitle className="text-3xl text-gray-900 font-bold mb-2">{challenge.title}</CardTitle>
+                <CardDescription className="text-lg text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    by {challenge.company_name || 'Anonymous'}
                   </div>
-                  <div className="flex items-center text-white/60">
-                    <Clock className="h-4 w-4 mr-2" />
-                    {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
-                  </div>
-                </div>
+                </CardDescription>
               </CardHeader>
             </Card>
 
             {/* Challenge Description */}
-            <Card className="bg-white/10 border-white/20">
+            <Card className="bg-white border-gray-200">
               <CardHeader>
-                <CardTitle className="text-white">Challenge Description</CardTitle>
+                <CardTitle className="text-gray-900">Challenge Description</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-white font-semibold mb-2">Overview</h4>
-                  <p className="text-white/80">{challenge.description}</p>
-                </div>
-                <div>
-                  <h4 className="text-white font-semibold mb-2">Problem Statement</h4>
-                  <p className="text-white/80">{challenge.problem_statement}</p>
-                </div>
-                {challenge.data_pack_url && (
-                  <div>
-                    <h4 className="text-white font-semibold mb-2">Data Pack</h4>
-                    <p className="text-white/80 mb-2">{challenge.data_pack_description}</p>
-                    <Button asChild variant="outline" className="border-white/20 text-white">
-                      <a href={challenge.data_pack_url} target="_blank" rel="noopener noreferrer">
-                        Download Data Pack
-                      </a>
-                    </Button>
+                <p className="text-gray-700 leading-relaxed">{challenge.description}</p>
+
+                {challenge.detailed_description && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">Detailed Description</h4>
+                    <p className="text-gray-700 leading-relaxed">{challenge.detailed_description}</p>
+                  </div>
+                )}
+
+                {challenge.domains && challenge.domains.length > 0 && (
+                  <div className="pt-4">
+                    <h4 className="font-semibold text-gray-900 mb-3">Relevant Domains</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {challenge.domains.map((domain) => (
+                        <Badge key={domain} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                          {domain}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {challenge.requirements && challenge.requirements.length > 0 && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">Requirements</h4>
+                    <ul className="space-y-2">
+                      {challenge.requirements.map((requirement, index) => (
+                        <li key={index} className="flex items-start gap-2 text-gray-700">
+                          <span className="text-blue-600 mt-1">•</span>
+                          {requirement}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {challenge.judging_criteria && challenge.judging_criteria.length > 0 && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">Judging Criteria</h4>
+                    <ul className="space-y-2">
+                      {challenge.judging_criteria.map((criteria, index) => (
+                        <li key={index} className="flex items-start gap-2 text-gray-700">
+                          <span className="text-blue-600 mt-1">•</span>
+                          {criteria}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {challenge.submission_guidelines && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2">Submission Guidelines</h4>
+                    <p className="text-gray-700 leading-relaxed">{challenge.submission_guidelines}</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Deliverables */}
-            <Card className="bg-white/10 border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Required Deliverables</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-start space-x-3">
-                    <Github className="h-5 w-5 text-blue-400 mt-0.5" />
-                    <div>
-                      <h4 className="text-white font-medium">GitHub Repository</h4>
-                      <p className="text-white/70 text-sm">Complete source code with documentation</p>
-                    </div>
+            {/* Submissions */}
+            {submissions.length > 0 && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Community Submissions</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    {submissions.length} submission{submissions.length !== 1 ? 's' : ''} from the community
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {submissions.map((submission) => (
+                      <div key={submission.id} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="font-medium text-gray-900">
+                              {submission.profiles?.full_name || 'Anonymous'}
+                            </h4>
+                            <p className="text-sm text-gray-600">
+                              @{submission.profiles?.username || 'user'} • {new Date(submission.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+
+                        {submission.readme_notes && (
+                          <p className="text-gray-700 mb-3 text-sm">{submission.readme_notes}</p>
+                        )}
+
+                        <div className="space-y-2">
+                          <Button asChild variant="outline" size="sm" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <a href={submission.repository_url} target="_blank" rel="noopener noreferrer">
+                              <Github className="w-4 h-4 mr-2" />
+                              View Repository
+                            </a>
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <a href={submission.pitch_deck_url} target="_blank" rel="noopener noreferrer">
+                              <FileText className="w-4 h-4 mr-2" />
+                              View Pitch Deck
+                            </a>
+                          </Button>
+                          <Button asChild variant="outline" size="sm" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
+                            <a href={submission.demo_video_url} target="_blank" rel="noopener noreferrer">
+                              <Play className="w-4 h-4 mr-2" />
+                              Watch Demo
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <FileText className="h-5 w-5 text-blue-400 mt-0.5" />
-                    <div>
-                      <h4 className="text-white font-medium">Pitch Deck</h4>
-                      <p className="text-white/70 text-sm">5-10 slide presentation explaining your solution</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3">
-                    <Video className="h-5 w-5 text-blue-400 mt-0.5" />
-                    <div>
-                      <h4 className="text-white font-medium">Demo Video</h4>
-                      <p className="text-white/70 text-sm">3-5 minute demonstration of your working solution</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Submission Status */}
-            <Card className="bg-white/10 border-white/20">
+            {/* Quick Info */}
+            <Card className="bg-white border-gray-200">
               <CardHeader>
-                <CardTitle className="text-white">Your Submission</CardTitle>
+                <CardTitle className="text-gray-900">Challenge Details</CardTitle>
               </CardHeader>
-              <CardContent>
-                {submission ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/70">Status:</span>
-                      <Badge className={submission.status === 'reviewed' ? "bg-green-500/20 text-green-300 border-green-500/30" : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"}>
-                        {submission.status === 'reviewed' ? 'Reviewed' : submission.status === 'submitted' ? 'Under Review' : submission.status}
-                      </Badge>
-                    </div>
-                    <div className="text-white/70 text-sm">
-                      Submitted on {new Date(submission.created_at).toLocaleDateString()}
-                    </div>
+              <CardContent className="space-y-4">
+                <div className="flex items-center text-gray-600">
+                  <Calendar className="h-4 w-4 mr-3" />
+                  <div>
+                    <div className="font-medium text-gray-900">Deadline</div>
+                    <div className="text-sm">{formatDeadline(challenge.submission_deadline)}</div>
+                  </div>
+                </div>
 
-                    {submission.scores && submission.scores.length > 0 && (
-                      <>
-                        <div>
-                          <h4 className="text-white/70 font-semibold mb-2">Overall Score</h4>
-                          <p className="text-2xl font-bold text-white">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
-                        </div>
+                <div className="flex items-center text-gray-600">
+                  <Trophy className="h-4 w-4 mr-3" />
+                  <div>
+                    <div className="font-medium text-gray-900">Prize Pool</div>
+                    <div className="text-sm">{formatPrize(challenge.prize_amount)}</div>
+                  </div>
+                </div>
 
-                        <div>
-                          <h4 className="text-white/70 font-semibold mb-2">GitHub Repository Analysis</h4>
-                          <div className="border border-white/20 p-3 rounded bg-white/5">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="font-medium text-white/80">Repository Validation</span>
-                              <span className="font-bold text-white">{submission.scores[0].pre_screening_score}/5</span>
-                            </div>
-                            <p className="text-sm text-white/60">
-                              {submission.scores[0].pre_screening_score === 5 
-                                ? "✅ Repository exists and contains README.md" 
-                                : "❌ Repository validation failed - missing repository or README.md"}
-                            </p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                    
-                    {submission.final_score && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-white/70">Final Score:</span>
-                        <span className="text-white font-bold">{submission.final_score}</span>
-                      </div>
-                    )}
-                    <div className="space-y-2">
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
-                        <a href={submission.repository_url} target="_blank" rel="noopener noreferrer">
-                          View Repository
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
-                        <a href={submission.pitch_deck_url} target="_blank" rel="noopener noreferrer">
-                          View Pitch Deck
-                        </a>
-                      </Button>
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
-                        <a href={submission.demo_video_url} target="_blank" rel="noopener noreferrer">
-                          Watch Demo
-                        </a>
-                      </Button>
-                    </div>
+                <div className="flex items-center text-gray-600">
+                  <User className="h-4 w-4 mr-3" />
+                  <div>
+                    <div className="font-medium text-gray-900">Submissions</div>
+                    <div className="text-sm">{submissions.length} submissions</div>
                   </div>
-                ) : canSubmit ? (
-                  <div className="space-y-4">
-                    <p className="text-white/70">You haven't submitted to this challenge yet.</p>
-                    <Button 
-                      onClick={() => setShowSubmissionForm(true)}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    >
-                      Submit Solution
-                    </Button>
-                  </div>
-                ) : !user ? (
-                  <div className="space-y-4">
-                    <p className="text-white/70">Sign in to submit your solution.</p>
-                    <Button 
-                      onClick={() => navigate("/auth")}
-                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600"
-                    >
-                      Sign In
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-white/70">
-                    {challenge.status !== 'active' ? 'Challenge is not accepting submissions' :
-                     daysLeft <= 0 ? 'Submission deadline has passed' : 'You have already submitted'}
-                  </div>
-                )}
+                </div>
               </CardContent>
             </Card>
 
-            {/* Challenge Stats */}
-            <Card className="bg-white/10 border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white">Challenge Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Prize Pool:</span>
-                  <span className="text-white font-bold">{formatPrize(challenge.prize_amount)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Status:</span>
-                  <Badge className={getStatusColor(challenge.status)}>
-                    {challenge.status}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-white/70">Time Left:</span>
-                  <span className="text-white">{daysLeft > 0 ? `${daysLeft} days` : 'Ended'}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Submission Form Modal */}
-        {showSubmissionForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <Card className="bg-slate-900 border-white/20 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <CardHeader>
-                <CardTitle className="text-white">Submit Your Solution</CardTitle>
-                <CardDescription className="text-white/70">
-                  All fields are required. Make sure your links are publicly accessible.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      GitHub Repository URL
-                    </label>
-                    <Input
-                      type="url"
-                      required
-                      value={submissionForm.repository_url}
-                      onChange={(e) => setSubmissionForm({...submissionForm, repository_url: e.target.value})}
-                      placeholder="https://github.com/username/project"
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="text-white/80 text-sm font-medium">
-                        Pitch Deck
-                      </Label>
-                      <div className="flex items-center space-x-2">
-                        <Label htmlFor="upload-toggle" className="text-white/60 text-xs">
-                          Upload file
-                        </Label>
-                        <input
-                          id="upload-toggle"
-                          type="checkbox"
-                          checked={useFileUpload}
-                          onChange={(e) => {
-                            setUseFileUpload(e.target.checked);
-                            if (!e.target.checked) {
-                              setUploadedPitchDeck(null);
-                              setSubmissionForm({...submissionForm, pitch_deck_url: ''});
-                            }
-                          }}
-                          className="w-4 h-4"
-                        />
-                      </div>
-                    </div>
-
-                    {useFileUpload ? (
-                      <div className="space-y-2">
-                        {!uploadedPitchDeck ? (
-                          <div className="space-y-2">
+            {/* Submit Solution */}
+            {user && !isExpired && challenge.status === 'active' && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Submit Your Solution</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    {hasSubmitted 
+                      ? "You have already submitted a solution. You can update it from your dashboard."
+                      : "Ready to showcase your AI solution?"
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {!hasSubmitted ? (
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                          <Upload className="mr-2 h-4 w-4" />
+                          Submit Solution
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border-gray-200">
+                        <DialogHeader>
+                          <DialogTitle className="text-gray-900">Submit Your Solution</DialogTitle>
+                          <DialogDescription className="text-gray-600">
+                            Fill in the details about your solution. All fields are required.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                          <div>
+                            <Label htmlFor="repository_url" className="text-gray-900">Repository URL</Label>
                             <Input
-                              type="file"
-                              accept=".pdf,.ppt,.pptx"
-                              onChange={handlePitchDeckUpload}
-                              disabled={uploadingPitchDeck}
-                              className="bg-white/10 border-white/20 text-white file:bg-white/10 file:border-0 file:text-white/80"
+                              id="repository_url"
+                              value={formData.repository_url}
+                              onChange={(e) => setFormData({...formData, repository_url: e.target.value})}
+                              placeholder="https://github.com/username/repo"
+                              required
+                              className="mt-1 border-gray-300 text-gray-900"
                             />
-                            {uploadingPitchDeck && (
-                              <p className="text-sm text-white/60">Uploading...</p>
-                            )}
-                            <p className="text-xs text-white/60">
-                              Supported formats: PDF, PPT, PPTX
-                            </p>
                           </div>
-                        ) : (
-                          <div className="flex items-center justify-between p-3 border border-white/20 rounded-lg bg-white/5">
-                            <div className="flex items-center gap-2">
-                              <File className="h-4 w-4 text-white/60" />
-                              <span className="text-sm text-white/80">Pitch deck uploaded successfully</span>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={removePitchDeck}
-                              className="text-white/60 hover:text-white"
+
+                          <div>
+                            <Label htmlFor="pitch_deck_url" className="text-gray-900">Pitch Deck URL</Label>
+                            <Input
+                              id="pitch_deck_url"
+                              value={formData.pitch_deck_url}
+                              onChange={(e) => setFormData({...formData, pitch_deck_url: e.target.value})}
+                              placeholder="https://drive.google.com/file/d/... or upload PDF below"
+                              required
+                              className="mt-1 border-gray-300 text-gray-900"
+                            />
+                          </div>
+
+                          <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                            <Label className="text-sm font-medium mb-2 block text-gray-900">Upload Pitch Deck PDF</Label>
+                            <p className="text-xs text-gray-600 mb-3">
+                              Upload a PDF file directly to replace or set the pitch deck URL
+                            </p>
+                            <FileUpload
+                              fileType="document"
+                              title="Pitch Deck PDF"
+                              description="Upload your pitch deck as a PDF file"
+                              acceptedTypes=".pdf"
+                              onUploadComplete={(url) => {
+                                setFormData({...formData, pitch_deck_url: url});
+                                toast({
+                                  title: "Success",
+                                  description: "PDF uploaded and pitch deck URL updated",
+                                });
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="demo_video_url" className="text-gray-900">Demo Video URL</Label>
+                            <Input
+                              id="demo_video_url"
+                              value={formData.demo_video_url}
+                              onChange={(e) => setFormData({...formData, demo_video_url: e.target.value})}
+                              placeholder="https://youtube.com/watch?v=..."
+                              required
+                              className="mt-1 border-gray-300 text-gray-900"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="readme_notes" className="text-gray-900">Additional Notes</Label>
+                            <Textarea
+                              id="readme_notes"
+                              value={formData.readme_notes}
+                              onChange={(e) => setFormData({...formData, readme_notes: e.target.value})}
+                              placeholder="Any additional information about your solution..."
+                              rows={3}
+                              className="mt-1 border-gray-300 text-gray-900"
+                            />
+                          </div>
+
+                          <div className="flex justify-end space-x-2 pt-4">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => setIsDialogOpen(false)}
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
-                              <X className="h-4 w-4" />
+                              Cancel
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              disabled={submitting}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              {submitting ? "Submitting..." : "Submit Solution"}
                             </Button>
                           </div>
-                        )}
-                      </div>
-                    ) : (
-                      <Input
-                        type="url"
-                        required
-                        value={submissionForm.pitch_deck_url}
-                        onChange={(e) => setSubmissionForm({...submissionForm, pitch_deck_url: e.target.value})}
-                        placeholder="https://drive.google.com/... or https://slides.google.com/..."
-                        className="bg-white/10 border-white/20 text-white"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      Demo Video URL
-                    </label>
-                    <Input
-                      type="url"
-                      required
-                      value={submissionForm.demo_video_url}
-                      onChange={(e) => setSubmissionForm({...submissionForm, demo_video_url: e.target.value})}
-                      placeholder="https://youtube.com/... or https://vimeo.com/..."
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
-                      Additional Notes (Optional)
-                    </label>
-                    <Textarea
-                      value={submissionForm.readme_notes}
-                      onChange={(e) => setSubmissionForm({...submissionForm, readme_notes: e.target.value})}
-                      placeholder="Any additional information about your solution..."
-                      className="bg-white/10 border-white/20 text-white"
-                      rows={4}
-                    />
-                  </div>
-                  <div className="flex gap-3 pt-4">
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
                     <Button 
-                      type="submit" 
-                      disabled={submitting}
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                    >
-                      {submitting ? 'Submitting...' : 'Submit Solution'}
-                    </Button>
-                    <Button 
-                      type="button"
-                      onClick={() => setShowSubmissionForm(false)}
+                      onClick={() => navigate("/dashboard")}
                       variant="outline"
-                      className="border-white/20 text-white"
+                      className="w-full border-gray-300 text-gray-700 hover:bg-gray-50"
                     >
-                      Cancel
+                      View My Submission
                     </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {!user && (
+              <Card className="bg-white border-gray-200">
+                <CardHeader>
+                  <CardTitle className="text-gray-900">Join the Challenge</CardTitle>
+                  <CardDescription className="text-gray-600">
+                    Sign in to submit your solution and compete for prizes.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={() => navigate("/auth")}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Sign In to Participate
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
