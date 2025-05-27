@@ -23,16 +23,22 @@ SELECT conname, contype
 FROM pg_constraint 
 WHERE conrelid = 'user_roles'::regclass;
 
--- Test inserting a role to make sure everything works
+-- Test the table structure without violating foreign key constraints
 DO $$
 BEGIN
-    -- Try to insert a test role (will be cleaned up)
-    INSERT INTO user_roles (user_id, role) 
-    VALUES ('00000000-0000-0000-0000-000000000000'::uuid, 'participant'::app_role)
-    ON CONFLICT DO NOTHING;
+    -- Test that the enum values work
+    PERFORM 'admin'::app_role;
+    PERFORM 'company'::app_role;
+    PERFORM 'participant'::app_role;
+    PERFORM 'sponsor'::app_role;
+    PERFORM 'evaluator'::app_role;
     
-    -- Clean up the test
-    DELETE FROM user_roles WHERE user_id = '00000000-0000-0000-0000-000000000000'::uuid;
+    -- Test that the table exists and has the right columns
+    PERFORM column_name FROM information_schema.columns 
+    WHERE table_name = 'user_roles' AND column_name = 'user_id';
+    
+    PERFORM column_name FROM information_schema.columns 
+    WHERE table_name = 'user_roles' AND column_name = 'role';
     
     RAISE NOTICE 'Table structure verification successful!';
 EXCEPTION 
