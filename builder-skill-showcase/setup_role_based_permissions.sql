@@ -7,17 +7,33 @@ CREATE POLICY "Sponsors can create challenges" ON challenges FOR INSERT WITH CHE
   )
 );
 
+CREATE POLICY "Sponsors can view their challenges" ON challenges FOR SELECT USING (
+  company_id = auth.uid() OR
+  EXISTS (
+    SELECT 1 FROM user_roles ur 
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('sponsor', 'admin')
+  )
+);
+
 CREATE POLICY "Sponsors can update their challenges" ON challenges FOR UPDATE USING (
   company_id = auth.uid() OR
   EXISTS (
     SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = auth.uid() AND ur.role = 'admin'
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('sponsor', 'admin')
   )
 ) WITH CHECK (
   company_id = auth.uid() OR
   EXISTS (
     SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = auth.uid() AND ur.role = 'admin'
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('sponsor', 'admin')
+  )
+);
+
+CREATE POLICY "Sponsors can delete their challenges" ON challenges FOR DELETE USING (
+  company_id = auth.uid() OR
+  EXISTS (
+    SELECT 1 FROM user_roles ur 
+    WHERE ur.user_id = auth.uid() AND ur.role IN ('sponsor', 'admin')
   )
 );
 

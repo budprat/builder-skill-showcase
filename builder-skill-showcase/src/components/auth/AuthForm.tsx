@@ -106,6 +106,17 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
         if (signUpError) {
           console.error("Signup error:", signUpError);
+          
+          // If user already exists, provide a more helpful message
+          if (signUpError.message.includes("User already registered")) {
+            toast({
+              title: "Account exists",
+              description: "An account with this email already exists. Please sign in instead or use a different email.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           throw signUpError;
         }
 
@@ -121,6 +132,24 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         if (authData.user && authData.session) {
           console.log("User created and signed in automatically");
           console.log("User ID:", authData.user.id);
+
+          // Ensure role is assigned (fallback if trigger doesn't work)
+          try {
+            const { error: roleError } = await (supabase as any)
+              .from('user_roles')
+              .insert({
+                user_id: authData.user.id,
+                role: data.role
+              });
+            
+            if (roleError && !roleError.message.includes('duplicate')) {
+              console.error("Error assigning role:", roleError);
+            } else {
+              console.log("Role assigned successfully:", data.role);
+            }
+          } catch (roleAssignError) {
+            console.error("Role assignment error:", roleAssignError);
+          }
 
           toast({
             title: "Welcome!",

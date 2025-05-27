@@ -35,6 +35,6 @@ SELECT
   ur.role,
   ur.created_at
 FROM auth.users u
-LEFT JOIN profiles p ON u.id = p.user_id
+LEFT JOIN profiles p ON u.id = p.id
 LEFT JOIN user_roles ur ON u.id = ur.user_id
 WHERE u.id = '3dde62f3-5045-4bc8-90b5-676d7ec368cc';
