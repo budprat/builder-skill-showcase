@@ -119,16 +119,16 @@ const Index = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
-              <Button 
-                size="lg" 
-                className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
-                onClick={() => navigate(user ? "/challenges" : "/auth")}
-              >
-                {user ? "Explore Challenges" : "Join as Builder"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
               {!user && (
                 <>
+                  <Button 
+                    size="lg" 
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join as Builder
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                   <Button 
                     size="lg" 
                     className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
