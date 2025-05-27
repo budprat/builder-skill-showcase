@@ -60,9 +60,9 @@ export const Header = () => {
           onClick={() => navigate("/")}
         >
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
-            E
+            N
           </div>
-          <span className="text-xl font-bold text-gray-900 hidden sm:block">EliteBuilders</span>
+          <span className="text-xl font-bold text-gray-900 hidden sm:block">NUSpace</span>
         </div>
 
         {/* Desktop Navigation */}
@@ -137,9 +137,9 @@ export const Header = () => {
               <div className="flex flex-col h-full">
                 <div className="flex items-center space-x-2 py-4 border-b border-gray-200">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold">
-                    E
+                    N
                   </div>
-                  <span className="text-xl font-bold text-gray-900">EliteBuilders</span>
+                  <span className="text-xl font-bold text-gray-900">NUSpace</span>
                 </div>
 
                 <nav className="flex-1 py-6">

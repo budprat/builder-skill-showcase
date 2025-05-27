@@ -90,17 +90,17 @@ const Index = () => {
       <Header />
 
       {/* Hero Section - Foundry of Future AI Leaders */}
-      <section className="relative py-6 md:py-8 px-4">
+      <section className="relative py-4 md:py-6 px-4">
         <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-3 leading-tight animate-fade-in">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2 leading-tight animate-fade-in">
               Build the Future of{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 AI Products
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 mb-4 leading-relaxed max-w-3xl mx-auto animate-fade-in">
+            <p className="text-base md:text-lg text-gray-600 mb-3 leading-relaxed max-w-2xl mx-auto animate-fade-in">
               Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
               build cutting-edge prototypes, and shape the next generation of AI applications.
             </p>
