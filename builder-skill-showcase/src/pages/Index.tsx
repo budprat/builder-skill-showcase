@@ -85,31 +85,37 @@ const Index = () => {
     return diffDays;
   };
 
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'completed':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'draft':
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       {/* Hero Section - Foundry of Future AI Leaders */}
-      <section className="relative section-spacing px-4">
+      <section className="relative py-4 md:py-6 px-4">
         <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-5xl mx-auto content-spacing">
-            {/* Elite Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 mb-6 animate-fade-in">
-              <Star className="w-4 h-4" />
-              <span>The Foundry of Future AI Leaders</span>
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-2 leading-tight animate-fade-in">
               Build the Future of{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 AI Products
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-4xl mx-auto animate-fade-in">
-              Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
-              build cutting-edge prototypes, and shape the next generation of AI applications in our 
-              prestigious innovation accelerator.
+            <p className="text-base md:text-lg text-gray-600 mb-3 leading-relaxed max-w-2xl mx-auto animate-fade-in">
+              Join elite Creators in solving real-world challenges. Compete for Prizes, 
+              build cutting-edge prototypes, and shape the next generation of AI applications.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
@@ -121,6 +127,26 @@ const Index = () => {
                 {user ? "Explore Challenges" : "Join as Builder"}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+              {!user && (
+                <>
+                  <Button 
+                    size="lg" 
+                    className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join as Sponsor
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    className="bg-purple-600 hover:bg-purple-700 text-white text-lg px-8 py-4 hover-lift font-semibold"
+                    onClick={() => navigate("/auth")}
+                  >
+                    Join as Evaluator
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </>
+              )}
               <Button 
                 size="lg" 
                 variant="outline" 
@@ -135,23 +161,22 @@ const Index = () => {
       </section>
 
       {/* Featured Challenges Section - Moved here */}
-      <section className="section-spacing px-4 bg-white border-t border-gray-200">
+      <section className="py-8 md:py-12 px-4 bg-white border-t border-gray-200">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Challenges</h2>
-            <p className="text-xl text-gray-600">Discover the most exciting AI building opportunities</p>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Featured Challenges</h2>
           </div>
 
           {loadingChallenges ? (
             <div className="text-center text-gray-600">Loading challenges...</div>
           ) : featuredChallenges.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
               {featuredChallenges.map((challenge) => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
                   <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group" onClick={() => navigate(`/challenges/${challenge.id}`)}>
                 {challenge.image_url && (
-                  <div className="aspect-video w-full overflow-hidden rounded-t-lg relative">
+                  <div className="aspect-[4/3] w-full overflow-hidden rounded-t-lg relative">
                     <img
                       src={challenge.image_url}
                       alt={challenge.title}
@@ -165,70 +190,62 @@ const Index = () => {
                         console.log('Featured challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
-                    <Badge className="absolute top-2 left-2 bg-green-100 text-green-800 border-green-200">
-                      Active
+                    <Badge className={`absolute top-1 left-1 text-xs ${getStatusColor(challenge.status)}`}>
+                      {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                     </Badge>
                   </div>
                 )}
-                <CardHeader>
-                      <div className="flex items-start justify-between mb-2">
+                    <CardHeader className="pb-1 p-3">
+                      <div className="flex items-start justify-between mb-1">
                         {!challenge.image_url && (
-                          <Badge className="bg-green-100 text-green-800 border-green-200">
-                            Active
+                          <Badge className={`text-xs ${getStatusColor(challenge.status)}`}>
+                            {challenge.status.charAt(0).toUpperCase() + challenge.status.slice(1)}
                           </Badge>
                         )}
                         <div className="text-right ml-auto">
-                          <div className="text-xl font-bold text-gray-900">
+                          <div className="text-sm font-bold text-gray-900">
                             {formatPrize(challenge.prize_amount)}
                           </div>
-                          {challenge.prize_description && (
-                            <div className="text-gray-600 text-xs">{challenge.prize_description}</div>
-                          )}
                         </div>
                       </div>
-                      <CardTitle className="text-gray-900 text-lg mb-2 font-semibold group-hover:text-blue-600 transition-colors">
-                        {challenge.title}
-                      </CardTitle>
-                      <CardDescription className="text-gray-600">
-                        by {challenge.company_name || 'Anonymous'}
+                      <CardTitle className="text-gray-900 text-sm mb-1 font-semibold line-clamp-2">{challenge.title}</CardTitle>
+                      <CardDescription className="text-gray-600 text-xs">
+                        {challenge.company_name || 'Anonymous'}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-2 pt-0 p-3">
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {challenge.domains.slice(0, 2).map((domain, index) => (
-                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs">
+                          {challenge.domains.slice(0, 1).map((domain, index) => (
+                            <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 text-xs px-1 py-0">
                               {domain}
                             </Badge>
                           ))}
-                          {challenge.domains.length > 2 && (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs">
-                              +{challenge.domains.length - 2} more
+                          {challenge.domains.length > 1 && (
+                            <Badge variant="secondary" className="bg-gray-100 text-gray-600 border-gray-200 text-xs px-1 py-0">
+                              +{challenge.domains.length - 1}
                             </Badge>
                           )}
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Due: {formatDeadline(challenge.submission_deadline)}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
+                      <div className="text-xs text-gray-600">
+                        <div className="flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {daysLeft > 0 ? `${daysLeft} days left` : 'Ended'}
                         </div>
                       </div>
 
-                      <div className="pt-2">
+                      <div className="pt-1">
                         <Button 
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                          size="sm"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs py-1"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/challenges/${challenge.id}`);
                           }}
                         >
-                          View Challenge
+                          View
                         </Button>
                       </div>
                     </CardContent>

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { cleanupAuthState } from "@/utils/authCleanup";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const createAuthSchema = (mode: "signin" | "signup") => {
   const baseSchema = z.object({
@@ -22,6 +22,7 @@ const createAuthSchema = (mode: "signin" | "signup") => {
   if (mode === "signup") {
     return baseSchema.extend({
       fullName: z.string().min(2, "Full name must be at least 2 characters"),
+      role: z.enum(["participant", "sponsor", "evaluator"]),
     });
   }
 
@@ -49,6 +50,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       email: "",
       password: "",
       fullName: "",
+      role: "participant",
     },
   });
 
@@ -58,25 +60,26 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       email: "",
       password: "",
       fullName: "",
+      role: "participant",
     });
   });
 
   const handleSubmit = async (data: AuthFormData) => {
     console.log("=== FORM SUBMIT TRIGGERED ===");
-    console.log("Form data:", { email: data.email, mode, fullName: data.fullName });
-    
+    console.log("Form data:", { email: data.email, mode, fullName: data.fullName, role: data.role });
+
     if (isLoading) {
       console.log("Already loading, ignoring submit");
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Clean up any existing auth state first
       console.log("Cleaning up auth state...");
       cleanupAuthState();
-      
+
       // Try to sign out any existing session
       try {
         console.log("Attempting cleanup signout...");
@@ -87,13 +90,14 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
       if (mode === "signup") {
         console.log("=== STARTING SIGNUP PROCESS ===");
-        
+
         const { data: authData, error: signUpError } = await supabase.auth.signUp({
           email: data.email,
           password: data.password,
           options: {
             data: {
               full_name: data.fullName,
+              role: data.role,
             }
           }
         });
@@ -117,18 +121,18 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         if (authData.user && authData.session) {
           console.log("User created and signed in automatically");
           console.log("User ID:", authData.user.id);
-          
+
           toast({
             title: "Welcome!",
             description: "Your account has been created successfully.",
           });
-          
+
           // Navigate to dashboard
           navigate("/dashboard");
         }
       } else {
         console.log("=== STARTING SIGNIN PROCESS ===");
-        
+
         const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
           email: data.email,
           password: data.password,
@@ -144,12 +148,12 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         if (authData.user && authData.session) {
           console.log("User signed in successfully");
           console.log("User ID:", authData.user.id);
-          
+
           toast({
             title: "Welcome back!",
             description: "You have been signed in successfully.",
           });
-          
+
           // Navigate to dashboard
           navigate("/dashboard");
         }
@@ -157,9 +161,9 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
     } catch (error: any) {
       console.error("=== AUTH ERROR ===");
       console.error("Error details:", error);
-      
+
       let errorMessage = "An unexpected error occurred. Please try again.";
-      
+
       if (error.message) {
         if (error.message.includes("Invalid login credentials")) {
           errorMessage = "Invalid email or password. Please check your credentials and try again.";
@@ -173,7 +177,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           errorMessage = error.message;
         }
       }
-      
+
       toast({
         title: mode === "signin" ? "Sign in failed" : "Sign up failed",
         description: errorMessage,
@@ -202,26 +206,51 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             {mode === "signup" && (
-              <FormField
-                control={form.control}
-                name="fullName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-900">Full Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Enter your full name"
-                        className="border-gray-300 text-gray-900 placeholder:text-gray-500"
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <>
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-900">Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter your full name"
+                          className="border-gray-300 text-gray-900 placeholder:text-gray-500"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-gray-900">Role</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="border-gray-300 text-gray-900 placeholder:text-gray-500">
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="participant">Participant</SelectItem>
+                          <SelectItem value="sponsor">Sponsor</SelectItem>
+                          <SelectItem value="evaluator">Evaluator</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -241,7 +270,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="password"
@@ -277,7 +306,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                 </FormItem>
               )}
             />
-            
+
             <Button
               type="submit"
               disabled={isLoading}
@@ -287,7 +316,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             </Button>
           </form>
         </Form>
-        
+
         <div className="mt-6 text-center">
           <p className="text-gray-600">
             {mode === "signin" ? "Don't have an account?" : "Already have an account?"}

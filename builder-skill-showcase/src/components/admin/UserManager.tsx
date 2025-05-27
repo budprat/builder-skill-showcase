@@ -222,6 +222,8 @@ export const UserManager = () => {
                           <SelectContent>
                             <SelectItem value="participant">Participant</SelectItem>
                             <SelectItem value="company">Company</SelectItem>
+                            <SelectItem value="sponsor">Sponsor</SelectItem>
+                            <SelectItem value="evaluator">Evaluator</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>
