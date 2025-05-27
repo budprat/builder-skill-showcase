@@ -149,7 +149,7 @@ const Index = () => {
               {featuredChallenges.map((challenge) => {
                 const daysLeft = getDaysLeft(challenge.submission_deadline);
                 return (
-                  <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
+                  <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group" onClick={() => navigate(`/challenges/${challenge.id}`)}>
                 {challenge.image_url && (
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
                     <img
@@ -222,7 +222,10 @@ const Index = () => {
                       <div className="pt-2">
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                          onClick={() => navigate(`/challenges/${challenge.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/challenges/${challenge.id}`);
+                          }}
                         >
                           View Challenge
                         </Button>
