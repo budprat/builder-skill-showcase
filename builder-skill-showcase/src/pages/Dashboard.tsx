@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
 import { BadgeCollection } from "@/components/badges/BadgeCollection";
+import EvaluatorSubmissionManager from "@/components/evaluator/EvaluatorSubmissionManager";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Profile = Tables<"profiles">;
@@ -1708,35 +1709,7 @@ const Dashboard = () => {
 
               {userRole === 'evaluator' && (
                 <TabsContent value="evaluate" className="mt-0">
-                  <Card className="bg-white border-gray-200">
-                    <CardHeader>
-                      <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
-                        <Gavel className="h-6 w-6" />
-                        Evaluate Submissions
-                        <Button 
-                          onClick={() => navigate('/admin')}
-                          className="ml-auto bg-purple-600 hover:bg-purple-700 text-white"
-                        >
-                          <Gavel className="h-4 w-4 mr-2" />
-                          Go to Evaluation Panel
-                        </Button>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-12">
-                        <Gavel className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                        <p className="text-gray-600 text-lg">Evaluation Panel</p>
-                        <p className="text-gray-500 text-sm mt-2">Access the admin panel to evaluate submissions</p>
-                        <Button 
-                          onClick={() => navigate('/admin')}
-                          className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
-                        >
-                          <Gavel className="h-4 w-4 mr-2" />
-                          Start Evaluating
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <EvaluatorSubmissionManager />
                 </TabsContent>
               )}
             </div>
