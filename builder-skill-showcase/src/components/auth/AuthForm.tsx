@@ -122,6 +122,24 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           console.log("User created and signed in automatically");
           console.log("User ID:", authData.user.id);
 
+          // Ensure role is assigned (fallback if trigger doesn't work)
+          try {
+            const { error: roleError } = await (supabase as any)
+              .from('user_roles')
+              .insert({
+                user_id: authData.user.id,
+                role: data.role
+              });
+            
+            if (roleError && !roleError.message.includes('duplicate')) {
+              console.error("Error assigning role:", roleError);
+            } else {
+              console.log("Role assigned successfully:", data.role);
+            }
+          } catch (roleAssignError) {
+            console.error("Role assignment error:", roleAssignError);
+          }
+
           toast({
             title: "Welcome!",
             description: "Your account has been created successfully.",
