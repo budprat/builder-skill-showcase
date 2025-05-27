@@ -467,17 +467,17 @@ const ChallengeDetail = () => {
                       </div>
                     )}
                     <div className="space-y-2">
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
+                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white hover:bg-white/10">
                         <a href={submission.repository_url} target="_blank" rel="noopener noreferrer">
                           View Repository
                         </a>
                       </Button>
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
+                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white hover:bg-white/10">
                         <a href={submission.pitch_deck_url} target="_blank" rel="noopener noreferrer">
                           View Pitch Deck
                         </a>
                       </Button>
-                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white">
+                      <Button asChild variant="outline" size="sm" className="w-full border-white/20 text-white hover:bg-white/10">
                         <a href={submission.demo_video_url} target="_blank" rel="noopener noreferrer">
                           Watch Demo
                         </a>

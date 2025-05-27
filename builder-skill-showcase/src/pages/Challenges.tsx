@@ -254,19 +254,12 @@ const Challenges = () => {
 
                   <div className="flex gap-2 pt-2">
                     <Button 
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                       disabled={challenge.status === "completed" || daysLeft <= 0}
                       onClick={() => handleJoinChallenge(challenge.id)}
                     >
                       {challenge.status === "active" ? "Join Challenge" : 
                        challenge.status === "judging" ? "View Results" : "View Details"}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-white/20 text-white hover:bg-white/10"
-                      onClick={() => handleJoinChallenge(challenge.id)}
-                    >
-                      Details
                     </Button>
                   </div>
                 </CardContent>
