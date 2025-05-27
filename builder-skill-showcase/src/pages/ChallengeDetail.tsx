@@ -823,9 +823,3 @@ const ChallengeDetail = () => {
 };
 
 export default ChallengeDetail;
-      </div>
-    </div>
-  );
-};
-
-export default ChallengeDetail;
