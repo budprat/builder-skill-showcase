@@ -15,6 +15,10 @@ export const Header = () => {
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Debug logging
+  console.log('Header - User:', user?.id);
+  console.log('Header - User Role:', userRole);
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
