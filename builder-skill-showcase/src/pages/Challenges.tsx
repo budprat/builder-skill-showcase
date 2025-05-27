@@ -213,13 +213,17 @@ const Challenges = () => {
               <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md">
                 {challenge.image_url && (
                   <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-                    <img 
-                      src={challenge.image_url} 
+                    <img
+                      src={challenge.image_url}
                       alt={challenge.title}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         console.error('Failed to load challenge image:', challenge.image_url);
-                        e.currentTarget.parentElement!.style.display = 'none';
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Challenge image loaded successfully:', challenge.image_url);
                       }}
                     />
                   </div>

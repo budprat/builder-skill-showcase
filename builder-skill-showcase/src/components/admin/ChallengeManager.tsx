@@ -70,6 +70,19 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       if (error) throw error;
       console.log('Fetched challenges count:', data?.length || 0);
       console.log('Challenge IDs:', data?.map(c => c.id) || []);
+      
+      // Log image URLs for debugging
+      data?.forEach(challenge => {
+        if (challenge.image_url || challenge.image_urls) {
+          console.log(`Challenge "${challenge.title}" images:`, {
+            image_url: challenge.image_url,
+            image_urls: challenge.image_urls,
+            image_urls_type: typeof challenge.image_urls,
+            image_urls_is_array: Array.isArray(challenge.image_urls)
+          });
+        }
+      });
+      
       setChallenges(data || []);
     } catch (error) {
       console.error('Error fetching challenges:', error);

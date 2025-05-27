@@ -344,7 +344,11 @@ const ChallengeDetail = () => {
                         className="w-full max-w-md h-64 object-cover rounded-lg border shadow-sm"
                         onError={(e) => {
                           console.error('Failed to load primary image:', challenge.image_url);
-                          e.currentTarget.style.display = 'none';
+                          const target = e.currentTarget as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                        onLoad={() => {
+                          console.log('Primary image loaded successfully:', challenge.image_url);
                         }}
                       />
                     </div>
@@ -363,7 +367,11 @@ const ChallengeDetail = () => {
                             onClick={() => window.open(url, '_blank')}
                             onError={(e) => {
                               console.error('Failed to load additional image:', url);
-                              e.currentTarget.style.display = 'none';
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                            onLoad={() => {
+                              console.log('Additional image loaded successfully:', url);
                             }}
                           />
                         ))}

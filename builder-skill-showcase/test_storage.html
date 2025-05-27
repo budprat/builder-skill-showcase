@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Storage Test</title>
+</head>
+<body>
+    <h1>Storage Access Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Test if we can access the storage bucket
+        async function testStorage() {
+            const results = document.getElementById('results');
+            
+            // Try to fetch a test image from the storage
+            const testUrls = [
+                'https://udjwjoymlofdocclufxv.supabase.co/storage/v1/object/public/user-files/',
+                // Add any specific image URLs you've uploaded
+            ];
+            
+            for (const url of testUrls) {
+                try {
+                    const response = await fetch(url);
+                    results.innerHTML += `<p>URL: ${url} - Status: ${response.status}</p>`;
+                } catch (error) {
+                    results.innerHTML += `<p>URL: ${url} - Error: ${error.message}</p>`;
+                }
+            }
+        }
+        
+        testStorage();
+    </script>
+</body>
+</html>
