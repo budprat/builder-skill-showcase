@@ -138,4 +138,8 @@ BEGIN
   END LOOP;
 END $$;
 
-RAISE NOTICE 'Diagnostic script completed. Check the results above to identify the issue.';
+-- Diagnostic script completed
+DO $$
+BEGIN
+  RAISE NOTICE 'Diagnostic script completed. Check the results above to identify the issue.';
+END $$;
