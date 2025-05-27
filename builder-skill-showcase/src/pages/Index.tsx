@@ -189,10 +189,6 @@ const Index = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">
-                        {challenge.description}
-                      </p>
-
                       {challenge.domains && challenge.domains.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {challenge.domains.slice(0, 2).map((domain, index) => (
