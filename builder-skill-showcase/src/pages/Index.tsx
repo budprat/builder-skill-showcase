@@ -90,26 +90,25 @@ const Index = () => {
       <Header />
 
       {/* Hero Section - Foundry of Future AI Leaders */}
-      <section className="relative section-spacing px-4">
+      <section className="relative py-12 md:py-16 px-4">
         <div className="container mx-auto text-center relative z-10">
-          <div className="max-w-5xl mx-auto content-spacing">
+          <div className="max-w-4xl mx-auto">
             {/* Elite Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 mb-6 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 mb-4 animate-fade-in">
               <Star className="w-4 h-4" />
               <span>The Foundry of Future AI Leaders</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight animate-fade-in">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4 leading-tight animate-fade-in">
               Build the Future of{" "}
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 AI Products
               </span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed max-w-4xl mx-auto animate-fade-in">
+            <p className="text-lg md:text-xl text-gray-600 mb-6 leading-relaxed max-w-3xl mx-auto animate-fade-in">
               Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
-              build cutting-edge prototypes, and shape the next generation of AI applications in our 
-              prestigious innovation accelerator.
+              build cutting-edge prototypes, and shape the next generation of AI applications.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
