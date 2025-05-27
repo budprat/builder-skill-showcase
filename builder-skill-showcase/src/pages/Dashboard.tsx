@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { User, Settings, Trophy, Upload, Plus, Edit, Trash2, ExternalLink, Star, FileText, Eye, Users } from "lucide-react";
+import { User, Settings, Trophy, Upload, Plus, Edit, Trash2, ExternalLink, Star, FileText, Eye, Users, MapPin, Mail, Github, Linkedin, Globe, Gavel } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
