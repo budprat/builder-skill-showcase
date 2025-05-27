@@ -212,27 +212,22 @@ const Challenges = () => {
             return (
               <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md">
                 {challenge.image_url && (
-                        <img 
-                          src={challenge.image_url} 
-                          alt={challenge.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.error('Failed to load challenge image:', challenge.image_url);
-                            console.error('Image URL parts:', {
-                              fullUrl: challenge.image_url,
-                              containsUserFiles: challenge.image_url.includes('user-files'),
-                              containsChallenges: challenge.image_url.includes('challenges'),
-                              isHttps: challenge.image_url.startsWith('https://')
-                            });
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.src = '/placeholder.svg';
-                            target.alt = 'Challenge image not available';
-                          }}
-                          onLoad={() => {
-                            console.log('Challenge image loaded successfully:', challenge.image_url);
-                          }}
-                        />
-                      )}
+                  <div className="aspect-video w-full overflow-hidden rounded-t-lg">
+                    <img
+                      src={challenge.image_url}
+                      alt={challenge.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load challenge image:', challenge.image_url);
+                        const target = e.currentTarget as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={() => {
+                        console.log('Challenge image loaded successfully:', challenge.image_url);
+                      }}
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <Badge className={getStatusColor(challenge.status)}>
