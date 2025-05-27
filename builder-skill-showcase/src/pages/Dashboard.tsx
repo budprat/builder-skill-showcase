@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { User, Settings, Trophy, Upload, Plus, Edit, Trash2, ExternalLink, Star, FileText, Eye, Users, MapPin, Mail, Github, Linkedin, Globe, Gavel } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,16 @@ const Dashboard = () => {
     readme_notes: "",
   });
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCreateChallengeDialogOpen, setIsCreateChallengeDialogOpen] = useState(false);
+  const [challengeFormData, setChallengeFormData] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+    submission_deadline: "",
+    prize_amount: "",
+    difficulty_level: "",
+    challenge_type: "",
+  });
 
   const [profileData, setProfileData] = useState({
     full_name: "",
@@ -294,6 +305,56 @@ const Dashboard = () => {
       readme_notes: submission.readme_notes || "",
     });
     setIsEditDialogOpen(true);
+  };
+
+  const createChallenge = async () => {
+    if (!user || userRole !== 'sponsor') return;
+
+    setUpdating(true);
+    try {
+      const { error } = await supabase
+        .from('challenges')
+        .insert({
+          title: challengeFormData.title,
+          description: challengeFormData.description,
+          requirements: challengeFormData.requirements,
+          submission_deadline: challengeFormData.submission_deadline,
+          prize_amount: parseFloat(challengeFormData.prize_amount) || null,
+          difficulty_level: challengeFormData.difficulty_level,
+          challenge_type: challengeFormData.challenge_type,
+          company_id: user.id,
+          company_name: profileData.full_name || user.email?.split('@')[0] || 'Company',
+          status: 'active',
+          created_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Challenge created successfully",
+      });
+
+      setIsCreateChallengeDialogOpen(false);
+      setChallengeFormData({
+        title: "",
+        description: "",
+        requirements: "",
+        submission_deadline: "",
+        prize_amount: "",
+        difficulty_level: "",
+        challenge_type: "",
+      });
+      await fetchChallenges();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create challenge",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const updateSubmission = async () => {
@@ -1001,13 +1062,134 @@ const Dashboard = () => {
                       <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
                         <Plus className="h-6 w-6" />
                         My Challenges
-                        <Button 
-                          onClick={() => navigate('/admin')}
-                          className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Challenge
-                        </Button>
+                        <Dialog open={isCreateChallengeDialogOpen} onOpenChange={setIsCreateChallengeDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button className="ml-auto bg-blue-600 hover:bg-blue-700 text-white">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Create Challenge
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border-gray-200">
+                            <DialogHeader>
+                              <DialogTitle className="text-gray-900">Create New Challenge</DialogTitle>
+                              <DialogDescription>
+                                Create a new coding challenge for participants to solve
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="challenge_title" className="text-gray-900">Challenge Title</Label>
+                                <Input
+                                  id="challenge_title"
+                                  value={challengeFormData.title}
+                                  onChange={(e) => setChallengeFormData({...challengeFormData, title: e.target.value})}
+                                  placeholder="Enter challenge title"
+                                  className="mt-1 border-gray-300 text-gray-900"
+                                />
+                              </div>
+
+                              <div>
+                                <Label htmlFor="challenge_description" className="text-gray-900">Description</Label>
+                                <Textarea
+                                  id="challenge_description"
+                                  value={challengeFormData.description}
+                                  onChange={(e) => setChallengeFormData({...challengeFormData, description: e.target.value})}
+                                  placeholder="Describe the challenge in detail"
+                                  rows={3}
+                                  className="mt-1 border-gray-300 text-gray-900"
+                                />
+                              </div>
+
+                              <div>
+                                <Label htmlFor="challenge_requirements" className="text-gray-900">Requirements</Label>
+                                <Textarea
+                                  id="challenge_requirements"
+                                  value={challengeFormData.requirements}
+                                  onChange={(e) => setChallengeFormData({...challengeFormData, requirements: e.target.value})}
+                                  placeholder="List the technical requirements and constraints"
+                                  rows={3}
+                                  className="mt-1 border-gray-300 text-gray-900"
+                                />
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="challenge_deadline" className="text-gray-900">Submission Deadline</Label>
+                                  <Input
+                                    id="challenge_deadline"
+                                    type="datetime-local"
+                                    value={challengeFormData.submission_deadline}
+                                    onChange={(e) => setChallengeFormData({...challengeFormData, submission_deadline: e.target.value})}
+                                    className="mt-1 border-gray-300 text-gray-900"
+                                  />
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="challenge_prize" className="text-gray-900">Prize Amount ($)</Label>
+                                  <Input
+                                    id="challenge_prize"
+                                    type="number"
+                                    value={challengeFormData.prize_amount}
+                                    onChange={(e) => setChallengeFormData({...challengeFormData, prize_amount: e.target.value})}
+                                    placeholder="1000"
+                                    className="mt-1 border-gray-300 text-gray-900"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="challenge_difficulty" className="text-gray-900">Difficulty Level</Label>
+                                  <Select value={challengeFormData.difficulty_level} onValueChange={(value) => setChallengeFormData({...challengeFormData, difficulty_level: value})}>
+                                    <SelectTrigger className="mt-1 border-gray-300 text-gray-900">
+                                      <SelectValue placeholder="Select difficulty" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="beginner">Beginner</SelectItem>
+                                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                                      <SelectItem value="advanced">Advanced</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div>
+                                  <Label htmlFor="challenge_type" className="text-gray-900">Challenge Type</Label>
+                                  <Select value={challengeFormData.challenge_type} onValueChange={(value) => setChallengeFormData({...challengeFormData, challenge_type: value})}>
+                                    <SelectTrigger className="mt-1 border-gray-300 text-gray-900">
+                                      <SelectValue placeholder="Select type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="web_development">Web Development</SelectItem>
+                                      <SelectItem value="mobile_development">Mobile Development</SelectItem>
+                                      <SelectItem value="data_science">Data Science</SelectItem>
+                                      <SelectItem value="machine_learning">Machine Learning</SelectItem>
+                                      <SelectItem value="algorithms">Algorithms</SelectItem>
+                                      <SelectItem value="system_design">System Design</SelectItem>
+                                      <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end space-x-2 pt-4">
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => setIsCreateChallengeDialogOpen(false)}
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button 
+                                  onClick={createChallenge} 
+                                  disabled={updating || !challengeFormData.title || !challengeFormData.description}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                  {updating ? "Creating..." : "Create Challenge"}
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -1017,7 +1199,7 @@ const Dashboard = () => {
                           <p className="text-gray-600 text-lg">No challenges created yet</p>
                           <p className="text-gray-500 text-sm mt-2">Create your first challenge to get started!</p>
                           <Button 
-                            onClick={() => navigate('/admin')}
+                            onClick={() => setIsCreateChallengeDialogOpen(true)}
                             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <Plus className="h-4 w-4 mr-2" />
