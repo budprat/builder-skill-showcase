@@ -114,7 +114,7 @@ const Index = () => {
             </h1>
 
             <p className="text-base md:text-lg text-gray-600 mb-3 leading-relaxed max-w-2xl mx-auto animate-fade-in">
-              Join elite AI builders in solving real-world challenges. Compete for substantial prizes, 
+              Join elite Creators in solving real-world challenges. Compete for Prizes, 
               build cutting-edge prototypes, and shape the next generation of AI applications.
             </p>
 
