@@ -3,13 +3,21 @@
 CREATE OR REPLACE FUNCTION handle_new_user_role()
 RETURNS TRIGGER AS $$
 DECLARE
+  user_role_text TEXT;
   user_role app_role;
 BEGIN
-  -- Get the role from user metadata, default to 'participant'
-  user_role := COALESCE(
-    (NEW.raw_user_meta_data->>'role')::app_role,
-    'participant'::app_role
-  );
+  -- Get the role from user metadata as text first
+  user_role_text := COALESCE(NEW.raw_user_meta_data->>'role', 'participant');
+  
+  -- Convert to enum with validation
+  BEGIN
+    user_role := user_role_text::app_role;
+  EXCEPTION 
+    WHEN invalid_text_representation THEN
+      -- If the role is invalid, default to participant
+      user_role := 'participant'::app_role;
+      RAISE WARNING 'Invalid role % provided for user %, defaulting to participant', user_role_text, NEW.id;
+  END;
   
   -- Log the role assignment attempt
   RAISE NOTICE 'Assigning role % to user %', user_role, NEW.id;
