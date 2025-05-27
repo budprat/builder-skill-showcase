@@ -253,8 +253,6 @@ const Challenges = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-0">
-                  <p className="text-gray-700 text-sm line-clamp-3">{challenge.description}</p>
-
                   {challenge.domains && challenge.domains.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {challenge.domains.slice(0, 3).map((domain) => (
