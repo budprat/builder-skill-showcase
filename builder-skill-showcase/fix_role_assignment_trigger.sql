@@ -1,9 +1,10 @@
 
 -- Fix role assignment trigger for new user signups
 
--- Drop existing trigger and function if they exist
+-- Drop existing trigger and function if they exist (trigger first, then function)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP FUNCTION IF EXISTS public.handle_new_user_role();
+DROP TRIGGER IF EXISTS on_auth_user_created_role_assignment ON auth.users;
+DROP FUNCTION IF EXISTS public.handle_new_user_role() CASCADE;
 
 -- Create improved function to handle new user role assignment
 CREATE OR REPLACE FUNCTION public.handle_new_user_role()
