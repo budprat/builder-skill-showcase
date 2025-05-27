@@ -349,8 +349,9 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="edit-profile">Edit Profile</TabsTrigger>
             <TabsTrigger value="submissions">My Submissions</TabsTrigger>
             <TabsTrigger value="files">Documents</TabsTrigger>
           </TabsList>
@@ -361,6 +362,93 @@ const Dashboard = () => {
                 <CardTitle className="flex items-center gap-2">
                   <User className="h-5 w-5" />
                   Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Full Name</Label>
+                    <p className="text-base font-medium">{profileData.full_name || "Not provided"}</p>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Username</Label>
+                    <p className="text-base font-medium">{profileData.username || "Not provided"}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Bio</Label>
+                  <p className="text-base">{profileData.bio || "No bio provided"}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Location</Label>
+                    <p className="text-base">{profileData.location || "Not provided"}</p>
+                  </div>
+                  
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Experience Level</Label>
+                    <Badge variant="outline" className="mt-1">
+                      {profileData.experience_level ? profileData.experience_level.charAt(0).toUpperCase() + profileData.experience_level.slice(1) : "Not specified"}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground">Links</Label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {profileData.github_url && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">GitHub:</span>
+                        <a href={profileData.github_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                          {profileData.github_url}
+                        </a>
+                      </div>
+                    )}
+                    {profileData.linkedin_url && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">LinkedIn:</span>
+                        <a href={profileData.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                          {profileData.linkedin_url}
+                        </a>
+                      </div>
+                    )}
+                    {profileData.portfolio_url && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">Portfolio:</span>
+                        <a href={profileData.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                          {profileData.portfolio_url}
+                        </a>
+                      </div>
+                    )}
+                    {!profileData.github_url && !profileData.linkedin_url && !profileData.portfolio_url && (
+                      <p className="text-sm text-muted-foreground">No links provided</p>
+                    )}
+                  </div>
+                </div>
+
+                {profileData.skills && profileData.skills.length > 0 && (
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Skills</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {profileData.skills.map((skill, index) => (
+                        <Badge key={index} variant="secondary">{skill}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="edit-profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Edit Profile
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
