@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -81,7 +80,7 @@ const EvaluatorSubmissionManager = () => {
             created_at
           )
         `)
-        .eq('status', 'submitted')
+        .eq('status', 'reviewed')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -100,7 +99,7 @@ const EvaluatorSubmissionManager = () => {
 
   const openScoreDialog = (submission: SubmissionWithDetails) => {
     setSelectedSubmission(submission);
-    
+
     // Check if user has already scored this submission
     const existingScore = submission.scores?.find(score => score.evaluator_id === user?.id);
     if (existingScore) {
@@ -120,7 +119,7 @@ const EvaluatorSubmissionManager = () => {
         feedback: "",
       });
     }
-    
+
     setIsScoreDialogOpen(true);
   };
 
@@ -149,7 +148,7 @@ const EvaluatorSubmissionManager = () => {
 
       // Check if score already exists
       const existingScore = selectedSubmission.scores?.find(score => score.evaluator_id === user.id);
-      
+
       if (existingScore) {
         // Update existing score
         const { error } = await supabase
@@ -218,10 +217,10 @@ const EvaluatorSubmissionManager = () => {
       <CardHeader>
         <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
           <Gavel className="h-6 w-6" />
-          Submissions to Evaluate
+          Reviewed Submissions to Evaluate
         </CardTitle>
         <CardDescription>
-          Review and score participant submissions
+          Score participant submissions that have been reviewed
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -236,7 +235,7 @@ const EvaluatorSubmissionManager = () => {
             {submissions.map((submission) => {
               const evaluationStatus = getUserEvaluationStatus(submission);
               const userScore = submission.scores?.find(score => score.evaluator_id === user?.id);
-              
+
               return (
                 <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <div className="flex items-start justify-between">
@@ -245,8 +244,8 @@ const EvaluatorSubmissionManager = () => {
                         <h3 className="font-semibold text-gray-900 text-lg">
                           {submission.challenges?.title}
                         </h3>
-                        <Badge className={getStatusColor(submission.status || 'submitted')}>
-                          {submission.status || 'submitted'}
+                        <Badge className={getStatusColor(submission.status || 'reviewed')}>
+                          {submission.status || 'reviewed'}
                         </Badge>
                         <Badge 
                           variant={evaluationStatus === 'evaluated' ? 'default' : 'outline'}
@@ -267,7 +266,7 @@ const EvaluatorSubmissionManager = () => {
                       <p className="text-gray-600 mb-2">
                         <strong>Participant:</strong> {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
                       </p>
-                      
+
                       <p className="text-gray-600 mb-2">
                         <strong>Company:</strong> {submission.challenges?.company_name || 'N/A'}
                       </p>

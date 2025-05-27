@@ -8,10 +8,11 @@ ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Evaluators can view all submissions" ON submissions;
 DROP POLICY IF EXISTS "Evaluators can view submissions" ON submissions;
 DROP POLICY IF EXISTS "Admin and evaluators can view submissions" ON submissions;
+DROP POLICY IF EXISTS "Evaluators can view submitted submissions" ON submissions;
 
--- Create a comprehensive policy for evaluators to view submissions
-CREATE POLICY "Evaluators can view submitted submissions" ON submissions FOR SELECT USING (
-  status = 'submitted' AND (
+-- Create a policy for evaluators to view only REVIEWED submissions
+CREATE POLICY "Evaluators can view reviewed submissions" ON submissions FOR SELECT USING (
+  status = 'reviewed' AND (
     EXISTS (
       SELECT 1 FROM user_roles ur 
       WHERE ur.user_id = auth.uid() AND ur.role IN ('evaluator', 'admin')
@@ -19,22 +20,21 @@ CREATE POLICY "Evaluators can view submitted submissions" ON submissions FOR SEL
   )
 );
 
+-- Ensure participants can still view their own submissions
+CREATE POLICY "Participants can view own submissions" ON submissions FOR SELECT USING (
+  participant_id = auth.uid()
+);
+
 -- Ensure evaluators can view challenge details
 DROP POLICY IF EXISTS "Evaluators can view challenges" ON challenges;
-CREATE POLICY "Evaluators can view challenges" ON challenges FOR SELECT USING (
-  EXISTS (
-    SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = auth.uid() AND ur.role IN ('evaluator', 'admin', 'participant')
-  )
+CREATE POLICY "All authenticated can view challenges" ON challenges FOR SELECT USING (
+  auth.uid() IS NOT NULL
 );
 
 -- Ensure evaluators can view participant profiles
 DROP POLICY IF EXISTS "Evaluators can view profiles" ON profiles;
-CREATE POLICY "Evaluators can view profiles" ON profiles FOR SELECT USING (
-  EXISTS (
-    SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = auth.uid() AND ur.role IN ('evaluator', 'admin')
-  )
+CREATE POLICY "All authenticated can view profiles" ON profiles FOR SELECT USING (
+  auth.uid() IS NOT NULL
 );
 
 -- Fix scores table policies
@@ -56,6 +56,12 @@ GRANT SELECT ON profiles TO authenticated;
 GRANT ALL ON scores TO authenticated;
 
 -- Verify the setup
+SELECT 
+  'Current submissions with reviewed status:' as info,
+  COUNT(*) as reviewed_count
+FROM submissions 
+WHERE status = 'reviewed';
+
 SELECT 
   'Current evaluator users:' as info,
   u.email,
