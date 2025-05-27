@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { User, FileText, Trophy, Upload, Trash2, Edit, Eye, Settings, MapPin, Github, Linkedin, Globe, Mail } from "lucide-react";
+import { User, FileText, Trophy, Upload, Trash2, Edit, Eye, Settings, MapPin, Github, Linkedin, Globe, Mail, Plus, Gavel } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/files/FileUpload";
@@ -21,10 +22,12 @@ type Profile = Tables<"profiles">;
 type Submission = Tables<"submissions">;
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, userRole } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [challenges, setChallenges] = useState<any[]>([]);
   const [updating, setUpdating] = useState(false);
   const [deletingSubmissionId, setDeletingSubmissionId] = useState<string | null>(null);
   const [editingSubmissionId, setEditingSubmissionId] = useState<string | null>(null);
@@ -52,8 +55,28 @@ const Dashboard = () => {
     if (user) {
       fetchProfile();
       fetchSubmissions();
+      if (userRole === 'sponsor') {
+        fetchChallenges();
+      }
     }
-  }, [user]);
+  }, [user, userRole]);
+
+  const fetchChallenges = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .eq('company_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setChallenges(data || []);
+    } catch (error) {
+      console.error('Error fetching challenges:', error);
+    }
+  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -390,6 +413,24 @@ const Dashboard = () => {
                       <FileText className="h-4 w-4 mr-2" />
                       Documents
                     </TabsTrigger>
+                    {userRole === 'sponsor' && (
+                      <TabsTrigger 
+                        value="my-challenges" 
+                        className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        My Challenges ({challenges.length})
+                      </TabsTrigger>
+                    )}
+                    {userRole === 'evaluator' && (
+                      <TabsTrigger 
+                        value="evaluate" 
+                        className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
+                      >
+                        <Gavel className="h-4 w-4 mr-2" />
+                        Evaluate Submissions
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </CardContent>
               </Card>
@@ -952,6 +993,113 @@ const Dashboard = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              {userRole === 'sponsor' && (
+                <TabsContent value="my-challenges" className="mt-0">
+                  <Card className="bg-white border-gray-200">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+                        <Plus className="h-6 w-6" />
+                        My Challenges
+                        <Button 
+                          onClick={() => navigate('/admin')}
+                          className="ml-auto bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Challenge
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {challenges.length === 0 ? (
+                        <div className="text-center py-12">
+                          <Plus className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                          <p className="text-gray-600 text-lg">No challenges created yet</p>
+                          <p className="text-gray-500 text-sm mt-2">Create your first challenge to get started!</p>
+                          <Button 
+                            onClick={() => navigate('/admin')}
+                            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Create Challenge
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {challenges.map((challenge: any) => (
+                            <div key={challenge.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:bg-gray-100 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-gray-900 text-lg">{challenge.title}</h3>
+                                  <p className="text-gray-600 mt-1">{challenge.description}</p>
+                                  <div className="flex items-center gap-2 mt-3">
+                                    <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-800">
+                                      {challenge.status || 'Active'}
+                                    </Badge>
+                                    {challenge.prize_amount && (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                        ${challenge.prize_amount}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 ml-4">
+                                  <div className="text-sm text-gray-600">
+                                    {new Date(challenge.submission_deadline).toLocaleDateString()}
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigate(`/challenges/${challenge.id}`)}
+                                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
+
+              {userRole === 'evaluator' && (
+                <TabsContent value="evaluate" className="mt-0">
+                  <Card className="bg-white border-gray-200">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+                        <Gavel className="h-6 w-6" />
+                        Evaluate Submissions
+                        <Button 
+                          onClick={() => navigate('/admin')}
+                          className="ml-auto bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <Gavel className="h-4 w-4 mr-2" />
+                          Go to Evaluation Panel
+                        </Button>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12">
+                        <Gavel className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                        <p className="text-gray-600 text-lg">Evaluation Panel</p>
+                        <p className="text-gray-500 text-sm mt-2">Access the admin panel to evaluate submissions</p>
+                        <Button 
+                          onClick={() => navigate('/admin')}
+                          className="mt-4 bg-purple-600 hover:bg-purple-700 text-white"
+                        >
+                          <Gavel className="h-4 w-4 mr-2" />
+                          Start Evaluating
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )}
             </div>
           </div>
         </Tabs>
