@@ -35,6 +35,8 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
 
   const fetchBadges = async () => {
     try {
+      console.log('Fetching badges for user:', userId);
+      
       // Fetch user's earned badges
       const { data: earnedBadges, error: earnedError } = await supabase
         .from('user_badges')
@@ -44,7 +46,12 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
         `)
         .eq('user_id', userId);
 
-      if (earnedError) throw earnedError;
+      if (earnedError) {
+        console.error('Error fetching user badges:', earnedError);
+        throw earnedError;
+      }
+
+      console.log('User badges fetched:', earnedBadges);
 
       // Fetch all available badges
       const { data: badges, error: badgesError } = await supabase
@@ -52,7 +59,12 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
         .select('*')
         .order('name');
 
-      if (badgesError) throw badgesError;
+      if (badgesError) {
+        console.error('Error fetching all badges:', badgesError);
+        throw badgesError;
+      }
+
+      console.log('All badges fetched:', badges);
 
       setUserBadges(earnedBadges || []);
       setAllBadges(badges || []);
@@ -60,7 +72,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
       console.error('Error fetching badges:', error);
       toast({
         title: "Error",
-        description: "Failed to load badges",
+        description: `Failed to load badges: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
