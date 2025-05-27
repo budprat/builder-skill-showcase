@@ -5,62 +5,62 @@
 
 @layer base {
   :root {
-    /* Primary Colors - Foundation & Trust */
-    --background: 240 24% 96%; /* Lunar Grey #F0F4F8 */
-    --foreground: 215 25% 27%; /* Graphite #334155 */
+    /* Light Theme - Clean and Modern */
+    --background: 0 0% 100%; /* Pure White #FFFFFF */
+    --foreground: 210 40% 10%; /* Very Dark Gray #1A1A1A */
 
     /* Card backgrounds */
-    --card: 216 33% 97%; /* Lighter Lunar Grey #E1E8F0 */
-    --card-foreground: 215 25% 27%; /* Graphite */
+    --card: 0 0% 100%; /* Pure White */
+    --card-foreground: 210 40% 10%; /* Very Dark Gray */
 
-    --popover: 0 0% 100%; /* Titanium White */
-    --popover-foreground: 215 25% 27%; /* Graphite */
+    --popover: 0 0% 100%; /* Pure White */
+    --popover-foreground: 210 40% 10%; /* Very Dark Gray */
 
-    /* Primary Brand - Deep Space Blue */
-    --primary: 215 100% 12%; /* Deep Space Blue #0A192F */
-    --primary-foreground: 0 0% 100%; /* Titanium White */
+    /* Primary Brand - Professional Blue */
+    --primary: 211 100% 40%; /* Professional Blue #0066CC */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    /* Secondary - Subtle greys */
-    --secondary: 215 20% 65%; /* Stardust Silver #A0AEC0 */
-    --secondary-foreground: 215 25% 27%; /* Graphite */
+    /* Secondary - Light greys for subtle elements */
+    --secondary: 210 20% 96%; /* Very Light Gray #F8F9FA */
+    --secondary-foreground: 210 20% 40%; /* Medium Gray #666666 */
 
-    --muted: 216 33% 97%; /* Light Lunar Grey */
-    --muted-foreground: 215 16% 47%; /* Between Stardust Silver and Graphite */
+    --muted: 210 20% 96%; /* Very Light Gray #F8F9FA */
+    --muted-foreground: 210 15% 46%; /* Medium Gray #737373 */
 
-    /* Accent - Cyber Teal */
-    --accent: 177 100% 48%; /* Cyber Teal #00F5D4 */
-    --accent-foreground: 215 100% 12%; /* Deep Space Blue */
+    /* Accent - Professional Blue */
+    --accent: 211 100% 40%; /* Professional Blue #0066CC */
+    --accent-foreground: 0 0% 100%; /* White */
 
     /* Destructive - Error Red */
     --destructive: 0 84% 60%; /* Error Red #EF4444 */
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs */
-    --border: 215 20% 82%; /* Light Stardust Silver */
-    --input: 215 20% 82%;
-    --ring: 177 100% 48%; /* Cyber Teal for focus rings */
+    --border: 214 32% 84%; /* Light Gray Border #D1D5DB */
+    --input: 214 32% 84%; /* Light Gray */
+    --ring: 211 100% 40%; /* Professional Blue for focus rings */
 
     --radius: 0.5rem;
 
     /* Sidebar colors */
-    --sidebar-background: 215 100% 12%; /* Deep Space Blue */
-    --sidebar-foreground: 215 20% 75%; /* Light Stardust Silver */
-    --sidebar-primary: 177 100% 48%; /* Cyber Teal */
+    --sidebar-background: 0 0% 100%; /* White */
+    --sidebar-foreground: 210 40% 10%; /* Very Dark Gray */
+    --sidebar-primary: 211 100% 40%; /* Professional Blue */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 95% 15%; /* Slightly lighter Deep Space Blue */
-    --sidebar-accent-foreground: 215 20% 75%;
-    --sidebar-border: 215 90% 18%;
-    --sidebar-ring: 177 100% 48%;
+    --sidebar-accent: 210 20% 96%; /* Very Light Gray */
+    --sidebar-accent-foreground: 210 40% 10%;
+    --sidebar-border: 214 32% 84%;
+    --sidebar-ring: 211 100% 40%;
 
     /* Additional semantic colors */
     --success: 142 71% 45%; /* Success Green #10B981 */
     --warning: 38 92% 50%; /* Warning Amber #F59E0B */
-    --nebula-purple: 258 100% 69%; /* Nebula Purple #7B61FF */
-    --solar-flare: 38 100% 56%; /* Solar Flare Orange #FF9F1C */
+    --professional-blue: 211 100% 40%; /* Professional Blue #0066CC */
+    --text-gray: 210 20% 40%; /* Medium Gray #666666 */
   }
 
   .dark {
-    /* Dark theme with Deep Space Blue as primary background */
+    /* Dark theme preserved for potential theme switching */
     --background: 215 100% 12%; /* Deep Space Blue */
     --foreground: 0 0% 100%; /* Titanium White */
 
@@ -89,7 +89,7 @@
     --input: 215 90% 18%;
     --ring: 177 100% 48%;
 
-    --sidebar-background: 215 100% 8%; /* Even darker Deep Space Blue */
+    --sidebar-background: 215 100% 8%;
     --sidebar-foreground: 215 20% 75%;
     --sidebar-primary: 177 100% 48%;
     --sidebar-primary-foreground: 215 100% 12%;
@@ -110,58 +110,42 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Typography hierarchy following the design system */
+  /* Typography hierarchy for light theme */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-semibold tracking-tight text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   h1 {
-    @apply text-4xl lg:text-5xl;
+    @apply text-4xl lg:text-5xl font-bold;
   }
 
   h2 {
-    @apply text-3xl lg:text-4xl;
+    @apply text-3xl lg:text-4xl font-bold;
   }
 
   h3 {
-    @apply text-2xl lg:text-3xl;
+    @apply text-2xl lg:text-3xl font-semibold;
   }
 
   h4 {
-    @apply text-xl lg:text-2xl;
+    @apply text-xl lg:text-2xl font-semibold;
   }
 
   h5 {
-    @apply text-lg lg:text-xl;
+    @apply text-lg lg:text-xl font-medium;
   }
 
   h6 {
-    @apply text-base lg:text-lg;
+    @apply text-base lg:text-lg font-medium;
   }
 
-  /* Custom utility classes for the design system */
-  .text-cyber-teal {
-    color: hsl(var(--accent));
-  }
-
-  .bg-cyber-teal {
-    background-color: hsl(var(--accent));
-  }
-
-  .text-nebula-purple {
-    color: hsl(var(--nebula-purple));
-  }
-
-  .bg-nebula-purple {
-    background-color: hsl(var(--nebula-purple));
-  }
-
-  .text-deep-space {
+  /* Custom utility classes for the light design system */
+  .text-professional-blue {
     color: hsl(var(--primary));
   }
 
-  .bg-deep-space {
+  .bg-professional-blue {
     background-color: hsl(var(--primary));
   }
 
@@ -181,81 +165,76 @@
     background-color: hsl(var(--warning));
   }
 
-  .text-solar-flare {
-    color: hsl(var(--solar-flare));
+  .text-gray {
+    color: hsl(var(--text-gray));
   }
 
-  .bg-solar-flare {
-    background-color: hsl(var(--solar-flare));
-  }
-
-  /* Geometric patterns and tech-inspired backgrounds */
-  .circuit-pattern {
-    background-image: 
-      radial-gradient(circle at 1px 1px, hsl(var(--accent)) 1px, transparent 0);
-    background-size: 20px 20px;
-    opacity: 0.05;
-  }
-
-  .data-grid {
-    background-image: 
-      linear-gradient(hsl(var(--border)) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.1;
-  }
-
-  /* Sophisticated card styling */
+  /* Clean modern card styling */
   .elite-card {
-    @apply bg-card border border-border/50 rounded-lg shadow-sm;
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--card)/0.8));
+    @apply bg-card border border-border rounded-lg;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .elite-card-hover {
-    @apply elite-card transition-all duration-300 hover:shadow-md hover:border-accent/20;
+    @apply elite-card transition-all duration-300;
   }
 
-  /* Premium badge styling */
+  .elite-card-hover:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Modern badge styling */
   .elite-badge {
     @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
-    color: hsl(var(--primary));
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .elite-badge-success {
+    @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
+    background-color: hsl(var(--success));
+    color: white;
   }
 
   .elite-badge-secondary {
     @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium;
-    background: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--solar-flare)));
-    color: white;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
   }
 
-  /* Futuristic button styles */
+  /* Professional button styles */
   .cta-primary {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-200;
-    box-shadow: 0 4px 14px hsl(var(--accent)/0.3);
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200;
+    box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
   }
 
   .cta-primary:hover {
-    box-shadow: 0 6px 20px hsl(var(--accent)/0.4);
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
     transform: translateY(-1px);
   }
 
-  /* Progress and status indicators */
-  .progress-cyber {
-    background: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--nebula-purple)));
+  .cta-outline {
+    @apply border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground transition-all duration-200;
   }
 
-  /* Focus states with cyber teal */
-  .focus-cyber:focus {
-    @apply outline-none ring-2 ring-accent ring-offset-2;
+  /* Progress and status indicators */
+  .progress-primary {
+    background: hsl(var(--primary));
+  }
+
+  /* Focus states with professional blue */
+  .focus-primary:focus {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
   }
 
   /* Subtle animations for micro-interactions */
   .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-0.5;
+    @apply transition-transform duration-200 hover:-translate-y-1;
   }
 
-  .glow-accent {
-    box-shadow: 0 0 20px hsl(var(--accent)/0.3);
+  .glow-primary {
+    box-shadow: 0 0 20px hsl(var(--primary)/0.2);
   }
 
   /* Grid system for structured layouts */
@@ -276,9 +255,30 @@
   .content-spacing {
     @apply space-y-8 lg:space-y-12;
   }
+
+  /* Light theme specific utilities */
+  .gradient-bg-light {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+  }
+
+  .header-border {
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .subtle-shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-shadow {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-shadow-hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 }
 
-/* Scrollbar styling for a polished look */
+/* Modern scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -288,10 +288,50 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--accent));
+  background: hsl(var(--primary));
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--accent)/0.8);
+  background: hsl(var(--primary)/0.8);
+}
+
+/* Light theme specific component overrides */
+.light-header {
+  background: white;
+  border-bottom: 1px solid hsl(var(--border));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.light-card {
+  background: white;
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.light-input {
+  background: white;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.light-input:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary)/0.2);
+}
+
+/* Status badge variants for light theme */
+.status-active {
+  background-color: hsl(var(--success));
+  color: white;
+}
+
+.status-completed {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.status-pending {
+  background-color: hsl(var(--warning));
+  color: white;
 }
