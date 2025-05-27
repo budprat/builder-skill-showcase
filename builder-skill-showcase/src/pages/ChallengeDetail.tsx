@@ -814,11 +814,15 @@ const ChallengeDetail = () => {
                   </Button>
                 </CardContent>
               </Card>
-            ```text
-
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChallengeDetail;
       </div>
     </div>
   );
