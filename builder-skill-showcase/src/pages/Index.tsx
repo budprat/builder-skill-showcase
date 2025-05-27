@@ -1,16 +1,34 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Trophy, Users, Zap, Target, Star, Award, Code2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Trophy, Users, Zap, Target, Star, Award, Code2, Calendar, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { SampleDataCreator } from "@/components/admin/SampleDataCreator";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  company_name: string;
+  domains: string[];
+  prize_amount: number;
+  prize_description: string;
+  submission_deadline: string;
+  status: string;
+  created_at: string;
+}
 
 const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showAdminTools, setShowAdminTools] = useState(false);
+  const [featuredChallenges, setFeaturedChallenges] = useState<Challenge[]>([]);
+  const [loadingChallenges, setLoadingChallenges] = useState(true);
 
   // Show admin tools if user email contains 'admin' or is a specific test email
   useEffect(() => {
@@ -18,6 +36,54 @@ const Index = () => {
       setShowAdminTools(true);
     }
   }, [user]);
+
+  // Fetch featured challenges
+  useEffect(() => {
+    fetchFeaturedChallenges();
+  }, []);
+
+  const fetchFeaturedChallenges = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .eq('status', 'active')
+        .order('prize_amount', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setFeaturedChallenges(data || []);
+    } catch (error) {
+      console.error('Error fetching featured challenges:', error);
+    } finally {
+      setLoadingChallenges(false);
+    }
+  };
+
+  const formatPrize = (amount: number) => {
+    if (!amount) return 'TBD';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDeadline = (deadline: string) => {
+    return new Date(deadline).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
+  const getDaysLeft = (deadline: string) => {
+    const now = new Date();
+    const deadlineDate = new Date(deadline);
+    const diffTime = deadlineDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,6 +219,105 @@ const Index = () => {
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Win & Get Recognized</h3>
               <p className="text-gray-600 leading-relaxed">Submit your solution for expert judging and compete for prizes and career opportunities</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Challenges Section */}
+      <section className="section-spacing px-4 bg-white border-t border-gray-200">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Featured Challenges</h2>
+            <p className="text-xl text-gray-600">Discover the most exciting AI building opportunities</p>
+          </div>
+          
+          {loadingChallenges ? (
+            <div className="text-center text-gray-600">Loading challenges...</div>
+          ) : featuredChallenges.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {featuredChallenges.map((challenge) => {
+                const daysLeft = getDaysLeft(challenge.submission_deadline);
+                return (
+                  <Card key={challenge.id} className="bg-white border-gray-200 hover:bg-gray-50 transition-all cursor-pointer shadow-sm hover:shadow-md group">
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-2">
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          Active
+                        </Badge>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-gray-900">
+                            {formatPrize(challenge.prize_amount)}
+                          </div>
+                          {challenge.prize_description && (
+                            <div className="text-gray-600 text-xs">{challenge.prize_description}</div>
+                          )}
+                        </div>
+                      </div>
+                      <CardTitle className="text-gray-900 text-lg mb-2 font-semibold group-hover:text-blue-600 transition-colors">
+                        {challenge.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-600">
+                        by {challenge.company_name || 'Anonymous'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">
+                        {challenge.description}
+                      </p>
+
+                      {challenge.domains && challenge.domains.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {challenge.domains.slice(0, 2).map((domain, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                              {domain}
+                            </Badge>
+                          ))}
+                          {challenge.domains.length > 2 && (
+                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                              +{challenge.domains.length - 2} more
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center text-gray-600">
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Due: {formatDeadline(challenge.submission_deadline)}
+                        </div>
+                        <div className="flex items-center text-gray-600">
+                          <Clock className="h-4 w-4 mr-2" />
+                          {daysLeft > 0 ? `${daysLeft} days left` : 'Deadline passed'}
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                          onClick={() => navigate(`/challenges/${challenge.id}`)}
+                        >
+                          View Challenge
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center text-gray-600">No active challenges available at the moment.</div>
+          )}
+          
+          <div className="text-center">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-2 border-gray-300 text-gray-700 hover:bg-gray-50 text-lg px-8 py-4 hover-lift font-medium"
+              onClick={() => navigate("/challenges")}
+            >
+              View All Challenges
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </section>
