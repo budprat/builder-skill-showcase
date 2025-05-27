@@ -214,6 +214,7 @@ export const AdminPanel = () => {
             <Button 
               variant="outline"
               className="w-full"
+              onClick={awardMissingFirstSubmissionBadges}
             >
               Award Missing "First Steps" Badges
             </Button>
