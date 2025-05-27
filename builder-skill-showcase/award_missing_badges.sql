@@ -28,7 +28,11 @@ SELECT
 FROM users_missing_badge umb
 CROSS JOIN badges b
 WHERE b.badge_type = 'first_submission'
-ON CONFLICT (user_id, badge_id) DO NOTHING;
+  AND NOT EXISTS (
+    SELECT 1 FROM user_badges ub2 
+    WHERE ub2.user_id = umb.user_id 
+    AND ub2.badge_id = b.id
+  );
 
 -- Show the results
 SELECT 
