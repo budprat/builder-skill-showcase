@@ -1654,13 +1654,11 @@ const Dashboard = () => {
                                       <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                      <SelectItem value="web_development">Web Development</SelectItem>
-                                      <SelectItem value="mobile_development">Mobile Development</SelectItem>
-                                      <SelectItem value="data_science">Data Science</SelectItem>
-                                      <SelectItem value="machine_learning">Machine Learning</SelectItem>
-                                      <SelectItem value="algorithms">Algorithms</SelectItem>
-                                      <SelectItem value="system_design">System Design</SelectItem>
-                                      <SelectItem value="other">Other</SelectItem>
+                                      <SelectItem value="standard">Standard</SelectItem>
+                                      <SelectItem value="hackathon">Hackathon</SelectItem>
+                                      <SelectItem value="competition">Competition</SelectItem>
+                                      <SelectItem value="bounty">Bounty</SelectItem>
+                                      <SelectItem value="research">Research</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
