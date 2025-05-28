@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit, Trash2, Trophy, Calendar, Users, DollarSign, FileText, Github, Play, Star } from "lucide-react";
@@ -16,7 +17,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type Challenge = Tables<"challenges">;
 
-const SponsorChallengeManager = () => {
+export const SponsorChallengeManager = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [challenges, setChallenges] = useState<Challenge[]>([]);
@@ -924,5 +925,3 @@ const SponsorChallengeManager = () => {
     </div>
   );
 };
-
-export default SponsorChallengeManager;
