@@ -67,9 +67,6 @@ const ChallengeDetail = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { checkAndAwardBadges } = useBadges();
-  
-  // Check if user came from dashboard overview
-  const [showBackButton, setShowBackButton] = useState(true);
 
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -93,15 +90,6 @@ const ChallengeDetail = () => {
       fetchRulesGuidelines();
     }
   }, [id, user]);
-
-  useEffect(() => {
-    // Check if user came from dashboard overview
-    const referrer = document.referrer;
-    const currentOrigin = window.location.origin;
-    if (referrer.includes(`${currentOrigin}/dashboard`) || referrer.includes(`${currentOrigin}/#/dashboard`)) {
-      setShowBackButton(false);
-    }
-  }, []);
 
   const fetchChallenge = async () => {
     try {
@@ -302,18 +290,16 @@ const ChallengeDetail = () => {
 
       <div className="container mx-auto px-4 py-8">
         {/* Navigation */}
-        {showBackButton && (
-          <div className="mb-6">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/challenges")}
-              className="border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Challenges
-            </Button>
-          </div>
-        )}
+        <div className="mb-6">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/challenges")}
+            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Challenges
+          </Button>
+        </div>
 
         {/* Main Content with Challenge Header */}
         <div className="mb-6">
