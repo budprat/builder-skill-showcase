@@ -936,48 +936,6 @@ export const SponsorChallengeManager = () => {
                             No evaluation scores yet
                           </div>
                         </div>
-
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-blue-600">
-                                      {score.technical_implementation || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-500">Technical</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-green-600">
-                                      {score.innovation || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-500">Innovation</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-purple-600">
-                                      {score.presentation || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-500">Presentation</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-orange-600">
-                                      {score.practicality || 0}
-                                    </div>
-                                    <div className="text-xs text-gray-500">Practicality</div>
-                                  </div>
-                                </div>
-
-                                {score.feedback && (
-                                  <div className="mt-3 p-3 bg-gray-50 rounded">
-                                    <strong className="text-gray-900">Evaluator Feedback:</strong>
-                                    <p className="text-gray-700 mt-1">{score.feedback}</p>
-                                  </div>
-                                )}
-
-                                <p className="text-xs text-gray-500 mt-2">
-                                  Evaluated: {new Date(score.created_at).toLocaleDateString()}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
                       )}
                     </div>
                   ))}
