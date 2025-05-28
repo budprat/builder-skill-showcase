@@ -611,6 +611,44 @@ const Dashboard = () => {
     );
   }
 
+  const handleProfileUpdate = async (updatedData: any) => {
+    if (!user) return;
+
+    try {
+      // Sanitize inputs
+      const sanitizedData = {
+        ...updatedData,
+        full_name: updatedData.full_name?.trim().substring(0, 100),
+        bio: updatedData.bio?.trim().substring(0, 500),
+        location: updatedData.location?.trim().substring(0, 100),
+        github_url: updatedData.github_url?.trim().match(/^https:\/\/github\.com\/[a-zA-Z0-9-]+\/?$/) ? updatedData.github_url : null,
+        linkedin_url: updatedData.linkedin_url?.trim().match(/^https:\/\/linkedin\.com\/in\/[a-zA-Z0-9-]+\/?$/) ? updatedData.linkedin_url : null,
+        portfolio_url: updatedData.portfolio_url?.trim().match(/^https?:\/\/[^\s<>"]+$/) ? updatedData.portfolio_url : null,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(sanitizedData)
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+      fetchProfile();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -944,7 +982,7 @@ const Dashboard = () => {
                     </div>
 
                     <Button 
-                      onClick={updateProfile} 
+                      onClick={() => handleProfileUpdate(profileData)}
                       disabled={updating}
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
