@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Eye, FileText, Github, Play, Gavel, Star } from "lucide-react";
+import { Eye, FileText, Github, Play, Gavel, Star, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -280,13 +280,28 @@ const EvaluatorSubmissionManager = () => {
   return (
     <Card className="bg-white border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
-          <Gavel className="h-6 w-6" />
-          Reviewed Submissions to Evaluate
-        </CardTitle>
-        <CardDescription>
-          Score participant submissions that have been reviewed
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+              <Gavel className="h-6 w-6" />
+              Reviewed Submissions to Evaluate
+            </CardTitle>
+            <CardDescription>
+              Score participant submissions that have been reviewed
+            </CardDescription>
+          </div>
+          <Button
+            onClick={() => {
+              const dashboardTab = document.querySelector('[value="score-dashboard"]') as HTMLElement;
+              dashboardTab?.click();
+            }}
+            variant="outline"
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            View Score Analytics
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {submissions.length === 0 ? (

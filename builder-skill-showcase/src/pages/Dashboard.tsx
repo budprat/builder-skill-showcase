@@ -18,6 +18,7 @@ import { BadgeCollection } from "@/components/badges/BadgeCollection";
 import { SponsorChallengeManager } from "@/components/admin/SponsorChallengeManager";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import EvaluatorSubmissionManager from "@/components/evaluator/EvaluatorSubmissionManager";
+import ScoreDashboard from "@/components/evaluator/ScoreDashboard";
 
 interface Challenge {
   id: string;
@@ -268,6 +269,7 @@ const Dashboard = () => {
                 {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
                 {console.log('Current user role for evaluator tab:', userRole)}
                 <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
+                <TabsTrigger value="score-dashboard">Score Analytics</TabsTrigger>
               </>
             )}
             {userRole === 'sponsor' && (
@@ -673,17 +675,28 @@ const Dashboard = () => {
           </TabsContent>
 
           {userRole === 'evaluator' && (
-            <TabsContent value="evaluator" className="space-y-6">
-              {console.log('=== EVALUATOR TAB CONTENT RENDERED ===')}
-              {console.log('User role for evaluator tab:', userRole)}
-              <RoleGuard 
-                allowedRoles={['evaluator']} 
-                fallbackMessage="Only evaluators can evaluate submissions."
-              >
-                {console.log('=== INSIDE ROLE GUARD FOR EVALUATOR ===')}
-                <EvaluatorSubmissionManager />
-              </RoleGuard>
-            </TabsContent>
+            <>
+              <TabsContent value="evaluator" className="space-y-6">
+                {console.log('=== EVALUATOR TAB CONTENT RENDERED ===')}
+                {console.log('User role for evaluator tab:', userRole)}
+                <RoleGuard 
+                  allowedRoles={['evaluator']} 
+                  fallbackMessage="Only evaluators can evaluate submissions."
+                >
+                  {console.log('=== INSIDE ROLE GUARD FOR EVALUATOR ===')}
+                  <EvaluatorSubmissionManager />
+                </RoleGuard>
+              </TabsContent>
+              
+              <TabsContent value="score-dashboard" className="space-y-6">
+                <RoleGuard 
+                  allowedRoles={['evaluator']} 
+                  fallbackMessage="Only evaluators can view score analytics."
+                >
+                  <ScoreDashboard />
+                </RoleGuard>
+              </TabsContent>
+            </>
           )}
 
           {userRole === 'sponsor' && (
