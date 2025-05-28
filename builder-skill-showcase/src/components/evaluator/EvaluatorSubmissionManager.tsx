@@ -25,11 +25,12 @@ interface SubmissionWithDetails extends Submission {
 
 const EvaluatorSubmissionManager = () => {
   console.log('=== EVALUATOR SUBMISSION MANAGER MOUNTED ===');
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { toast } = useToast();
   
   console.log('EvaluatorSubmissionManager - User:', user?.id);
   console.log('EvaluatorSubmissionManager - User exists:', !!user);
+  console.log('EvaluatorSubmissionManager - User role:', userRole);
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
@@ -44,11 +45,14 @@ const EvaluatorSubmissionManager = () => {
   });
 
   useEffect(() => {
-    console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id);
-    if (user) {
+    console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id, 'userRole:', userRole);
+    if (user && userRole === 'evaluator') {
+      console.log('EvaluatorSubmissionManager - User and role confirmed, fetching submissions');
       fetchSubmissions();
+    } else {
+      console.log('EvaluatorSubmissionManager - Missing user or role:', { hasUser: !!user, userRole });
     }
-  }, [user]);
+  }, [user, userRole]);
 
   const fetchSubmissions = async () => {
     if (!user) {
