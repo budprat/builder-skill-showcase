@@ -398,91 +398,99 @@ const EvaluatorSubmissionManager = () => {
                       )}
 
                       {/* AI Score Report */}
-                      {submission.scores && submission.scores.length > 0 && (
-                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                            <BarChart3 className="h-4 w-4 text-purple-600" />
-                            AI Score Report
-                          </h4>
+                      {(() => {
+                        const aiScore = submission.scores?.find(score => 
+                          score.llm_scores || 
+                          score.pre_screening_score !== null
+                        );
+                        if (!aiScore) return null;
 
-                          {/* Check if this is an AI evaluation (has pre_screening_score or llm_scores) */}
-                          {(submission.scores[0].pre_screening_score !== undefined || submission.scores[0].llm_scores) ? (
-                            <>
-                              {/* Overall Score Display */}
-                              <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
-                                <div>
-                                  <div className="text-sm text-gray-600">Overall AI Score</div>
-                                  <div className="text-2xl font-bold text-purple-600">
-                                    {parseFloat(submission.scores[0].total_score || '0').toFixed(1)}/100
-                                  </div>
-                                </div>
-                                <Badge className="bg-green-100 text-green-800 border-green-200">
-                                  {submission.scores[0].status || 'completed'}
-                                </Badge>
-                              </div>
+                        return (
+                          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-purple-600" />
+                              AI Score Report
+                            </h4>
 
-                              {/* Repository Analysis */}
-                              {submission.scores[0].pre_screening_score !== undefined && (
-                                <div className="mb-4 p-3 bg-white rounded border">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium text-sm">Repository Validation</span>
-                                    <span className="font-bold text-lg">{submission.scores[0].pre_screening_score || 0}/5</span>
-                                  </div>
-                                  <p className="text-xs text-gray-600">
-                                    {(submission.scores[0].pre_screening_score || 0) === 5 
-                                      ? "✅ Repository exists and contains README.md" 
-                                      : "❌ Repository validation failed - missing repository or README.md"}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Detailed LLM Scores */}
-                              {submission.scores[0].llm_scores && (
-                                <div className="space-y-3 mb-4">
-                                  <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
-                                  {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                    <div key={criterion} className="bg-white p-3 rounded border">
-                                      <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium text-sm text-gray-900">
-                                          {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                        </span>
-                                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                                          {scoreData.score?.toFixed(1) || '0'}/20
-                                        </Badge>
-                                      </div>
-                                      {scoreData.explanation && (
-                                        <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded">
-                                          {scoreData.explanation}
-                                        </p>
-                                      )}
+                            {/* Check if this is an AI evaluation (has pre_screening_score or llm_scores) */}
+                            {(submission.scores[0].pre_screening_score !== null || submission.scores[0].llm_scores) ? (
+                              <>
+                                {/* Overall Score Display */}
+                                <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
+                                  <div>
+                                    <div className="text-sm text-gray-600">Overall AI Score</div>
+                                    <div className="text-2xl font-bold text-purple-600">
+                                      {parseFloat(submission.scores[0].total_score || '0').toFixed(1)}/100
                                     </div>
-                                  ))}
+                                  </div>
+                                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                                    {submission.scores[0].status || 'completed'}
+                                  </Badge>
                                 </div>
-                              )}
 
-                              {/* AI Feedback */}
-                              {submission.scores[0].feedback && (
-                                <div className="mt-4">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <FileText className="h-4 w-4 text-amber-600" />
-                                    <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                                {/* Repository Analysis */}
+                                {submission.scores[0].pre_screening_score !== undefined && (
+                                  <div className="mb-4 p-3 bg-white rounded border">
+                                    <div className="flex justify-between items-center mb-2">
+                                      <span className="font-medium text-sm">Repository Validation</span>
+                                      <span className="font-bold text-lg">{submission.scores[0].pre_screening_score || 0}/5</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600">
+                                      {(submission.scores[0].pre_screening_score || 0) === 5 
+                                        ? "✅ Repository exists and contains README.md" 
+                                        : "❌ Repository validation failed - missing repository or README.md"}
+                                    </p>
                                   </div>
-                                  <div className="bg-white p-3 rounded border border-amber-100">
-                                    <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                )}
+
+                                {/* Detailed LLM Scores */}
+                                {submission.scores[0].llm_scores && (
+                                  <div className="space-y-3 mb-4">
+                                    <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
+                                    {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                      <div key={criterion} className="bg-white p-3 rounded border">
+                                        <div className="flex justify-between items-center mb-2">
+                                          <span className="font-medium text-sm text-gray-900">
+                                            {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                          </span>
+                                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                                            {scoreData.score?.toFixed(1) || '0'}/20
+                                          </Badge>
+                                        </div>
+                                        {scoreData.explanation && (
+                                          <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded">
+                                            {scoreData.explanation}
+                                          </p>
+                                        )}
+                                      </div>
+                                    ))}
                                   </div>
-                                </div>
-                              )}
-                            </>
-                          ) : (
-                            /* Show when AI scores are not available */
-                            <div className="text-center py-8">
-                              <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                              <p className="text-gray-600 text-sm">No AI evaluation scores available</p>
-                              <p className="text-gray-500 text-xs mt-1">This submission may have been manually evaluated</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                                )}
+
+                                {/* AI Feedback */}
+                                {submission.scores[0].feedback && (
+                                  <div className="mt-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <FileText className="h-4 w-4 text-amber-600" />
+                                      <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                                    </div>
+                                    <div className="bg-white p-3 rounded border border-amber-100">
+                                      <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              /* Show when AI scores are not available */
+                              <div className="text-center py-8">
+                                <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                                <p className="text-gray-600 text-sm">No AI evaluation scores available</p>
+                                <p className="text-gray-500 text-xs mt-1">This submission may have been manually evaluated</p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     <div className="ml-4">
