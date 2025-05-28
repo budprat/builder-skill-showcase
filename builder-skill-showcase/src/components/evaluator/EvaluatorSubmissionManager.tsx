@@ -44,18 +44,28 @@ const EvaluatorSubmissionManager = () => {
     feedback: "",
   });
 
+  // Force immediate fetch when component mounts and user is available
   useEffect(() => {
     console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id, 'userRole:', userRole);
     console.log('EvaluatorSubmissionManager useEffect - Dependencies:', { user: !!user, userRole });
     
-    if (user) {
+    if (user?.id) {
       console.log('EvaluatorSubmissionManager - User confirmed, fetching submissions');
       fetchSubmissions();
     } else {
-      console.log('EvaluatorSubmissionManager - No user found');
+      console.log('EvaluatorSubmissionManager - No user found, setting loading to false');
       setLoading(false);
     }
   }, [user?.id]);
+
+  // Also trigger fetch when both user and userRole are available
+  useEffect(() => {
+    console.log('EvaluatorSubmissionManager - Role effect triggered, user:', !!user, 'userRole:', userRole);
+    if (user?.id && userRole === 'evaluator') {
+      console.log('EvaluatorSubmissionManager - Both user and evaluator role confirmed, fetching submissions');
+      fetchSubmissions();
+    }
+  }, [user?.id, userRole]);
 
   const fetchSubmissions = async () => {
     if (!user) {
