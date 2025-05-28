@@ -78,8 +78,7 @@ const EvaluatorSubmissionManager = () => {
           profiles (
             id,
             full_name,
-            username,
-            email
+            username
           ),
           scores (
             id,
