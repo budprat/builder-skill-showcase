@@ -24,8 +24,12 @@ interface SubmissionWithDetails extends Submission {
 }
 
 const EvaluatorSubmissionManager = () => {
+  console.log('=== EVALUATOR SUBMISSION MANAGER MOUNTED ===');
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  console.log('EvaluatorSubmissionManager - User:', user?.id);
+  console.log('EvaluatorSubmissionManager - User exists:', !!user);
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
