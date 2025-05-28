@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +59,7 @@ interface UserBadge {
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -69,6 +71,15 @@ const Dashboard = () => {
   console.log('Loading state:', loading);
   console.log('User email:', user?.email);
   console.log('Is evaluator?:', userRole === 'evaluator');
+  
+  // Redirect admin users to admin panel
+  useEffect(() => {
+    if (userRole === 'admin') {
+      navigate('/admin');
+      return;
+    }
+  }, [userRole, navigate]);
+
   const [submitting, setSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -246,20 +257,20 @@ const Dashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            {(userRole === 'participant' || !userRole || userRole === 'admin') && (
+            {(userRole === 'participant' || !userRole) && (
               <>
                 <TabsTrigger value="submissions">My Submissions</TabsTrigger>
                 <TabsTrigger value="badges">Badges</TabsTrigger>
               </>
             )}
-            {(userRole === 'evaluator' || userRole === 'admin') && (
+            {userRole === 'evaluator' && (
               <>
                 {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
                 {console.log('Current user role for evaluator tab:', userRole)}
                 <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
               </>
             )}
-            {(userRole === 'sponsor' || userRole === 'admin') && (
+            {userRole === 'sponsor' && (
               <TabsTrigger value="sponsor">Manage Challenges</TabsTrigger>
             )}
           </TabsList>
@@ -667,13 +678,13 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          {(userRole === 'evaluator' || userRole === 'admin') && (
+          {userRole === 'evaluator' && (
             <TabsContent value="evaluator" className="space-y-6">
               {console.log('=== EVALUATOR TAB CONTENT RENDERED ===')}
               {console.log('User role for evaluator tab:', userRole)}
               <RoleGuard 
-                allowedRoles={['evaluator', 'admin']} 
-                fallbackMessage="Only evaluators and administrators can evaluate submissions."
+                allowedRoles={['evaluator']} 
+                fallbackMessage="Only evaluators can evaluate submissions."
               >
                 {console.log('=== INSIDE ROLE GUARD FOR EVALUATOR ===')}
                 <EvaluatorSubmissionManager />
@@ -681,11 +692,11 @@ const Dashboard = () => {
             </TabsContent>
           )}
 
-          {(userRole === 'sponsor' || userRole === 'admin') && (
+          {userRole === 'sponsor' && (
             <TabsContent value="sponsor" className="space-y-6">
               <RoleGuard 
-                allowedRoles={['sponsor', 'admin']} 
-                fallbackMessage="Only sponsors and administrators can manage challenges."
+                allowedRoles={['sponsor']} 
+                fallbackMessage="Only sponsors can manage challenges."
               >
                 <SponsorChallengeManager />
               </RoleGuard>
