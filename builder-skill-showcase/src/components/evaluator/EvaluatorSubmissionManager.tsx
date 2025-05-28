@@ -28,6 +28,9 @@ const EvaluatorSubmissionManager = () => {
   const { toast } = useToast();
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+
+  console.log('=== EVALUATOR SUBMISSION MANAGER RENDERED ===');
+  console.log('Component mounted, user:', user?.id);
   const [evaluating, setEvaluating] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionWithDetails | null>(null);
   const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
@@ -46,6 +49,10 @@ const EvaluatorSubmissionManager = () => {
   }, [user]);
 
   const fetchSubmissions = async () => {
+    console.log('=== FETCH SUBMISSIONS CALLED ===');
+    console.log('User exists:', !!user);
+    console.log('User ID:', user?.id);
+    
     if (!user) {
       console.log('No user found, skipping fetch');
       return;
