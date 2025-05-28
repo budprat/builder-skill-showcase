@@ -106,11 +106,12 @@ const Dashboard = () => {
   const fetchChallenges = async () => {
     try {
       if (userRole === 'sponsor' && user) {
-        // Fetch challenges created by the sponsor
+        // Fetch challenges created by the sponsor only
         const { data, error } = await supabase
           .from('challenges')
           .select('*')
           .eq('company_id', user.id)
+          .not('company_id', 'is', null)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
