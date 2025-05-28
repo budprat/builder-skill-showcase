@@ -52,7 +52,7 @@ const EvaluatorSubmissionManager = () => {
     console.log('=== FETCH SUBMISSIONS CALLED ===');
     console.log('User exists:', !!user);
     console.log('User ID:', user?.id);
-    
+
     if (!user) {
       console.log('No user found, skipping fetch');
       return;
@@ -108,8 +108,7 @@ const EvaluatorSubmissionManager = () => {
           profiles (
             id,
             full_name,
-            username,
-            email
+            username
           ),
           scores (
             id,
@@ -174,7 +173,7 @@ const EvaluatorSubmissionManager = () => {
         innovation: existingScore.innovation || 0,
         presentation: existingScore.presentation || 0,
         practicality: existingScore.practicality || 0,
-        feedback: existingScore.feedback || "",
+        feedback: "",
       });
     } else {
       setScoreData({
