@@ -37,8 +37,7 @@ SELECT
   company_id,
   status
 FROM challenges 
-WHERE company_id IS NULL 
-   OR company_id = '';
+WHERE company_id IS NULL;
 
 -- Check user roles
 SELECT 
