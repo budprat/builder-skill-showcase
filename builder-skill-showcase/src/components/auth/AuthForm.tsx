@@ -39,6 +39,8 @@ interface AuthFormProps {
 }
 
 export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
