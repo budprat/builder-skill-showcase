@@ -111,11 +111,16 @@ const Dashboard = () => {
           .from('challenges')
           .select('*')
           .eq('company_id', user.id)
-          .not('company_id', 'is', null)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setChallenges(data || []);
+        
+        // Additional client-side filtering to ensure only sponsor's challenges
+        const sponsorChallenges = (data || []).filter(challenge => 
+          challenge.company_id === user.id
+        );
+        
+        setChallenges(sponsorChallenges);
       } else {
         // For other users, fetch active challenges
         const { data, error } = await supabase
