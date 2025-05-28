@@ -1,2 +1,432 @@
-Analysis: The task is to integrate the SponsorChallengeManager component into the Dashboard, making it accessible via a tab for users with "sponsor" or "admin" roles and also add missing imports and replace tab content.
-```
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, User, Trophy, Upload, ExternalLink, Github, Play, FileText, Plus, Edit, Trash2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { Header } from "@/components/layout/Header";
+import { useToast } from "@/hooks/use-toast";
+import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
+import { SponsorChallengeManager } from "@/components/admin/SponsorChallengeManager";
+import { RoleGuard } from "@/components/auth/RoleGuard";
+
+interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  company_name: string;
+  domains: string[];
+  prize_amount: number;
+  submission_deadline: string;
+  status: string;
+}
+
+interface Submission {
+  id: string;
+  challenge_id: string;
+  challenge_title: string;
+  repository_url: string;
+  pitch_deck_url: string;
+  demo_video_url: string;
+  submitted_at: string;
+  status: string;
+  score?: number;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  badge_type: string;
+  icon_url?: string;
+}
+
+interface UserBadge {
+  id: string;
+  badge_id: string;
+  awarded_at: string;
+  badges: Badge;
+}
+
+const Dashboard = () => {
+  const { user, userRole } = useAuth();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    company_name: "",
+    domains: "",
+    prize_amount: "",
+    submission_deadline: "",
+    challenge_type: "standard",
+  });
+
+  useEffect(() => {
+    if (user) {
+      fetchChallenges();
+      fetchSubmissions();
+      fetchUserBadges();
+    }
+  }, [user]);
+
+  const fetchChallenges = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setChallenges(data || []);
+    } catch (error) {
+      console.error('Error fetching challenges:', error);
+    }
+  };
+
+  const fetchSubmissions = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('submissions')
+        .select(`
+          *,
+          challenges(title)
+        `)
+        .eq('user_id', user.id)
+        .order('submitted_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const formattedSubmissions = data?.map(submission => ({
+        ...submission,
+        challenge_title: submission.challenges?.title || 'Unknown Challenge'
+      })) || [];
+      
+      setSubmissions(formattedSubmissions);
+    } catch (error) {
+      console.error('Error fetching submissions:', error);
+    }
+  };
+
+  const fetchUserBadges = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select(`
+          *,
+          badges(*)
+        `)
+        .eq('user_id', user.id)
+        .order('awarded_at', { ascending: false });
+
+      if (error) throw error;
+      setUserBadges(data || []);
+    } catch (error) {
+      console.error('Error fetching user badges:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    
+    setSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('challenges')
+        .insert([{
+          title: formData.title,
+          description: formData.description,
+          company_name: formData.company_name,
+          company_id: user.id,
+          domains: formData.domains.split(',').map(d => d.trim()),
+          prize_amount: parseInt(formData.prize_amount),
+          submission_deadline: formData.submission_deadline,
+          challenge_type: formData.challenge_type,
+          status: 'active'
+        }]);
+
+      if (error) throw error;
+
+      setIsDialogOpen(false);
+      setFormData({
+        title: "",
+        description: "",
+        company_name: "",
+        domains: "",
+        prize_amount: "",
+        submission_deadline: "",
+        challenge_type: "standard",
+      });
+      fetchChallenges();
+
+      toast({
+        title: "Success",
+        description: "Challenge created successfully",
+      });
+    } catch (error: any) {
+      console.error('Error creating challenge:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create challenge",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatPrize = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'submitted': return 'bg-blue-500';
+      case 'under_review': return 'bg-yellow-500';
+      case 'evaluated': return 'bg-green-500';
+      case 'rejected': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading your dashboard...</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+          <p className="text-gray-600">Manage your challenges, submissions, and track your progress</p>
+        </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="submissions">My Submissions</TabsTrigger>
+            <TabsTrigger value="badges">Badges</TabsTrigger>
+            {(userRole === 'sponsor' || userRole === 'admin') && (
+              <TabsTrigger value="sponsor">Manage Challenges</TabsTrigger>
+            )}
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Challenges</CardTitle>
+                  <Trophy className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{challenges.length}</div>
+                  <p className="text-xs text-muted-foreground">Available to participate</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">My Submissions</CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{submissions.length}</div>
+                  <p className="text-xs text-muted-foreground">Total submissions made</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
+                  <Trophy className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{userBadges.length}</div>
+                  <p className="text-xs text-muted-foreground">Achievements unlocked</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Challenges</CardTitle>
+                  <CardDescription>Latest challenges available for participation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {challenges.slice(0, 3).map((challenge) => (
+                      <div key={challenge.id} className="flex items-center space-x-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{challenge.title}</p>
+                          <p className="text-sm text-gray-500 truncate">{challenge.company_name}</p>
+                          <p className="text-xs text-gray-400">Prize: {formatPrize(challenge.prize_amount)}</p>
+                        </div>
+                        <Badge variant="secondary">{challenge.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Submissions</CardTitle>
+                  <CardDescription>Your latest challenge submissions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {submissions.slice(0, 3).map((submission) => (
+                      <div key={submission.id} className="flex items-center space-x-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{submission.challenge_title}</p>
+                          <p className="text-xs text-gray-400">
+                            Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge className={getStatusColor(submission.status)}>
+                          {submission.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="submissions" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>My Submissions</CardTitle>
+                <CardDescription>Track all your challenge submissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {submissions.map((submission) => (
+                    <div key={submission.id} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{submission.challenge_title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">
+                            Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2">
+                            {submission.repository_url && (
+                              <a
+                                href={submission.repository_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                <Github className="h-4 w-4" />
+                                Repository
+                              </a>
+                            )}
+                            {submission.demo_video_url && (
+                              <a
+                                href={submission.demo_video_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                <Play className="h-4 w-4" />
+                                Demo
+                              </a>
+                            )}
+                            {submission.pitch_deck_url && (
+                              <a
+                                href={submission.pitch_deck_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                              >
+                                <FileText className="h-4 w-4" />
+                                Pitch Deck
+                              </a>
+                            )}
+                          </div>
+                          {submission.score && (
+                            <p className="text-sm text-green-600 mt-2">Score: {submission.score}/100</p>
+                          )}
+                        </div>
+                        <Badge className={getStatusColor(submission.status)}>
+                          {submission.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                  {submissions.length === 0 && (
+                    <p className="text-center text-gray-500 py-8">
+                      No submissions yet. Start by participating in a challenge!
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="badges" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Your Badges</CardTitle>
+                <CardDescription>Achievements and milestones you've unlocked</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BadgeDisplay userBadges={userBadges} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {(userRole === 'sponsor' || userRole === 'admin') && (
+            <TabsContent value="sponsor" className="space-y-6">
+              <RoleGuard 
+                allowedRoles={['sponsor', 'admin']} 
+                fallbackMessage="Only sponsors and administrators can manage challenges."
+              >
+                <SponsorChallengeManager />
+              </RoleGuard>
+            </TabsContent>
+          )}
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
