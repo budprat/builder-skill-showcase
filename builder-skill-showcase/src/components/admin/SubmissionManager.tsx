@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Eye, Star, MessageSquare } from "lucide-react";
+import { FileText, Eye, Star, MessageSquare, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -82,14 +82,14 @@ export const SubmissionManager = () => {
 
       // Check and award badges based on score
       if (parseFloat(finalScore) >= 90) {
-        await checkAndAwardBadges(selectedSubmission.profiles.id, 'high_score', {
-          challengeId: selectedSubmission.challenges.id,
+        await checkAndAwardBadges(selectedSubmission.participant_id, 'high_score', {
+          challengeId: selectedSubmission.challenge_id,
           score: finalScore
         });
       }
 
-      await checkAndAwardBadges(selectedSubmission.profiles.id, 'challenge_completion', {
-        challengeId: selectedSubmission.challenges.id
+      await checkAndAwardBadges(selectedSubmission.participant_id, 'challenge_completion', {
+        challengeId: selectedSubmission.challenge_id
       });
 
       setIsScoreDialogOpen(false);
@@ -111,7 +111,7 @@ export const SubmissionManager = () => {
       const { data: badgeData, error: badgeError } = await supabase
         .from('badges')
         .select('*')
-        .eq('type', badgeType)
+        .eq('badge_type', badgeType)
         .single(); // Assuming badge types are unique
 
       if (badgeError) {
@@ -149,7 +149,7 @@ export const SubmissionManager = () => {
           {
             user_id: userId,
             badge_id: badgeData.id,
-            awarded_at: new Date().toISOString(),
+            earned_at: new Date().toISOString(),
             context: context,
           },
         ]);
