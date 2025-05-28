@@ -36,6 +36,7 @@ export const SponsorChallengeManager = () => {
     prize_description: "",
     submission_deadline: "",
     status: "active" as "active" | "draft" | "judging" | "completed",
+    challenge_type: "standard" as "standard" | "hackathon" | "competition" | "bounty" | "research",
     company_name: "",
     domains: "",
     deliverables_repository: "",
@@ -105,6 +106,7 @@ export const SponsorChallengeManager = () => {
         prize_description: formData.prize_description,
         submission_deadline: formData.submission_deadline,
         status: formData.status,
+        challenge_type: formData.challenge_type,
         company_name: formData.company_name,
         company_id: user.id,
         domains: formData.domains.split(',').map(d => d.trim()).filter(d => d.length > 0),
@@ -207,6 +209,7 @@ export const SponsorChallengeManager = () => {
       prize_description: "",
       submission_deadline: "",
       status: "active",
+      challenge_type: "standard",
       company_name: "",
       domains: "",
       deliverables_repository: "",
@@ -235,6 +238,7 @@ export const SponsorChallengeManager = () => {
       prize_description: challenge.prize_description || "",
       submission_deadline: challenge.submission_deadline.split('T')[0],
       status: challenge.status as "active" | "draft" | "judging" | "completed",
+      challenge_type: (challenge as any).challenge_type || "standard",
       company_name: challenge.company_name || "",
       domains: Array.isArray(challenge.domains) ? challenge.domains.join(", ") : "",
       deliverables_repository: deliverables.repository || "",
@@ -388,19 +392,37 @@ export const SponsorChallengeManager = () => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="judging">Judging</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="status">Status</Label>
+                    <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="judging">Judging</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="challenge_type">Challenge Type</Label>
+                    <Select value={formData.challenge_type} onValueChange={(value) => setFormData({...formData, challenge_type: value as any})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select challenge type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="standard">Standard</SelectItem>
+                        <SelectItem value="hackathon">Hackathon</SelectItem>
+                        <SelectItem value="competition">Competition</SelectItem>
+                        <SelectItem value="bounty">Bounty</SelectItem>
+                        <SelectItem value="research">Research</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div>
