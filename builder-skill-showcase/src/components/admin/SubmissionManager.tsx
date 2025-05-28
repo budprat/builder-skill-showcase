@@ -229,9 +229,78 @@ export const SubmissionManager = () => {
                       </>
                     )}
                     {submission.final_score && (
-                      <span>Final Score: {submission.final_score}/100</span>
+                      <span className="font-bold text-purple-600">Final Score: {submission.final_score}/100</span>
                     )}
                   </div>
+
+                  {/* Comprehensive Score Report */}
+                  {submission.scores && submission.scores.length > 0 && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-purple-600" />
+                        Complete Score Report
+                      </h4>
+                      
+                      {/* Overall Score Display */}
+                      <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
+                        <div>
+                          <div className="text-sm text-gray-600">Overall Score</div>
+                          <div className="text-2xl font-bold text-purple-600">
+                            {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+                          </div>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                          {submission.scores[0].status}
+                        </Badge>
+                      </div>
+
+                      {/* Score Breakdown */}
+                      {submission.scores[0].llm_scores && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-gray-900 mb-2">Detailed Criteria Scores</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                              <div key={criterion} className="p-3 bg-white rounded border">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-medium text-sm capitalize">{criterion.replace(/_/g, ' ')}</span>
+                                  <span className="font-bold text-lg text-blue-600">{scoreData.score?.toFixed(1)}/20</span>
+                                </div>
+                                <p className="text-xs text-gray-600 leading-relaxed">{scoreData.explanation}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Repository Analysis */}
+                      <div className="mb-4 p-3 bg-white rounded border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-sm">Repository Validation</span>
+                          <span className="font-bold text-lg">{submission.scores[0].pre_screening_score}/5</span>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {submission.scores[0].pre_screening_score === 5 
+                            ? "✅ Repository exists and contains README.md" 
+                            : "❌ Repository validation failed - missing repository or README.md"}
+                        </p>
+                      </div>
+
+                      {/* Human Evaluation (if exists) */}
+                      {submission.final_score && (
+                        <div className="p-3 bg-green-50 rounded border border-green-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-sm text-green-800">Final Human Score</span>
+                            <span className="font-bold text-lg text-green-600">{submission.final_score}/100</span>
+                          </div>
+                          {submission.human_feedback && typeof submission.human_feedback === 'object' && (submission.human_feedback as any).feedback && (
+                            <p className="text-xs text-green-700 mt-2">
+                              <strong>Feedback:</strong> {(submission.human_feedback as any).feedback}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <Button

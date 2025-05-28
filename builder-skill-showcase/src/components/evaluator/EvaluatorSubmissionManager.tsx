@@ -321,86 +321,73 @@ const EvaluatorSubmissionManager = () => {
                 <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-gray-900 text-lg">
-                          {submission.challenges?.title}
-                        </h3>
-                        <Badge className={getStatusColor(submission.status || 'reviewed')}>
-                          {submission.status || 'reviewed'}
-                        </Badge>
+                      <h3 className="font-semibold text-gray-900 text-lg">
+                        {submission.challenges?.title || 'Unknown Challenge'}
+                      </h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                        <span>
+                          <strong>Participant:</strong> {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
+                        </span>
+                        <span>
+                          <strong>Submitted:</strong> {new Date(submission.created_at || '').toLocaleDateString()}
+                        </span>
                         <Badge 
-                          variant={evaluationStatus === 'evaluated' ? 'default' : 'outline'}
-                          className={evaluationStatus === 'evaluated' 
-                            ? 'bg-green-100 text-green-800 border-green-200' 
-                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                          }
+                          className={`${
+                            evaluationStatus === 'evaluated' 
+                              ? 'bg-green-100 text-green-800 border-green-200' 
+                              : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                          }`}
                         >
                           {evaluationStatus === 'evaluated' ? 'Evaluated' : 'Pending Evaluation'}
                         </Badge>
-                        {userScore && (
-                          <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                            Your Score: {userScore.total_score}/100
-                          </Badge>
-                        )}
-                        {allScores.length > 0 && (
-                          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                            {allScores.length} Score{allScores.length > 1 ? 's' : ''} Given
-                          </Badge>
-                        )}
                       </div>
 
-                      <p className="text-gray-600 mb-2">
-                        <strong>Participant:</strong> {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
-                      </p>
-
-                      <p className="text-gray-600 mb-2">
-                        <strong>Company:</strong> {submission.challenges?.company_name || 'N/A'}
-                      </p>
-
-                      <p className="text-gray-600 mb-4">
-                        <strong>Submitted:</strong> {new Date(submission.created_at).toLocaleDateString()}
-                      </p>
-
-                      <div className="flex items-center gap-2 mb-4">
-                        {submission.repository_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(submission.repository_url, '_blank')}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                          >
-                            <Github className="h-4 w-4 mr-1" />
-                            Repository
-                          </Button>
-                        )}
-                        {submission.pitch_deck_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(submission.pitch_deck_url, '_blank')}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                          >
-                            <FileText className="h-4 w-4 mr-1" />
-                            Pitch Deck
-                          </Button>
-                        )}
-                        {submission.demo_video_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(submission.demo_video_url, '_blank')}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                          >
-                            <Play className="h-4 w-4 mr-1" />
-                            Demo Video
-                          </Button>
-                        )}
-                      </div>
-
-                      {submission.readme_notes && (
-                        <div className="mt-3 p-3 bg-white rounded border border-gray-200">
-                          <strong className="text-gray-900">Notes:</strong>
-                          <p className="text-gray-700 mt-1">{submission.readme_notes}</p>
+                      {/* Score Report Display */}
+                      {submission.scores && submission.scores.length > 0 && (
+                        <div className="mt-3 p-3 bg-purple-50 rounded border border-purple-200">
+                          <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
+                            <Star className="h-4 w-4" />
+                            Current Evaluation Score
+                          </h4>
+                          {submission.scores.map((score: any) => (
+                            <div key={score.id} className="mb-3 last:mb-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-purple-700">
+                                  Evaluator: {score.evaluator_id === user?.id ? 'You' : score.evaluator_id?.substring(0, 8) + '...'}
+                                </span>
+                                <span className="text-lg font-bold text-purple-600">
+                                  {score.total_score}/100
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-4 gap-2 text-xs">
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-blue-600">{score.technical_implementation || 0}/25</div>
+                                  <div className="text-blue-700">Technical</div>
+                                </div>
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-green-600">{score.innovation || 0}/25</div>
+                                  <div className="text-green-700">Innovation</div>
+                                </div>
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-yellow-600">{score.presentation || 0}/25</div>
+                                  <div className="text-yellow-700">Presentation</div>
+                                </div>
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-orange-600">{score.practicality || 0}/25</div>
+                                  <div className="text-orange-700">Practicality</div>
+                                </div>
+                              </div>
+                              {score.feedback && (
+                                <div className="mt-2 p-2 bg-white rounded border text-sm">
+                                  <strong className="text-purple-900">Feedback:</strong>
+                                  <p className="text-gray-700 mt-1">{score.feedback}</p>
+                                </div>
+                              )}
+                              <div className="mt-1 text-xs text-purple-600">
+                                Evaluated on: {new Date(score.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
