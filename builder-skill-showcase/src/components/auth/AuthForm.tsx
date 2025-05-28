@@ -246,9 +246,9 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             description: mode === "signin" ? "Signed in successfully" : "Account created successfully",
           });
 
-          // Redirect to dashboard after successful sign-in
-          console.log("=== REDIRECTING TO DASHBOARD ===");
-          window.location.href = "/dashboard";
+          // Navigate to dashboard after successful sign-in
+          console.log("=== NAVIGATING TO DASHBOARD ===");
+          navigate("/dashboard");
         }
       }
     } catch (error: any) {
