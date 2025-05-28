@@ -385,12 +385,7 @@ const EvaluatorSubmissionManager = () => {
                                   <div className="text-orange-700">Practicality</div>
                                 </div>
                               </div>
-                              {score.feedback && (
-                                <div className="mt-2 p-2 bg-white rounded border text-sm">
-                                  <strong className="text-purple-900">Feedback:</strong>
-                                  <p className="text-gray-700 mt-1">{score.feedback}</p>
-                                </div>
-                              )}
+                              
                               <div className="mt-1 text-xs text-purple-600">
                                 Evaluated on: {new Date(score.created_at).toLocaleDateString()}
                               </div>
