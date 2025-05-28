@@ -106,7 +106,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
         if (signUpError) {
           console.error("Signup error:", signUpError);
-          
+
           // If user already exists, provide a more helpful message
           if (signUpError.message.includes("User already registered")) {
             toast({
@@ -116,7 +116,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             });
             return;
           }
-          
+
           throw signUpError;
         }
 
@@ -144,7 +144,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
-            
+
             if (profileError && !profileError.message.includes('duplicate')) {
               console.error("Error creating profile:", profileError);
             } else {
@@ -157,7 +157,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           // Ensure role is assigned (with retry logic)
           let roleAssigned = false;
           let retries = 3;
-          
+
           while (!roleAssigned && retries > 0) {
             try {
               // First check if role already exists
@@ -181,7 +181,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                   user_id: authData.user.id,
                   role: data.role
                 });
-              
+
               if (!roleError) {
                 console.log("Role assigned successfully:", data.role);
                 roleAssigned = true;
@@ -239,14 +239,16 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         if (authData.user && authData.session) {
           console.log("User signed in successfully");
           console.log("User ID:", authData.user.id);
+          console.log("=== AUTH PROCESS COMPLETED ===");
 
           toast({
-            title: "Welcome back!",
-            description: "You have been signed in successfully.",
+            title: "Success",
+            description: mode === "signin" ? "Signed in successfully" : "Account created successfully",
           });
 
-          // Navigate to dashboard
-          navigate("/dashboard");
+          // Redirect to dashboard after successful sign-in
+          console.log("=== REDIRECTING TO DASHBOARD ===");
+          window.location.href = "/dashboard";
         }
       }
     } catch (error: any) {
