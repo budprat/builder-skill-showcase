@@ -112,10 +112,21 @@ const Dashboard = () => {
       if (userRole === 'sponsor' && user) {
         console.log('Fetching challenges for sponsor:', user.id);
         
-        // Fetch challenges created by the sponsor only
+        // Optimized query: fetch only needed columns for better performance
         const { data, error } = await supabase
           .from('challenges')
-          .select('*')
+          .select(`
+            id,
+            title,
+            description,
+            company_name,
+            company_id,
+            domains,
+            prize_amount,
+            submission_deadline,
+            status,
+            created_at
+          `)
           .eq('company_id', user.id)
           .order('created_at', { ascending: false });
 
@@ -465,21 +476,9 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-1 gap-6">
                   <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                        <CardTitle>Your Challenges</CardTitle>
-                        <CardDescription>Overview of challenges you've created</CardDescription>
-                      </div>
-                      <Button 
-                        onClick={() => {
-                          const sponsorTab = document.querySelector('[value="sponsor"]') as HTMLElement;
-                          sponsorTab?.click();
-                        }}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create New Challenge
-                      </Button>
+                    <CardHeader>
+                      <CardTitle>Your Challenges</CardTitle>
+                      <CardDescription>Overview of challenges you've created</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">

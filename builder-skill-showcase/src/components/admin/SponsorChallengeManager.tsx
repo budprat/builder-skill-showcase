@@ -91,10 +91,30 @@ export const SponsorChallengeManager = () => {
         return;
       }
 
-      // Fetch challenges with strict filtering
+      // Optimized query: fetch only needed columns for better performance
       const { data, error } = await supabase
         .from('challenges')
-        .select('*')
+        .select(`
+          id,
+          title,
+          description,
+          problem_statement,
+          company_name,
+          company_id,
+          domains,
+          prize_amount,
+          prize_description,
+          submission_deadline,
+          status,
+          created_at,
+          updated_at,
+          image_url,
+          image_urls,
+          challenge_type,
+          difficulty_level,
+          deliverables,
+          evaluation_rubric
+        `)
         .eq('company_id', user.id)
         .order('created_at', { ascending: false });
 
