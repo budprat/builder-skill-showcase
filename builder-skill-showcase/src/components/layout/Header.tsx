@@ -18,25 +18,7 @@ export const Header = () => {
   console.log('Header - User:', user?.id);
   console.log('Header - User Role:', userRole);
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
-
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -216,9 +198,13 @@ export const Header = () => {
                       </div>
                       <Button
                         variant="outline"
-                        onClick={() => {
-                          handleSignOut();
-                          setIsMobileMenuOpen(false);
+                        onClick={async () => {
+                          try {
+                            setIsMobileMenuOpen(false);
+                            await signOut();
+                          } catch (error) {
+                            console.error("Logout error:", error);
+                          }
                         }}
                         className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
                       >
