@@ -44,16 +44,22 @@ const EvaluatorSubmissionManager = () => {
   });
 
   useEffect(() => {
+    console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id);
     if (user) {
       fetchSubmissions();
     }
   }, [user]);
 
   const fetchSubmissions = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('fetchSubmissions: No user, returning');
+      return;
+    }
 
+    console.log('EvaluatorSubmissionManager - Starting to fetch submissions for user:', user.id);
     setLoading(true);
     try {
+      console.log('EvaluatorSubmissionManager - Making Supabase query...');
       const { data, error } = await supabase
         .from('submissions')
         .select(`
@@ -87,10 +93,18 @@ const EvaluatorSubmissionManager = () => {
         .eq('status', 'reviewed')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('EvaluatorSubmissionManager - Query result:', { data, error });
+      console.log('EvaluatorSubmissionManager - Submissions found:', data?.length || 0);
+
+      if (error) {
+        console.error('EvaluatorSubmissionManager - Supabase error:', error);
+        throw error;
+      }
+      
       setSubmissions(data || []);
+      console.log('EvaluatorSubmissionManager - Submissions state updated with:', data?.length || 0, 'items');
     } catch (error) {
-      console.error('Error fetching submissions:', error);
+      console.error('EvaluatorSubmissionManager - Error fetching submissions:', error);
       toast({
         title: "Error",
         description: "Failed to fetch submissions",
@@ -98,6 +112,7 @@ const EvaluatorSubmissionManager = () => {
       });
     } finally {
       setLoading(false);
+      console.log('EvaluatorSubmissionManager - Fetch complete, loading set to false');
     }
   };
 
