@@ -152,10 +152,20 @@ const Dashboard = () => {
         setChallenges(sponsorChallenges);
       } else {
         console.log('Fetching active challenges for non-sponsor user');
-        // For other users, fetch active challenges
+        // Optimized query: fetch only needed columns for better performance
         const { data, error } = await supabase
           .from('challenges')
-          .select('*')
+          .select(`
+            id,
+            title,
+            description,
+            company_name,
+            domains,
+            prize_amount,
+            submission_deadline,
+            status,
+            created_at
+          `)
           .eq('status', 'active')
           .order('created_at', { ascending: false });
 
