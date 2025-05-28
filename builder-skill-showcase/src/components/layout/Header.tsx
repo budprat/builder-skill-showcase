@@ -90,12 +90,12 @@ export const Header = () => {
                 <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
               </button>
             )}
-            {(userRole === 'admin' || userRole === 'sponsor' || userRole === 'evaluator') && (
+            {userRole === 'admin' && (
               <button
                 onClick={() => navigate("/admin")}
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
               >
-                {userRole === 'admin' ? 'Admin' : 'Management'}
+                Admin
                 <Badge className="ml-2 bg-red-100 text-red-800 border-red-200 text-xs">
                   Admin
                 </Badge>

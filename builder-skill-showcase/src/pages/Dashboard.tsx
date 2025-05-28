@@ -690,6 +690,15 @@ const Dashboard = () => {
                         Evaluate Submissions
                       </TabsTrigger>
                     )}
+                    {(userRole === 'sponsor' || userRole === 'company') && (
+                      <TabsTrigger 
+                        value="manage-submissions" 
+                        className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Manage Submissions
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </CardContent>
               </Card>
@@ -1715,6 +1724,31 @@ const Dashboard = () => {
               {(userRole === 'evaluator' || userRole === 'admin') && (
                 <TabsContent value="evaluate" className="mt-0">
                   <EvaluatorSubmissionManager />
+                </TabsContent>
+              )}
+
+              {(userRole === 'sponsor' || userRole === 'company') && (
+                <TabsContent value="manage-submissions" className="mt-0">
+                  <Card className="bg-white border-gray-200">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+                        <Users className="h-6 w-6" />
+                        Manage Challenge Submissions
+                      </CardTitle>
+                      <CardDescription>
+                        View and manage submissions for your challenges
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12">
+                        <Users className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                        <p className="text-gray-600 text-lg">Submission management coming soon</p>
+                        <p className="text-gray-500 text-sm mt-2">
+                          You can view submissions for your challenges here once they are submitted.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
               )}
             </div>
