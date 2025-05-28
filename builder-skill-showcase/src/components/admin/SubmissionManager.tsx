@@ -329,7 +329,7 @@ export const SubmissionManager = () => {
                       {submission.scores[0].llm_scores && (
                         <div className="mb-4">
                           <h5 className="font-medium text-gray-900 mb-2">Detailed Criteria Scores</h5>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
                               <div key={criterion} className="p-3 bg-white rounded border">
                                 <div className="flex justify-between items-center mb-2">
@@ -339,6 +339,19 @@ export const SubmissionManager = () => {
                                 <p className="text-xs text-gray-600 leading-relaxed">{scoreData.explanation}</p>
                               </div>
                             ))}
+                            
+                            {/* LLM Feedback Card */}
+                            {submission.scores[0].feedback && (
+                              <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded border border-amber-200 md:col-span-2 lg:col-span-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MessageSquare className="h-4 w-4 text-amber-600" />
+                                  <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                                </div>
+                                <div className="bg-white p-3 rounded border border-amber-100">
+                                  <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
