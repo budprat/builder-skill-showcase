@@ -350,7 +350,12 @@ const EvaluatorSubmissionManager = () => {
 
                       {/* Score Report Display - Only show human evaluator scores */}
                       {(() => {
-                        const humanScores = submission.scores?.filter(score => !score.llm_scores && !score.pre_screening_score) || [];
+                        const humanScores = submission.scores?.filter(score => 
+                          score.evaluator_id && 
+                          !score.llm_scores && 
+                          score.pre_screening_score === null
+                        ) || [];
+                        
                         if (humanScores.length === 0) return null;
                         
                         return (
@@ -404,7 +409,10 @@ const EvaluatorSubmissionManager = () => {
 
                       {/* AI Score Report */}
                       {(() => {
-                        const aiScore = submission.scores?.find(score => score.llm_scores || score.pre_screening_score !== undefined);
+                        const aiScore = submission.scores?.find(score => 
+                          score.llm_scores || 
+                          (score.pre_screening_score !== null && score.pre_screening_score !== undefined)
+                        );
                         if (!aiScore) return null;
                         
                         return (
