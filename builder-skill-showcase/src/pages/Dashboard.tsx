@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
 import { SponsorChallengeManager } from "@/components/admin/SponsorChallengeManager";
 import { RoleGuard } from "@/components/auth/RoleGuard";
+import EvaluatorSubmissionManager from "@/components/evaluator/EvaluatorSubmissionManager";
 
 interface Challenge {
   id: string;
@@ -241,6 +242,9 @@ const Dashboard = () => {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="submissions">My Submissions</TabsTrigger>
             <TabsTrigger value="badges">Badges</TabsTrigger>
+            {(userRole === 'evaluator' || userRole === 'admin') && (
+              <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
+            )}
             {(userRole === 'sponsor' || userRole === 'admin') && (
               <TabsTrigger value="sponsor">Manage Challenges</TabsTrigger>
             )}
@@ -412,6 +416,17 @@ const Dashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {(userRole === 'evaluator' || userRole === 'admin') && (
+            <TabsContent value="evaluator" className="space-y-6">
+              <RoleGuard 
+                allowedRoles={['evaluator', 'admin']} 
+                fallbackMessage="Only evaluators and administrators can evaluate submissions."
+              >
+                <EvaluatorSubmissionManager />
+              </RoleGuard>
+            </TabsContent>
+          )}
 
           {(userRole === 'sponsor' || userRole === 'admin') && (
             <TabsContent value="sponsor" className="space-y-6">
