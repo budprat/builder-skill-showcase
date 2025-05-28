@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useToast } from "@/hooks/use-toast";
-import { BadgeDisplay } from "@/components/badges/BadgeDisplay";
+import { BadgeCollection } from "@/components/badges/BadgeCollection";
 import { SponsorChallengeManager } from "@/components/admin/SponsorChallengeManager";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import EvaluatorSubmissionManager from "@/components/evaluator/EvaluatorSubmissionManager";
@@ -667,15 +667,9 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="badges" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Badges</CardTitle>
-                <CardDescription>Achievements and milestones you've unlocked</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BadgeDisplay userBadges={userBadges} />
-              </CardContent>
-            </Card>
+            {user && (
+              <BadgeCollection userId={user.id} showTitle={false} compact={false} />
+            )}
           </TabsContent>
 
           {userRole === 'evaluator' && (
