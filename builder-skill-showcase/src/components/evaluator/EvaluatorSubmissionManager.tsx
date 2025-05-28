@@ -24,28 +24,8 @@ interface SubmissionWithDetails extends Submission {
 }
 
 const EvaluatorSubmissionManager = () => {
-  const { user, userRole } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-
-  console.log('=== EVALUATOR SUBMISSION MANAGER MOUNTED ===');
-  console.log('EvaluatorSubmissionManager - User:', user?.id);
-  console.log('EvaluatorSubmissionManager - User exists:', !!user);
-  console.log('EvaluatorSubmissionManager - User role:', userRole);
-
-  // Security check: Only allow evaluators and admins
-  if (userRole !== 'evaluator' && userRole !== 'admin') {
-    return (
-      <Card className="bg-white border-gray-200">
-        <CardContent className="p-6">
-          <div className="text-center text-red-600">
-            <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-            <p>You don't have permission to access this section.</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
@@ -59,39 +39,54 @@ const EvaluatorSubmissionManager = () => {
     feedback: "",
   });
 
-  // Force immediate fetch when component mounts and user is available
   useEffect(() => {
-    console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id, 'userRole:', userRole);
-    console.log('EvaluatorSubmissionManager useEffect - Dependencies:', { user: !!user, userRole });
-
-    if (user?.id) {
-      console.log('EvaluatorSubmissionManager - User confirmed, fetching submissions');
-      fetchSubmissions();
-    } else {
-      console.log('EvaluatorSubmissionManager - No user found, setting loading to false');
-      setLoading(false);
-    }
-  }, [user?.id]);
-
-  // Also trigger fetch when both user and userRole are available
-  useEffect(() => {
-    console.log('EvaluatorSubmissionManager - Role effect triggered, user:', !!user, 'userRole:', userRole);
-    if (user?.id && userRole === 'evaluator') {
-      console.log('EvaluatorSubmissionManager - Both user and evaluator role confirmed, fetching submissions');
+    if (user) {
       fetchSubmissions();
     }
-  }, [user?.id, userRole]);
+  }, [user]);
 
   const fetchSubmissions = async () => {
     if (!user) {
-      console.log('fetchSubmissions: No user, returning');
+      console.log('No user found, skipping fetch');
       return;
     }
 
-    console.log('EvaluatorSubmissionManager - Starting to fetch submissions for user:', user.id);
+    console.log('=== FETCHING SUBMISSIONS FOR EVALUATOR ===');
+    console.log('User ID:', user.id);
+    console.log('User Email:', user.email);
+
     setLoading(true);
     try {
-      console.log('EvaluatorSubmissionManager - Making Supabase query...');
+      // First, check user role in database
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      console.log('User roles from database:', { roleData, roleError });
+
+      // Check if we can access submissions at all (no filter)
+      const { data: allSubmissions, error: allError } = await supabase
+        .from('submissions')
+        .select('id, status, created_at, participant_id')
+        .order('created_at', { ascending: false });
+
+      console.log('=== ALL SUBMISSIONS CHECK ===');
+      console.log('Count:', allSubmissions?.length || 0);
+      console.log('Error:', allError);
+      console.log('Sample submissions:', allSubmissions?.slice(0, 3));
+
+      // Check submissions by status
+      if (allSubmissions && allSubmissions.length > 0) {
+        const statusCounts = allSubmissions.reduce((acc, sub) => {
+          acc[sub.status] = (acc[sub.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        console.log('Status breakdown:', statusCounts);
+      }
+
+      // Now try to fetch reviewed submissions specifically
+      console.log('=== FETCHING REVIEWED SUBMISSIONS ===');
       const { data, error } = await supabase
         .from('submissions')
         .select(`
@@ -106,7 +101,8 @@ const EvaluatorSubmissionManager = () => {
           profiles (
             id,
             full_name,
-            username
+            username,
+            email
           ),
           scores (
             id,
@@ -124,18 +120,32 @@ const EvaluatorSubmissionManager = () => {
         .eq('status', 'reviewed')
         .order('created_at', { ascending: false });
 
-      console.log('EvaluatorSubmissionManager - Query result:', { data, error });
-      console.log('EvaluatorSubmissionManager - Submissions found:', data?.length || 0);
+      console.log('=== REVIEWED SUBMISSIONS RESULT ===');
+      console.log('Data:', data);
+      console.log('Error:', error);
+      console.log('Count:', data?.length || 0);
+      console.log('User ID:', user.id);
 
       if (error) {
-        console.error('EvaluatorSubmissionManager - Supabase error:', error);
+        console.error('=== SUPABASE ERROR DETAILS ===');
+        console.error('Error object:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
         throw error;
       }
 
       setSubmissions(data || []);
-      console.log('EvaluatorSubmissionManager - Submissions state updated with:', data?.length || 0, 'items');
+      console.log('=== SUBMISSIONS SET SUCCESSFULLY ===');
+      console.log('Final submissions count:', data?.length || 0);
+
+      if (data && data.length > 0) {
+        console.log('Sample submission:', data[0]);
+      } else {
+        console.log('No reviewed submissions found for evaluator');
+      }
     } catch (error) {
-      console.error('EvaluatorSubmissionManager - Error fetching submissions:', error);
+      console.error('Error fetching submissions:', error);
       toast({
         title: "Error",
         description: "Failed to fetch submissions",
@@ -143,7 +153,6 @@ const EvaluatorSubmissionManager = () => {
       });
     } finally {
       setLoading(false);
-      console.log('EvaluatorSubmissionManager - Fetch complete, loading set to false');
     }
   };
 
