@@ -300,6 +300,7 @@ const EvaluatorSubmissionManager = () => {
             {submissions.map((submission) => {
               const evaluationStatus = getUserEvaluationStatus(submission);
               const userScore = submission.scores?.find(score => score.evaluator_id === user?.id);
+              const allScores = submission.scores || [];
 
               return (
                 <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
@@ -324,6 +325,11 @@ const EvaluatorSubmissionManager = () => {
                         {userScore && (
                           <Badge className="bg-purple-100 text-purple-800 border-purple-200">
                             Your Score: {userScore.total_score}/100
+                          </Badge>
+                        )}
+                        {allScores.length > 0 && (
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {allScores.length} Score{allScores.length > 1 ? 's' : ''} Given
                           </Badge>
                         )}
                       </div>
