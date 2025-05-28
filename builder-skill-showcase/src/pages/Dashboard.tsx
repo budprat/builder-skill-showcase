@@ -248,8 +248,12 @@ const Dashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="submissions">My Submissions</TabsTrigger>
-            <TabsTrigger value="badges">Badges</TabsTrigger>
+            {(userRole === 'participant' || !userRole || userRole === 'admin') && (
+              <>
+                <TabsTrigger value="submissions">My Submissions</TabsTrigger>
+                <TabsTrigger value="badges">Badges</TabsTrigger>
+              </>
+            )}
             {(userRole === 'evaluator' || userRole === 'admin') && (
               <>
                 {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
