@@ -105,14 +105,27 @@ const Dashboard = () => {
 
   const fetchChallenges = async () => {
     try {
-      const { data, error } = await supabase
-        .from('challenges')
-        .select('*')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
+      if (userRole === 'sponsor' && user) {
+        // Fetch challenges created by the sponsor
+        const { data, error } = await supabase
+          .from('challenges')
+          .select('*')
+          .eq('company_id', user.id)
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setChallenges(data || []);
+        if (error) throw error;
+        setChallenges(data || []);
+      } else {
+        // For other users, fetch active challenges
+        const { data, error } = await supabase
+          .from('challenges')
+          .select('*')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setChallenges(data || []);
+      }
     } catch (error) {
       console.error('Error fetching challenges:', error);
     }
@@ -385,7 +398,7 @@ const Dashboard = () => {
                       <Trophy className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">0</div>
+                      <div className="text-2xl font-bold">{challenges.length}</div>
                       <p className="text-xs text-muted-foreground">Challenges created</p>
                     </CardContent>
                   </Card>
@@ -424,49 +437,89 @@ const Dashboard = () => {
                   </Card>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                       <div>
-                        <CardTitle>Quick Actions</CardTitle>
-                        <CardDescription>Manage your challenges efficiently</CardDescription>
+                        <CardTitle>Your Challenges</CardTitle>
+                        <CardDescription>Overview of challenges you've created</CardDescription>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
                       <Button 
-                        className="w-full justify-start" 
-                        variant="outline"
                         onClick={() => {
                           const sponsorTab = document.querySelector('[value="sponsor"]') as HTMLElement;
                           sponsorTab?.click();
                         }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         Create New Challenge
                       </Button>
-                      <Button className="w-full justify-start" variant="outline">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Manage Existing Challenges
-                      </Button>
-                      <Button className="w-full justify-start" variant="outline">
-                        <FileText className="mr-2 h-4 w-4" />
-                        View All Submissions
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Challenge Performance</CardTitle>
-                      <CardDescription>Insights about your challenges</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="text-center py-8 text-gray-500">
-                          <Trophy className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                          <p className="text-sm">No challenges created yet</p>
-                          <p className="text-xs">Create your first challenge to see performance metrics</p>
-                        </div>
+                        {challenges.length === 0 ? (
+                          <div className="text-center py-12 text-gray-500">
+                            <Trophy className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                            <p className="text-lg">No challenges created yet</p>
+                            <p className="text-sm mt-2">Create your first challenge to start receiving submissions</p>
+                          </div>
+                        ) : (
+                          challenges.slice(0, 5).map((challenge) => (
+                            <div key={challenge.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <h3 className="font-semibold text-gray-900">{challenge.title}</h3>
+                                    <Badge className={`${
+                                      challenge.status === 'active' ? 'bg-green-100 text-green-800' :
+                                      challenge.status === 'completed' ? 'bg-red-100 text-red-800' :
+                                      challenge.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+                                      challenge.status === 'judging' ? 'bg-blue-100 text-blue-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {challenge.status}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{challenge.description}</p>
+                                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                      <Trophy className="h-3 w-3" />
+                                      {formatPrize(challenge.prize_amount)}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="h-3 w-3" />
+                                      {new Date(challenge.submission_deadline).toLocaleDateString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Users className="h-3 w-3" />
+                                      0 submissions
+                                    </span>
+                                  </div>
+                                </div>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => window.open(`/challenges/${challenge.id}`, '_self')}
+                                >
+                                  View
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                        {challenges.length > 5 && (
+                          <div className="text-center pt-4">
+                            <Button 
+                              variant="outline"
+                              onClick={() => {
+                                const sponsorTab = document.querySelector('[value="sponsor"]') as HTMLElement;
+                                sponsorTab?.click();
+                              }}
+                            >
+                              View All Challenges ({challenges.length})
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
