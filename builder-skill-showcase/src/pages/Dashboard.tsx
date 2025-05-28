@@ -243,7 +243,11 @@ const Dashboard = () => {
             <TabsTrigger value="submissions">My Submissions</TabsTrigger>
             <TabsTrigger value="badges">Badges</TabsTrigger>
             {(userRole === 'evaluator' || userRole === 'admin') && (
-              <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
+              <>
+                {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
+                {console.log('Current user role:', userRole)}
+                <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
+              </>
             )}
             {(userRole === 'sponsor' || userRole === 'admin') && (
               <TabsTrigger value="sponsor">Manage Challenges</TabsTrigger>
@@ -419,10 +423,13 @@ const Dashboard = () => {
 
           {(userRole === 'evaluator' || userRole === 'admin') && (
             <TabsContent value="evaluator" className="space-y-6">
+              {console.log('=== EVALUATOR TAB CONTENT RENDERED ===')}
+              {console.log('User role for evaluator tab:', userRole)}
               <RoleGuard 
                 allowedRoles={['evaluator', 'admin']} 
                 fallbackMessage="Only evaluators and administrators can evaluate submissions."
               >
+                {console.log('=== INSIDE ROLE GUARD FOR EVALUATOR ===')}
                 <EvaluatorSubmissionManager />
               </RoleGuard>
             </TabsContent>
