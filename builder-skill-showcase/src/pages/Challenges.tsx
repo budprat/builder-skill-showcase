@@ -55,15 +55,43 @@ const Challenges = () => {
   ];
 
   useEffect(() => {
-    fetchChallenges();
-  }, []);
+    if (user !== undefined) {
+      fetchChallenges();
+    }
+  }, [user]);
 
   const fetchChallenges = async () => {
     try {
-      const { data, error } = await supabase
-        .from('challenges')
-        .select('*')
-        .order('created_at', { ascending: false });
+      console.log('=== CHALLENGES PAGE FETCH ===');
+      console.log('Current user:', user?.id);
+      
+      // Get current user's role
+      let userRole = null;
+      if (user) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        userRole = roleData?.role;
+      }
+      
+      console.log('User role in Challenges page:', userRole);
+      
+      let query = supabase.from('challenges').select('*');
+      
+      // Apply role-based filtering
+      if (userRole === 'sponsor' || userRole === 'company') {
+        // Sponsors should only see their own challenges
+        query = query.eq('company_id', user.id);
+        console.log('Filtering challenges for sponsor/company:', user.id);
+      } else {
+        // Other users see all active challenges
+        query = query.eq('status', 'active');
+        console.log('Showing active challenges for non-sponsor user');
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       setChallenges(data || []);

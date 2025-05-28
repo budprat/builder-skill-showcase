@@ -44,13 +44,40 @@ const Leaderboard = () => {
 
   const fetchChallenges = async () => {
     try {
-      const { data, error } = await supabase
+      console.log('=== LEADERBOARD CHALLENGES FETCH ===');
+      
+      // Get current user and role
+      const { data: { user } } = await supabase.auth.getUser();
+      let userRole = null;
+      
+      if (user) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        userRole = roleData?.role;
+      }
+      
+      console.log('User role in Leaderboard:', userRole);
+      
+      let query = supabase
         .from('challenges')
-        .select('id, title, company_name')
-        .order('title');
+        .select('id, title, company_name');
+      
+      // Apply role-based filtering
+      if (userRole === 'sponsor' || userRole === 'company') {
+        // Sponsors should only see their own challenges
+        query = query.eq('company_id', user.id);
+        console.log('Filtering leaderboard challenges for sponsor/company:', user.id);
+      }
+      // Admins and other users can see all challenges
+      
+      const { data, error } = await query.order('title');
 
       if (error) throw error;
       setChallenges(data || []);
+      console.log('Leaderboard challenges loaded:', data?.length || 0);
     } catch (error) {
       console.error('Error fetching challenges:', error);
     }
