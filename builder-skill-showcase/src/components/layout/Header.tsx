@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const Header = () => {
-  const { user, userRole } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,25 +18,7 @@ export const Header = () => {
   console.log('Header - User:', user?.id);
   console.log('Header - User Role:', userRole);
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
-
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -67,22 +49,42 @@ export const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
             <button
-              key={item.href}
-              onClick={() => navigate(item.href)}
+              onClick={() => navigate("/challenges")}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
             >
-              {item.label}
-              {item.label === "Admin" && (
+              Challenges
+              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+            </button>
+            <button
+              onClick={() => navigate("/leaderboard")}
+              className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+            >
+              Leaderboard
+              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+            </button>
+            {user && (
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+              >
+                Dashboard
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+              </button>
+            )}
+            {userRole === 'admin' && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+              >
+                Admin
                 <Badge className="ml-2 bg-red-100 text-red-800 border-red-200 text-xs">
                   Admin
                 </Badge>
-              )}
-              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-            </button>
-          ))}
-        </nav>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+              </button>
+            )}
+          </nav>
 
         {/* Desktop User Menu */}
         <div className="hidden md:flex items-center space-x-4">
@@ -99,7 +101,13 @@ export const Header = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSignOut}
+                onClick={async () => {
+                  try {
+                    await signOut();
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                  }
+                }}
                 className="border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <LogOut className="h-4 w-4 mr-2" />
@@ -190,9 +198,13 @@ export const Header = () => {
                       </div>
                       <Button
                         variant="outline"
-                        onClick={() => {
-                          handleSignOut();
-                          setIsMobileMenuOpen(false);
+                        onClick={async () => {
+                          try {
+                            setIsMobileMenuOpen(false);
+                            await signOut();
+                          } catch (error) {
+                            console.error("Logout error:", error);
+                          }
                         }}
                         className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50"
                       >

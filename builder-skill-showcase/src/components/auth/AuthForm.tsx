@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 import { cleanupAuthState } from "@/utils/authCleanup";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -106,7 +106,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
 
         if (signUpError) {
           console.error("Signup error:", signUpError);
-          
+
           // If user already exists, provide a more helpful message
           if (signUpError.message.includes("User already registered")) {
             toast({
@@ -116,7 +116,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
             });
             return;
           }
-          
+
           throw signUpError;
         }
 
@@ -144,7 +144,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               });
-            
+
             if (profileError && !profileError.message.includes('duplicate')) {
               console.error("Error creating profile:", profileError);
             } else {
@@ -157,7 +157,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           // Ensure role is assigned (with retry logic)
           let roleAssigned = false;
           let retries = 3;
-          
+
           while (!roleAssigned && retries > 0) {
             try {
               // First check if role already exists
@@ -181,7 +181,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                   user_id: authData.user.id,
                   role: data.role
                 });
-              
+
               if (!roleError) {
                 console.log("Role assigned successfully:", data.role);
                 roleAssigned = true;
@@ -237,16 +237,20 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
 
         if (authData.user && authData.session) {
-          console.log("User signed in successfully");
-          console.log("User ID:", authData.user.id);
-
           toast({
-            title: "Welcome back!",
-            description: "You have been signed in successfully.",
+            title: "Success",
+            description: `Welcome back!`,
           });
 
-          // Navigate to dashboard
-          navigate("/dashboard");
+          console.log('User signed in successfully');
+          console.log('User ID:', authData.user?.id);
+          console.log('=== AUTH PROCESS COMPLETED ===');
+
+          // Add a small delay to ensure auth state is updated before navigation
+          setTimeout(() => {
+            console.log('=== NAVIGATING TO DASHBOARD ===');
+            navigate('/dashboard');
+          }, 500);
         }
       }
     } catch (error: any) {
@@ -332,7 +336,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                         <SelectContent>
                           <SelectItem value="participant">Participant</SelectItem>
                           <SelectItem value="sponsor">Sponsor</SelectItem>
-                          <SelectItem value="evaluator">Evaluator</SelectItem>
+                          <SelectItem value="company">Company</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

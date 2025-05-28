@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Eye, FileText, Github, Play, Gavel, Star } from "lucide-react";
+import { Eye, FileText, Github, Play, Gavel, Star, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -28,6 +28,9 @@ const EvaluatorSubmissionManager = () => {
   const { toast } = useToast();
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
+
+  console.log('=== EVALUATOR SUBMISSION MANAGER RENDERED ===');
+  console.log('Component mounted, user:', user?.id);
   const [evaluating, setEvaluating] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<SubmissionWithDetails | null>(null);
   const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false);
@@ -46,10 +49,51 @@ const EvaluatorSubmissionManager = () => {
   }, [user]);
 
   const fetchSubmissions = async () => {
-    if (!user) return;
+    console.log('=== FETCH SUBMISSIONS CALLED ===');
+    console.log('User exists:', !!user);
+    console.log('User ID:', user?.id);
+
+    if (!user) {
+      console.log('No user found, skipping fetch');
+      return;
+    }
+
+    console.log('=== FETCHING SUBMISSIONS FOR EVALUATOR ===');
+    console.log('User ID:', user.id);
+    console.log('User Email:', user.email);
 
     setLoading(true);
     try {
+      // First, check user role in database
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      console.log('User roles from database:', { roleData, roleError });
+
+      // Check if we can access submissions at all (no filter)
+      const { data: allSubmissions, error: allError } = await supabase
+        .from('submissions')
+        .select('id, status, created_at, participant_id')
+        .order('created_at', { ascending: false });
+
+      console.log('=== ALL SUBMISSIONS CHECK ===');
+      console.log('Count:', allSubmissions?.length || 0);
+      console.log('Error:', allError);
+      console.log('Sample submissions:', allSubmissions?.slice(0, 3));
+
+      // Check submissions by status
+      if (allSubmissions && allSubmissions.length > 0) {
+        const statusCounts = allSubmissions.reduce((acc, sub) => {
+          acc[sub.status] = (acc[sub.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        console.log('Status breakdown:', statusCounts);
+      }
+
+      // Now try to fetch reviewed submissions specifically
+      console.log('=== FETCHING REVIEWED SUBMISSIONS ===');
       const { data, error } = await supabase
         .from('submissions')
         .select(`
@@ -64,8 +108,7 @@ const EvaluatorSubmissionManager = () => {
           profiles (
             id,
             full_name,
-            username,
-            email
+            username
           ),
           scores (
             id,
@@ -83,8 +126,30 @@ const EvaluatorSubmissionManager = () => {
         .eq('status', 'reviewed')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('=== REVIEWED SUBMISSIONS RESULT ===');
+      console.log('Data:', data);
+      console.log('Error:', error);
+      console.log('Count:', data?.length || 0);
+      console.log('User ID:', user.id);
+
+      if (error) {
+        console.error('=== SUPABASE ERROR DETAILS ===');
+        console.error('Error object:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        throw error;
+      }
+
       setSubmissions(data || []);
+      console.log('=== SUBMISSIONS SET SUCCESSFULLY ===');
+      console.log('Final submissions count:', data?.length || 0);
+
+      if (data && data.length > 0) {
+        console.log('Sample submission:', data[0]);
+      } else {
+        console.log('No reviewed submissions found for evaluator');
+      }
     } catch (error) {
       console.error('Error fetching submissions:', error);
       toast({
@@ -108,7 +173,7 @@ const EvaluatorSubmissionManager = () => {
         innovation: existingScore.innovation || 0,
         presentation: existingScore.presentation || 0,
         practicality: existingScore.practicality || 0,
-        feedback: existingScore.feedback || "",
+        feedback: "",
       });
     } else {
       setScoreData({
@@ -215,13 +280,28 @@ const EvaluatorSubmissionManager = () => {
   return (
     <Card className="bg-white border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
-          <Gavel className="h-6 w-6" />
-          Reviewed Submissions to Evaluate
-        </CardTitle>
-        <CardDescription>
-          Score participant submissions that have been reviewed
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+              <Gavel className="h-6 w-6" />
+              Reviewed Submissions to Evaluate
+            </CardTitle>
+            <CardDescription>
+              Score participant submissions that have been reviewed
+            </CardDescription>
+          </div>
+          <Button
+            onClick={() => {
+              const dashboardTab = document.querySelector('[value="score-dashboard"]') as HTMLElement;
+              dashboardTab?.click();
+            }}
+            variant="outline"
+            className="border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
+            <BarChart3 className="h-4 w-4 mr-2" />
+            View Score Analytics
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {submissions.length === 0 ? (
@@ -235,6 +315,7 @@ const EvaluatorSubmissionManager = () => {
             {submissions.map((submission) => {
               const evaluationStatus = getUserEvaluationStatus(submission);
               const userScore = submission.scores?.find(score => score.evaluator_id === user?.id);
+              const allScores = submission.scores || [];
 
               return (
                 <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
@@ -259,6 +340,11 @@ const EvaluatorSubmissionManager = () => {
                         {userScore && (
                           <Badge className="bg-purple-100 text-purple-800 border-purple-200">
                             Your Score: {userScore.total_score}/100
+                          </Badge>
+                        )}
+                        {allScores.length > 0 && (
+                          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                            {allScores.length} Score{allScores.length > 1 ? 's' : ''} Given
                           </Badge>
                         )}
                       </div>

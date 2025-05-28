@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { ChallengeManager } from "./ChallengeManager";
 import { UserManager } from "./UserManager";
 import { SubmissionManager } from "./SubmissionManager";
+import { RoleGuard } from "@/components/auth/RoleGuard";
 
 export const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("challenges");
@@ -191,15 +192,21 @@ export const AdminPanel = () => {
           <div className="flex-1">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsContent value="challenges" className="mt-0">
-                <ChallengeManager onStatsUpdate={fetchStats} />
+                <RoleGuard allowedRoles={['admin']} fallbackMessage="Only administrators can manage challenges.">
+                  <ChallengeManager onStatsUpdate={fetchStats} />
+                </RoleGuard>
               </TabsContent>
 
               <TabsContent value="submissions" className="mt-0">
-                <SubmissionManager />
+                <RoleGuard allowedRoles={['admin']} fallbackMessage="Only administrators can manage submissions.">
+                  <SubmissionManager />
+                </RoleGuard>
               </TabsContent>
 
               <TabsContent value="users" className="mt-0">
-                <UserManager />
+                <RoleGuard allowedRoles={['admin']} fallbackMessage="Only administrators can manage users.">
+                  <UserManager />
+                </RoleGuard>
               </TabsContent>
             </Tabs>
           </div>

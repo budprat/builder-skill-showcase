@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -36,12 +35,15 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
   const fetchBadges = async () => {
     try {
       console.log('Fetching badges for user:', userId);
-      
+
       // Fetch user's earned badges
       const { data: earnedBadges, error: earnedError } = await supabase
         .from('user_badges')
         .select(`
-          *,
+          id,
+          earned_at,
+          badge_id,
+          user_id,
           badges (*)
         `)
         .eq('user_id', userId);
@@ -101,7 +103,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
             Badges ({unlockedBadges.length})
           </h3>
         )}
-        
+
         {unlockedBadges.length === 0 ? (
           <p className="text-gray-500 text-sm">No badges earned yet</p>
         ) : (
@@ -138,7 +140,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
             <Award className="h-4 w-4 text-yellow-600" />
             Earned Badges ({unlockedBadges.length})
           </h4>
-          
+
           {unlockedBadges.length === 0 ? (
             <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
               <Trophy className="h-12 w-12 mx-auto text-gray-400 mb-3" />
@@ -168,7 +170,7 @@ export const BadgeCollection: React.FC<BadgeCollectionProps> = ({
               <Lock className="h-4 w-4 text-gray-500" />
               Available Badges ({lockedBadges.length})
             </h4>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {lockedBadges.map((badge) => (
                 <div key={badge.id} className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-center opacity-60">

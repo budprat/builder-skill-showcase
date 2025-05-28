@@ -20,16 +20,21 @@ const Admin = () => {
       }
 
       try {
-        // Check if user has admin, sponsor, or evaluator role
+        // Check if user has admin role only
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .in('role', ['admin', 'sponsor', 'evaluator']);
+          .eq('role', 'admin');
 
-        setIsAdmin(data && data.length > 0);
+        if (error) {
+          console.error('Error checking admin access:', error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data && data.length > 0);
+        }
       } catch (error) {
-        console.log('User does not have admin access');
+        console.error('Exception checking admin access:', error);
         setIsAdmin(false);
       } finally {
         setCheckingAccess(false);
@@ -72,8 +77,8 @@ const Admin = () => {
           <Card className="max-w-md mx-auto bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <Shield className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h1 className="text-xl font-bold mb-2 text-gray-900">Access Required</h1>
-              <p className="text-gray-600">You need admin, sponsor, or evaluator privileges to access this panel.</p>
+              <h1 className="text-xl font-bold mb-2 text-gray-900">Admin Access Required</h1>
+              <p className="text-gray-600">You need admin privileges to access this panel.</p>
             </CardContent>
           </Card>
         </div>

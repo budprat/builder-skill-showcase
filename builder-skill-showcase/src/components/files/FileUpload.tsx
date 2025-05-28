@@ -46,7 +46,32 @@ export const FileUpload = ({
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
+      
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 10MB.",
+          variant: "destructive",
+        });
+        setUploading(false);
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+
+      if (!fileExt || !allowedTypes.includes('.' + fileExt)) {
+        toast({
+          title: "Invalid file type",
+          description: "Only PDF, DOC, DOCX, JPG, and PNG files are allowed.",
+          variant: "destructive",
+        });
+        setUploading(false);
+        return;
+      }
+
       const fileName = `${user.id}/${fileType}_${Date.now()}.${fileExt}`;
 
       // Upload to Supabase Storage

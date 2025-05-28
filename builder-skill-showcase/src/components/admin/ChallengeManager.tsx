@@ -70,7 +70,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       if (error) throw error;
       console.log('Fetched challenges count:', data?.length || 0);
       console.log('Challenge IDs:', data?.map(c => c.id) || []);
-      
+
       // Log image URLs for debugging
       data?.forEach(challenge => {
         if (challenge.image_url || challenge.image_urls) {
@@ -82,7 +82,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
           });
         }
       });
-      
+
       setChallenges(data || []);
     } catch (error) {
       console.error('Error fetching challenges:', error);
@@ -98,6 +98,27 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Verify user has permission to create challenges
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Verify user has permission to create challenges
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .in('role', ['admin', 'sponsor', 'company']);
+
+    if (roleError || !roleData || roleData.length === 0) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to create challenges.",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -306,12 +327,12 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
     try {
       const uploadPromises = files.map(file => handleImageUpload(file));
       const imageUrls = await Promise.all(uploadPromises);
-      
+
       setFormData(prev => ({ 
         ...prev, 
         image_urls: [...prev.image_urls, ...imageUrls] 
       }));
-      
+
       toast({
         title: "Success",
         description: `${files.length} additional image(s) uploaded successfully`,
@@ -717,7 +738,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div>
                         <Label htmlFor="additional_images">Additional Images (Optional)</Label>
                         <Input
