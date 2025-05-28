@@ -160,12 +160,13 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
           
           while (!roleAssigned && retries > 0) {
             try {
-              const { data: existingRole, error: checkError } = await supabase
+              // First check if role already exists
+              const { data: existingRole } = await supabase
                 .from('user_roles')
                 .select('*')
                 .eq('user_id', authData.user.id)
                 .eq('role', data.role)
-                .single();
+                .maybeSingle();
 
               if (existingRole) {
                 console.log("Role already exists:", data.role);
@@ -173,6 +174,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                 break;
               }
 
+              // Insert the role
               const { error: roleError } = await supabase
                 .from('user_roles')
                 .insert({
@@ -183,21 +185,21 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
               if (!roleError) {
                 console.log("Role assigned successfully:", data.role);
                 roleAssigned = true;
-              } else if (roleError.message.includes('duplicate')) {
+              } else if (roleError.message.includes('duplicate') || roleError.code === '23505') {
                 console.log("Role already exists (duplicate key)");
                 roleAssigned = true;
               } else {
                 console.error(`Role assignment attempt ${4 - retries} failed:`, roleError);
                 retries--;
                 if (retries > 0) {
-                  await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s before retry
                 }
               }
             } catch (roleAssignError) {
               console.error(`Role assignment error (attempt ${4 - retries}):`, roleAssignError);
               retries--;
               if (retries > 0) {
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
               }
             }
           }

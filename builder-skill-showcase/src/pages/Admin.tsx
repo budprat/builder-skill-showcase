@@ -20,17 +20,16 @@ const Admin = () => {
       }
 
       try {
-        // Use type assertion to bypass TypeScript error
-        const { data, error } = await (supabase as any)
+        // Check if user has admin, sponsor, or evaluator role
+        const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .single();
+          .in('role', ['admin', 'sponsor', 'evaluator']);
 
-        setIsAdmin(!!data);
+        setIsAdmin(data && data.length > 0);
       } catch (error) {
-        console.log('User is not an admin');
+        console.log('User does not have admin access');
         setIsAdmin(false);
       } finally {
         setCheckingAccess(false);
@@ -73,8 +72,8 @@ const Admin = () => {
           <Card className="max-w-md mx-auto bg-white border border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <Shield className="h-12 w-12 mx-auto mb-4 text-red-500" />
-              <h1 className="text-xl font-bold mb-2 text-gray-900">Admin Access Required</h1>
-              <p className="text-gray-600">You don't have permission to access the admin panel.</p>
+              <h1 className="text-xl font-bold mb-2 text-gray-900">Access Required</h1>
+              <p className="text-gray-600">You need admin, sponsor, or evaluator privileges to access this panel.</p>
             </CardContent>
           </Card>
         </div>
