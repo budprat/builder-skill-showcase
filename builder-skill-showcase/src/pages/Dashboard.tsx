@@ -58,6 +58,10 @@ interface UserBadge {
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
 
   console.log('=== DASHBOARD COMPONENT RENDERED ===');
   console.log('User:', user?.id);
@@ -65,11 +69,6 @@ const Dashboard = () => {
   console.log('Loading state:', loading);
   console.log('User email:', user?.email);
   console.log('Is evaluator?:', userRole === 'evaluator');
-
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
