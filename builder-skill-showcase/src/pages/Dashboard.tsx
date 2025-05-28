@@ -385,12 +385,12 @@ const Dashboard = () => {
     try {
       const uploadPromises = files.map(file => handleImageUpload(file));
       const imageUrls = await Promise.all(uploadPromises);
-      
+
       setChallengeFormData(prev => ({ 
         ...prev, 
         image_urls: [...prev.image_urls, ...imageUrls] 
       }));
-      
+
       toast({
         title: "Success",
         description: `${files.length} additional image(s) uploaded successfully`,
@@ -649,13 +649,15 @@ const Dashboard = () => {
                       <Settings className="h-4 w-4 mr-2" />
                       Edit Profile
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="submissions" 
-                      className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
-                    >
-                      <Trophy className="h-4 w-4 mr-2" />
-                      Submissions ({submissions.length})
-                    </TabsTrigger>
+                    {(userRole === 'participant' || userRole === 'admin') && (
+                      <TabsTrigger 
+                        value="submissions" 
+                        className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
+                      >
+                        <Trophy className="h-4 w-4 mr-2" />
+                        Submissions ({submissions.length})
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger 
                       value="badges" 
                       className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
@@ -670,7 +672,7 @@ const Dashboard = () => {
                       <FileText className="h-4 w-4 mr-2" />
                       Documents
                     </TabsTrigger>
-                    {userRole === 'sponsor' && (
+                    {(userRole === 'sponsor' || userRole === 'admin') && (
                       <TabsTrigger 
                         value="my-challenges" 
                         className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
@@ -679,7 +681,7 @@ const Dashboard = () => {
                         My Challenges ({challenges.length})
                       </TabsTrigger>
                     )}
-                    {userRole === 'evaluator' && (
+                    {(userRole === 'evaluator' || userRole === 'admin') && (
                       <TabsTrigger 
                         value="evaluate" 
                         className="w-full justify-start bg-transparent text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 hover:bg-gray-50"
@@ -699,6 +701,7 @@ const Dashboard = () => {
                 <Card className="bg-white border-gray-200">
                   <CardHeader>
                     <CardTitle className="text-gray-900 text-2xl">Profile Overview</CardTitle>
+                    <p className="text-sm text-gray-600">Role: {userRole || 'Loading...'}</p>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Basic Info */}
@@ -885,7 +888,7 @@ const Dashboard = () => {
                         <Label htmlFor="experience_level" className="text-gray-900">Experience Level</Label>
                         <select
                           id="experience_level"
-                          value={profileData.experience_level}
+                          value={profileData.experiencelevel}
                           onChange={(e) => setProfileData({...profileData, experience_level: e.target.value})}
                           className="mt-1 flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
@@ -942,280 +945,282 @@ const Dashboard = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="submissions" className="mt-0">
-                <Card className="bg-white border-gray-200">
-                  <CardHeader>
-                    <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
-                      <Trophy className="h-6 w-6" />
-                      My Submissions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {submissions.length === 0 ? (
-                      <div className="text-center py-12">
-                        <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                        <p className="text-gray-600 text-lg">No submissions yet</p>
-                        <p className="text-gray-500 text-sm mt-2">Start by participating in challenges!</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {submissions.map((submission: any) => (
-                          <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:bg-gray-100 transition-colors">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h3 className="font-semibold text-gray-900 text-lg">{submission.challenges?.title}</h3>
-                                <p className="text-gray-600 mt-1">
-                                  Company: {submission.challenges?.company_name || 'N/A'}
-                                </p>
-                                <div className="flex items-center gap-2 mt-3">
-                                  <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-800">
-                                    {submission.status}
-                                  </Badge>
-                                  {submission.scores && submission.scores.length > 0 && (
-                                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                                      AI Score: {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+              {(userRole === 'participant' || userRole === 'admin') && (
+                <TabsContent value="submissions" className="mt-0">
+                  <Card className="bg-white border-gray-200">
+                    <CardHeader>
+                      <CardTitle className="text-gray-900 text-2xl flex items-center gap-2">
+                        <Trophy className="h-6 w-6" />
+                        My Submissions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {submissions.length === 0 ? (
+                        <div className="text-center py-12">
+                          <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                          <p className="text-gray-600 text-lg">No submissions yet</p>
+                          <p className="text-gray-500 text-sm mt-2">Start by participating in challenges!</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {submissions.map((submission: any) => (
+                            <div key={submission.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6 hover:bg-gray-100 transition-colors">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-semibold text-gray-900 text-lg">{submission.challenges?.title}</h3>
+                                  <p className="text-gray-600 mt-1">
+                                    Company: {submission.challenges?.company_name || 'N/A'}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-3">
+                                    <Badge variant="outline" className="bg-blue-50 border-blue-200 text-blue-800">
+                                      {submission.status}
                                     </Badge>
-                                  )}
-                                  {submission.final_score && (
-                                    <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                                      Final Score: {submission.final_score}/100
-                                    </Badge>
-                                  )}
-                                </div>
+                                    {submission.scores && submission.scores.length > 0 && (
+                                      <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                                        AI Score: {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+                                      </Badge>
+                                    )}
+                                    {submission.final_score && (
+                                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                                        Final Score: {submission.final_score}/100
+                                      </Badge>
+                                    )}
+                                  </div>
 
-                                <div className="flex items-center gap-2 mt-4">
-                                  {submission.repository_url && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => window.open(submission.repository_url, '_blank')}
-                                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    >
-                                      Repository
-                                    </Button>
-                                  )}
-                                  {submission.pitch_deck_url && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => window.open(submission.pitch_deck_url, '_blank')}
-                                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    >
-                                      Pitch Deck
-                                    </Button>
-                                  )}
-                                  {submission.demo_video_url && (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => window.open(submission.demo_video_url, '_blank')}
-                                      className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                                    >
-                                      Demo Video
-                                    </Button>
-                                  )}
-                                  {submission.scores && submission.scores.length > 0 && (
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
-                                          <Eye className="h-4 w-4 mr-1" />
-                                          View Score Details
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent className="max-w-2xl bg-white border-gray-200">
-                                        <DialogHeader>
-                                          <DialogTitle className="text-gray-900">Your Score & Feedback</DialogTitle>
-                                        </DialogHeader>
-                                        <div className="space-y-4">
-                                          <div>
-                                            <h4 className="font-semibold mb-2 text-gray-900">Overall Score</h4>
-                                            <p className="text-2xl font-bold text-blue-600">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
-                                          </div>
-
-                                          <div>
-                                            <h4 className="font-semibold mb-2 text-gray-900">GitHub Repository Analysis</h4>
-                                            <div className="border border-gray-300 p-3 rounded bg-gray-50">
-                                              <div className="flex justify-between items-center mb-2">
-                                                <span className="font-medium text-gray-900">Repository Validation</span>
-                                                <span className="font-bold text-blue-600">{submission.scores[0].pre_screening_score}/5</span>
-                                              </div>
-                                              <p className="text-sm text-gray-700">
-                                                {submission.scores[0].pre_screening_score === 5 
-                                                  ? "✅ Repository exists and contains README.md" 
-                                                  : "❌ Repository validation failed - missing repository or README.md"}
-                                              </p>
-                                            </div>
-                                          </div>
-
-                                          {submission.scores[0].llm_scores && (
+                                  <div className="flex items-center gap-2 mt-4">
+                                    {submission.repository_url && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => window.open(submission.repository_url, '_blank')}
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                      >
+                                        Repository
+                                      </Button>
+                                    )}
+                                    {submission.pitch_deck_url && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => window.open(submission.pitch_deck_url, '_blank')}
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                      >
+                                        Pitch Deck
+                                      </Button>
+                                    )}
+                                    {submission.demo_video_url && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => window.open(submission.demo_video_url, '_blank')}
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                      >
+                                        Demo Video
+                                      </Button>
+                                    )}
+                                    {submission.scores && submission.scores.length > 0 && (
+                                      <Dialog>
+                                        <DialogTrigger asChild>
+                                          <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                                            <Eye className="h-4 w-4 mr-1" />
+                                            View Score Details
+                                          </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-2xl bg-white border-gray-200">
+                                          <DialogHeader>
+                                            <DialogTitle className="text-gray-900">Your Score & Feedback</DialogTitle>
+                                          </DialogHeader>
+                                          <div className="space-y-4">
                                             <div>
-                                              <h4 className="font-semibold mb-2 text-gray-900">Detailed Rubric Scores</h4>
-                                              <div className="space-y-2">
-                                                {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                                  <div key={criterion} className="border border-gray-300 p-2 rounded bg-gray-50">
-                                                    <div className="flex justify-between items-center mb-1">
-                                                      <span className="font-medium text-gray-900">{criterion}</span>
-                                                      <span className="font-bold text-blue-600">{scoreData.score?.toFixed(1)}/20</span>
+                                              <h4 className="font-semibold mb-2 text-gray-900">Overall Score</h4>
+                                              <p className="text-2xl font-bold text-blue-600">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
+                                            </div>
+
+                                            <div>
+                                              <h4 className="font-semibold mb-2 text-gray-900">GitHub Repository Analysis</h4>
+                                              <div className="border border-gray-300 p-3 rounded bg-gray-50">
+                                                <div className="flex justify-between items-center mb-2">
+                                                  <span className="font-medium text-gray-900">Repository Validation</span>
+                                                  <span className="font-bold text-blue-600">{submission.scores[0].pre_screening_score}/5</span>
+                                                </div>
+                                                <p className="text-sm text-gray-700">
+                                                  {submission.scores[0].pre_screening_score === 5 
+                                                    ? "✅ Repository exists and contains README.md" 
+                                                    : "❌ Repository validation failed - missing repository or README.md"}
+                                                </p>
+                                              </div>
+                                            </div>
+
+                                            {submission.scores[0].llm_scores && (
+                                              <div>
+                                                <h4 className="font-semibold mb-2 text-gray-900">Detailed Rubric Scores</h4>
+                                                <div className="space-y-2">
+                                                  {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                                    <div key={criterion} className="border border-gray-300 p-2 rounded bg-gray-50">
+                                                      <div className="flex justify-between items-center mb-1">
+                                                        <span className="font-medium text-gray-900">{criterion}</span>
+                                                        <span className="font-bold text-blue-600">{scoreData.score?.toFixed(1)}/20</span>
+                                                      </div>
+                                                      <p className="text-sm text-gray-700">{scoreData.explanation}</p>
                                                     </div>
-                                                    <p className="text-sm text-gray-700">{scoreData.explanation}</p>
-                                                  </div>
-                                                ))}
+                                                  ))}
+                                                </div>
                                               </div>
-                                            </div>
-                                          )}
+                                            )}
 
-                                          {submission.scores[0].feedback && (
-                                            <div>
-                                              <h4 className="font-semibold mb-2 text-gray-900">Feedback</h4>
-                                              <div className="bg-gray-50 p-3 rounded text-sm text-gray-700">
-                                                {submission.scores[0].feedback}
+                                            {submission.scores[0].feedback && (
+                                              <div>
+                                                <h4 className="font-semibold mb-2 text-gray-900">Feedback</h4>
+                                                <div className="bg-gray-50 p-3 rounded text-sm text-gray-700">
+                                                  {submission.scores[0].feedback}
+                                                </div>
                                               </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </DialogContent>
-                                    </Dialog>
-                                  )}
+                                            )}
+                                          </div>
+                                        </DialogContent>
+                                      </Dialog>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 ml-4">
+                                  <div className="text-sm text-gray-600">
+                                    {new Date(submission.created_at).toLocaleDateString()}
+                                  </div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openEditDialog(submission)}
+                                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => deleteSubmission(submission.id)}
+                                    disabled={deletingSubmissionId === submission.id}
+                                    className="bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    {deletingSubmissionId === submission.id ? (
+                                      "Deleting..."
+                                    ) : (
+                                      <>
+                                        <Trash2 className="h-4 w-4 mr-1" />
+                                        Delete
+                                      </>
+                                    )}
+                                  </Button>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 ml-4">
-                                <div className="text-sm text-gray-600">
-                                  {new Date(submission.created_at).toLocaleDateString()}
+                              {submission.readme_notes && (
+                                <div className="mt-4 p-3 bg-white rounded text-sm border border-gray-200">
+                                  <strong className="text-gray-900">Notes:</strong> 
+                                  <span className="text-gray-700 ml-2">{submission.readme_notes}</span>
                                 </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => openEditDialog(submission)}
-                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                                >
-                                  <Edit className="h-4 w-4 mr-1" />
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => deleteSubmission(submission.id)}
-                                  disabled={deletingSubmissionId === submission.id}
-                                  className="bg-red-600 hover:bg-red-700 text-white"
-                                >
-                                  {deletingSubmissionId === submission.id ? (
-                                    "Deleting..."
-                                  ) : (
-                                    <>
-                                      <Trash2 className="h-4 w-4 mr-1" />
-                                      Delete
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
+                              )}
                             </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
 
-                            {submission.readme_notes && (
-                              <div className="mt-4 p-3 bg-white rounded text-sm border border-gray-200">
-                                <strong className="text-gray-900">Notes:</strong> 
-                                <span className="text-gray-700 ml-2">{submission.readme_notes}</span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                  {/* Edit Submission Dialog */}
+                  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border-gray-200">
+                      <DialogHeader>
+                        <DialogTitle className="text-gray-900">Edit Submission</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="edit_repository_url" className="text-gray-900">Repository URL</Label>
+                          <Input
+                            id="edit_repository_url"
+                            value={editFormData.repository_url}
+                            onChange={(e) => setEditFormData({...editFormData, repository_url: e.target.value})}
+                            placeholder="https://github.com/username/repo"
+                            className="mt-1 border-gray-300 text-gray-900"
+                          />
+                        </div>
 
-                {/* Edit Submission Dialog */}
-                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border-gray-200">
-                    <DialogHeader>
-                      <DialogTitle className="text-gray-900">Edit Submission</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="edit_repository_url" className="text-gray-900">Repository URL</Label>
-                        <Input
-                          id="edit_repository_url"
-                          value={editFormData.repository_url}
-                          onChange={(e) => setEditFormData({...editFormData, repository_url: e.target.value})}
-                          placeholder="https://github.com/username/repo"
-                          className="mt-1 border-gray-300 text-gray-900"
-                        />
-                      </div>
+                        <div>
+                          <Label htmlFor="edit_pitch_deck_url" className="text-gray-900">Pitch Deck URL</Label>
+                          <Input
+                            id="edit_pitch_deck_url"
+                            value={editFormData.pitch_deck_url}
+                            onChange={(e) => setEditFormData({...editFormData, pitch_deck_url: e.target.value})}
+                            placeholder="https://drive.google.com/file/d/... or upload PDF below"
+                            className="mt-1 border-gray-300 text-gray-900"
+                          />
+                        </div>
 
-                      <div>
-                        <Label htmlFor="edit_pitch_deck_url" className="text-gray-900">Pitch Deck URL</Label>
-                        <Input
-                          id="edit_pitch_deck_url"
-                          value={editFormData.pitch_deck_url}
-                          onChange={(e) => setEditFormData({...editFormData, pitch_deck_url: e.target.value})}
-                          placeholder="https://drive.google.com/file/d/... or upload PDF below"
-                          className="mt-1 border-gray-300 text-gray-900"
-                        />
-                      </div>
+                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                          <Label className="text-sm font-medium mb-2 block text-gray-900">Upload Pitch Deck PDF</Label>
+                          <p className="text-xs text-gray-600 mb-3">
+                            Upload a PDF file directly to replace or set the pitch deck URL
+                          </p>
+                          <FileUpload
+                            fileType="document"
+                            title="Pitch Deck PDF"
+                            description="Upload your pitch deck as a PDF file"
+                            acceptedTypes=".pdf"
+                            onUploadComplete={(url) => {
+                              setEditFormData({...editFormData, pitch_deck_url: url});
+                              toast({
+                                title: "Success",
+                                description: "PDF uploaded and pitch deck URL updated",
+                              });
+                            }}
+                          />
+                        </div>
 
-                      <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                        <Label className="text-sm font-medium mb-2 block text-gray-900">Upload Pitch Deck PDF</Label>
-                        <p className="text-xs text-gray-600 mb-3">
-                          Upload a PDF file directly to replace or set the pitch deck URL
-                        </p>
-                        <FileUpload
-                          fileType="document"
-                          title="Pitch Deck PDF"
-                          description="Upload your pitch deck as a PDF file"
-                          acceptedTypes=".pdf"
-                          onUploadComplete={(url) => {
-                            setEditFormData({...editFormData, pitch_deck_url: url});
-                            toast({
-                              title: "Success",
-                              description: "PDF uploaded and pitch deck URL updated",
-                            });
-                          }}
-                        />
-                      </div>
+                        <div>
+                          <Label htmlFor="edit_demo_video_url" className="text-gray-900">Demo Video URL</Label>
+                          <Input
+                            id="edit_demo_video_url"
+                            value={editFormData.demo_video_url}
+                            onChange={(e) => setEditFormData({...editFormData, demo_video_url: e.target.value})}
+                            placeholder="https://youtube.com/watch?v=..."
+                            className="mt-1 border-gray-300 text-gray-900"
+                          />
+                        </div>
 
-                      <div>
-                        <Label htmlFor="edit_demo_video_url" className="text-gray-900">Demo Video URL</Label>
-                        <Input
-                          id="edit_demo_video_url"
-                          value={editFormData.demo_video_url}
-                          onChange={(e) => setEditFormData({...editFormData, demo_video_url: e.target.value})}
-                          placeholder="https://youtube.com/watch?v=..."
-                          className="mt-1 border-gray-300 text-gray-900"
-                        />
-                      </div>
+                        <div>
+                          <Label htmlFor="edit_readme_notes" className="text-gray-900">Additional Notes</Label>
+                          <Textarea
+                            id="edit_readme_notes"
+                            value={editFormData.readme_notes}
+                            onChange={(e) => setEditFormData({...editFormData, readme_notes: e.target.value})}
+                            placeholder="Any additional information about your solution..."
+                            rows={3}
+                            className="mt-1 border-gray-300 text-gray-900"
+                          />
+                        </div>
 
-                      <div>
-                        <Label htmlFor="edit_readme_notes" className="text-gray-900">Additional Notes</Label>
-                        <Textarea
-                          id="edit_readme_notes"
-                          value={editFormData.readme_notes}
-                          onChange={(e) => setEditFormData({...editFormData, readme_notes: e.target.value})}
-                          placeholder="Any additional information about your solution..."
-                          rows={3}
-                          className="mt-1 border-gray-300 text-gray-900"
-                        />
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setIsEditDialogOpen(false)}
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={updateSubmission} 
+                            disabled={updating}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            {updating ? "Updating..." : "Update Submission"}
+                          </Button>
+                        </div>
                       </div>
-
-                      <div className="flex justify-end space-x-2 pt-4">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setIsEditDialogOpen(false)}
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={updateSubmission} 
-                          disabled={updating}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          {updating ? "Updating..." : "Update Submission"}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </TabsContent>
+                    </DialogContent>
+                  </Dialog>
+                </TabsContent>
+              )}
 
               <TabsContent value="badges" className="mt-0">
                 <BadgeCollection userId={user.id} />
@@ -1251,7 +1256,7 @@ const Dashboard = () => {
                 </Card>
               </TabsContent>
 
-              {userRole === 'sponsor' && (
+              {(userRole === 'sponsor' || userRole === 'admin') && (
                 <TabsContent value="my-challenges" className="mt-0">
                   <Card className="bg-white border-gray-200">
                     <CardHeader>
@@ -1483,7 +1488,7 @@ const Dashboard = () => {
                                       </div>
                                     )}
                                   </div>
-                                  
+
                                   <div>
                                     <Label htmlFor="additional_images" className="text-gray-900">Additional Images (Optional)</Label>
                                     <Input
@@ -1707,7 +1712,7 @@ const Dashboard = () => {
                 </TabsContent>
               )}
 
-              {userRole === 'evaluator' && (
+              {(userRole === 'evaluator' || userRole === 'admin') && (
                 <TabsContent value="evaluate" className="mt-0">
                   <EvaluatorSubmissionManager />
                 </TabsContent>

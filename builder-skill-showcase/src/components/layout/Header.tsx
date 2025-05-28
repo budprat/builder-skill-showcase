@@ -67,22 +67,42 @@ export const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
             <button
-              key={item.href}
-              onClick={() => navigate(item.href)}
+              onClick={() => navigate("/challenges")}
               className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
             >
-              {item.label}
-              {item.label === "Admin" && (
+              Challenges
+              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+            </button>
+            <button
+              onClick={() => navigate("/leaderboard")}
+              className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+            >
+              Leaderboard
+              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+            </button>
+            {user && (
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+              >
+                Dashboard
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+              </button>
+            )}
+            {(userRole === 'admin' || userRole === 'sponsor' || userRole === 'evaluator') && (
+              <button
+                onClick={() => navigate("/admin")}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors relative group"
+              >
+                {userRole === 'admin' ? 'Admin' : 'Management'}
                 <Badge className="ml-2 bg-red-100 text-red-800 border-red-200 text-xs">
                   Admin
                 </Badge>
-              )}
-              <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
-            </button>
-          ))}
-        </nav>
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+              </button>
+            )}
+          </nav>
 
         {/* Desktop User Menu */}
         <div className="hidden md:flex items-center space-x-4">

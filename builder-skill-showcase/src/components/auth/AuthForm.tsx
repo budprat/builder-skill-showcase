@@ -332,7 +332,7 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
                         <SelectContent>
                           <SelectItem value="participant">Participant</SelectItem>
                           <SelectItem value="sponsor">Sponsor</SelectItem>
-                          <SelectItem value="evaluator">Evaluator</SelectItem>
+                          <SelectItem value="company">Company</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

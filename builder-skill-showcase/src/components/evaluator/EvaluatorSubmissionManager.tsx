@@ -24,13 +24,28 @@ interface SubmissionWithDetails extends Submission {
 }
 
 const EvaluatorSubmissionManager = () => {
-  console.log('=== EVALUATOR SUBMISSION MANAGER MOUNTED ===');
   const { user, userRole } = useAuth();
   const { toast } = useToast();
-  
+
+  console.log('=== EVALUATOR SUBMISSION MANAGER MOUNTED ===');
   console.log('EvaluatorSubmissionManager - User:', user?.id);
   console.log('EvaluatorSubmissionManager - User exists:', !!user);
   console.log('EvaluatorSubmissionManager - User role:', userRole);
+
+  // Security check: Only allow evaluators and admins
+  if (userRole !== 'evaluator' && userRole !== 'admin') {
+    return (
+      <Card className="bg-white border-gray-200">
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
+            <p>You don't have permission to access this section.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const [submissions, setSubmissions] = useState<SubmissionWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
@@ -48,7 +63,7 @@ const EvaluatorSubmissionManager = () => {
   useEffect(() => {
     console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id, 'userRole:', userRole);
     console.log('EvaluatorSubmissionManager useEffect - Dependencies:', { user: !!user, userRole });
-    
+
     if (user?.id) {
       console.log('EvaluatorSubmissionManager - User confirmed, fetching submissions');
       fetchSubmissions();
@@ -116,7 +131,7 @@ const EvaluatorSubmissionManager = () => {
         console.error('EvaluatorSubmissionManager - Supabase error:', error);
         throw error;
       }
-      
+
       setSubmissions(data || []);
       console.log('EvaluatorSubmissionManager - Submissions state updated with:', data?.length || 0, 'items');
     } catch (error) {

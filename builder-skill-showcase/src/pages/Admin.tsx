@@ -20,16 +20,21 @@ const Admin = () => {
       }
 
       try {
-        // Check if user has admin, sponsor, or evaluator role
+        // Check if user has admin, sponsor, evaluator, or company role
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .in('role', ['admin', 'sponsor', 'evaluator']);
+          .in('role', ['admin', 'sponsor', 'evaluator', 'company']);
 
-        setIsAdmin(data && data.length > 0);
+        if (error) {
+          console.error('Error checking admin access:', error);
+          setIsAdmin(false);
+        } else {
+          setIsAdmin(data && data.length > 0);
+        }
       } catch (error) {
-        console.log('User does not have admin access');
+        console.error('Exception checking admin access:', error);
         setIsAdmin(false);
       } finally {
         setCheckingAccess(false);
