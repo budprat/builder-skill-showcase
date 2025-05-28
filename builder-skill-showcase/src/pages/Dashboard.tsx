@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, User, Trophy, Upload, ExternalLink, Github, Play, FileText, Plus, Edit, Trash2 } from "lucide-react";
+import { Calendar, User, Trophy, Upload, ExternalLink, Github, Play, FileText, Plus, Edit, Trash2, Settings, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -263,87 +263,432 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Active Challenges</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{challenges.length}</div>
-                  <p className="text-xs text-muted-foreground">Available to participate</p>
-                </CardContent>
-              </Card>
+            {/* Participant Dashboard */}
+            {(userRole === 'participant' || !userRole) && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Active Challenges</CardTitle>
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{challenges.length}</div>
+                      <p className="text-xs text-muted-foreground">Available to participate</p>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">My Submissions</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{submissions.length}</div>
-                  <p className="text-xs text-muted-foreground">Total submissions made</p>
-                </CardContent>
-              </Card>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">My Submissions</CardTitle>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{submissions.length}</div>
+                      <p className="text-xs text-muted-foreground">Total submissions made</p>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
-                  <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{userBadges.length}</div>
-                  <p className="text-xs text-muted-foreground">Achievements unlocked</p>
-                </CardContent>
-              </Card>
-            </div>
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Badges Earned</CardTitle>
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{userBadges.length}</div>
+                      <p className="text-xs text-muted-foreground">Achievements unlocked</p>
+                    </CardContent>
+                  </Card>
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Challenges</CardTitle>
-                  <CardDescription>Latest challenges available for participation</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {challenges.slice(0, 3).map((challenge) => (
-                      <div key={challenge.id} className="flex items-center space-x-4">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{challenge.title}</p>
-                          <p className="text-sm text-gray-500 truncate">{challenge.company_name}</p>
-                          <p className="text-xs text-gray-400">Prize: {formatPrize(challenge.prize_amount)}</p>
-                        </div>
-                        <Badge variant="secondary">{challenge.status}</Badge>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Featured Challenges</CardTitle>
+                      <CardDescription>Trending challenges with high prizes</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {challenges.slice(0, 3).map((challenge) => (
+                          <div key={challenge.id} className="flex items-center space-x-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{challenge.title}</p>
+                              <p className="text-sm text-gray-500 truncate">{challenge.company_name}</p>
+                              <p className="text-xs text-green-600 font-medium">Prize: {formatPrize(challenge.prize_amount)}</p>
+                            </div>
+                            <Button size="sm" onClick={() => window.open(`/challenges/${challenge.id}`, '_self')}>
+                              View
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Submissions</CardTitle>
-                  <CardDescription>Your latest challenge submissions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {submissions.slice(0, 3).map((submission) => (
-                      <div key={submission.id} className="flex items-center space-x-4">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{submission.challenge_title}</p>
-                          <p className="text-xs text-gray-400">
-                            Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>My Progress</CardTitle>
+                      <CardDescription>Your recent submissions and performance</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {submissions.slice(0, 3).map((submission) => (
+                          <div key={submission.id} className="flex items-center space-x-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{submission.challenge_title}</p>
+                              <p className="text-xs text-gray-400">
+                                Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
+                              </p>
+                              {submission.score && (
+                                <p className="text-xs text-green-600">Score: {submission.score}/100</p>
+                              )}
+                            </div>
+                            <Badge className={getStatusColor(submission.status)}>
+                              {submission.status}
+                            </Badge>
+                          </div>
+                        ))}
+                        {submissions.length === 0 && (
+                          <p className="text-sm text-gray-500 text-center py-4">
+                            No submissions yet. Start your journey by participating in a challenge!
                           </p>
-                        </div>
-                        <Badge className={getStatusColor(submission.status)}>
-                          {submission.status}
-                        </Badge>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
+            {/* Sponsor Dashboard */}
+            {userRole === 'sponsor' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">My Challenges</CardTitle>
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-muted-foreground">Challenges created</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-muted-foreground">Across all challenges</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Active Participants</CardTitle>
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-muted-foreground">Currently participating</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Prize Pool</CardTitle>
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">$0</div>
+                      <p className="text-xs text-muted-foreground">Across all challenges</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Quick Actions</CardTitle>
+                        <CardDescription>Manage your challenges efficiently</CardDescription>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Button 
+                        className="w-full justify-start" 
+                        variant="outline"
+                        onClick={() => {
+                          const sponsorTab = document.querySelector('[value="sponsor"]') as HTMLElement;
+                          sponsorTab?.click();
+                        }}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create New Challenge
+                      </Button>
+                      <Button className="w-full justify-start" variant="outline">
+                        <Edit className="mr-2 h-4 w-4" />
+                        Manage Existing Challenges
+                      </Button>
+                      <Button className="w-full justify-start" variant="outline">
+                        <FileText className="mr-2 h-4 w-4" />
+                        View All Submissions
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Challenge Performance</CardTitle>
+                      <CardDescription>Insights about your challenges</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-center py-8 text-gray-500">
+                          <Trophy className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-sm">No challenges created yet</p>
+                          <p className="text-xs">Create your first challenge to see performance metrics</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
+            {/* Evaluator Dashboard */}
+            {userRole === 'evaluator' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+                      <FileText className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-orange-600">0</div>
+                      <p className="text-xs text-muted-foreground">Awaiting evaluation</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Completed Reviews</CardTitle>
+                      <Trophy className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">0</div>
+                      <p className="text-xs text-muted-foreground">Total evaluated</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Active Challenges</CardTitle>
+                      <Calendar className="h-4 w-4 text-blue-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-blue-600">{challenges.length}</div>
+                      <p className="text-xs text-muted-foreground">Available for evaluation</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Avg. Score Given</CardTitle>
+                      <Trophy className="h-4 w-4 text-purple-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-purple-600">--</div>
+                      <p className="text-xs text-muted-foreground">Out of 100</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle>Evaluation Queue</CardTitle>
+                        <CardDescription>Submissions waiting for your review</CardDescription>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          const evaluatorTab = document.querySelector('[value="evaluator"]') as HTMLElement;
+                          evaluatorTab?.click();
+                        }}
+                      >
+                        View All
+                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="text-center py-8 text-gray-500">
+                          <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-sm">No submissions pending review</p>
+                          <p className="text-xs">Check back later for new submissions to evaluate</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Evaluation Guidelines</CardTitle>
+                      <CardDescription>Key criteria for assessment</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Technical Implementation</p>
+                            <p className="text-xs text-gray-500">Code quality, architecture, and functionality</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Innovation & Creativity</p>
+                            <p className="text-xs text-gray-500">Unique approach and creative solutions</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Problem Solving</p>
+                            <p className="text-xs text-gray-500">How well the solution addresses the challenge</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                          <div>
+                            <p className="text-sm font-medium">Presentation</p>
+                            <p className="text-xs text-gray-500">Demo quality and documentation</p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
+
+            {/* Admin Dashboard */}
+            {userRole === 'admin' && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                      <User className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-muted-foreground">Registered users</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Challenges</CardTitle>
+                      <Trophy className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{challenges.length}</div>
+                      <p className="text-xs text-muted-foreground">All challenges</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">0</div>
+                      <p className="text-xs text-muted-foreground">All submissions</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">System Health</CardTitle>
+                      <Trophy className="h-4 w-4 text-green-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-green-600">Good</div>
+                      <p className="text-xs text-muted-foreground">All systems operational</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Admin Quick Actions</CardTitle>
+                      <CardDescription>Platform management tools</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Button 
+                        className="w-full justify-start" 
+                        variant="outline"
+                        onClick={() => window.open('/admin', '_self')}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Full Admin Panel
+                      </Button>
+                      <Button className="w-full justify-start" variant="outline">
+                        <Users className="mr-2 h-4 w-4" />
+                        Manage Users
+                      </Button>
+                      <Button className="w-full justify-start" variant="outline">
+                        <Trophy className="mr-2 h-4 w-4" />
+                        Manage Challenges
+                      </Button>
+                      <Button className="w-full justify-start" variant="outline">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Review Submissions
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Platform Statistics</CardTitle>
+                      <CardDescription>Overview of platform activity</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Active Challenges</span>
+                          <span className="font-medium">{challenges.length}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Total Prize Pool</span>
+                          <span className="font-medium">
+                            {formatPrize(challenges.reduce((total, challenge) => total + challenge.prize_amount, 0))}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Badges Awarded</span>
+                          <span className="font-medium">0</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm text-gray-600">Completion Rate</span>
+                          <span className="font-medium">--</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="submissions" className="space-y-6">
