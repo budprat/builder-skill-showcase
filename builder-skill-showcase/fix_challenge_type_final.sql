@@ -25,9 +25,9 @@ FROM information_schema.check_constraints
 WHERE constraint_name = 'valid_challenge_type';
 
 -- Test inserting a valid challenge_type
-INSERT INTO challenges (title, description, submission_deadline, challenge_type, difficulty_level, company_id, problem_statement, deliverables, evaluation_rubric) 
+INSERT INTO challenges (title, description, submission_deadline, challenge_type, difficulty_level, company_id, problem_statement, deliverables, evaluation_rubric, domains) 
 VALUES ('Test Challenge', 'Test Description', NOW() + INTERVAL '30 days', 'standard', 'intermediate', 
-        (SELECT id FROM auth.users LIMIT 1), 'Test problem statement', '[]'::jsonb, '[]'::jsonb)
+        (SELECT id FROM auth.users LIMIT 1), 'Test problem statement', '[]'::jsonb, '[]'::jsonb, ARRAY['AI', 'Machine Learning'])
 ON CONFLICT DO NOTHING;
 
 -- Clean up test record
