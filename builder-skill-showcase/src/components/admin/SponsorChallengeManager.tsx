@@ -37,6 +37,7 @@ export const SponsorChallengeManager = () => {
     submission_deadline: "",
     status: "active" as "active" | "draft" | "judging" | "completed",
     challenge_type: "standard" as "standard" | "hackathon" | "competition" | "bounty" | "research",
+    difficulty_level: "intermediate" as "beginner" | "intermediate" | "advanced",
     company_name: "",
     domains: "",
     deliverables_repository: "",
@@ -107,6 +108,7 @@ export const SponsorChallengeManager = () => {
         submission_deadline: formData.submission_deadline,
         status: formData.status,
         challenge_type: formData.challenge_type,
+        difficulty_level: formData.difficulty_level,
         company_name: formData.company_name,
         company_id: user.id,
         domains: formData.domains.split(',').map(d => d.trim()).filter(d => d.length > 0),
@@ -210,6 +212,7 @@ export const SponsorChallengeManager = () => {
       submission_deadline: "",
       status: "active",
       challenge_type: "standard",
+      difficulty_level: "intermediate",
       company_name: "",
       domains: "",
       deliverables_repository: "",
@@ -239,6 +242,7 @@ export const SponsorChallengeManager = () => {
       submission_deadline: challenge.submission_deadline.split('T')[0],
       status: challenge.status as "active" | "draft" | "judging" | "completed",
       challenge_type: (challenge as any).challenge_type || "standard",
+      difficulty_level: (challenge as any).difficulty_level || "intermediate",
       company_name: challenge.company_name || "",
       domains: Array.isArray(challenge.domains) ? challenge.domains.join(", ") : "",
       deliverables_repository: deliverables.repository || "",
@@ -392,7 +396,7 @@ export const SponsorChallengeManager = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="status">Status</Label>
                     <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as any})}>
@@ -420,6 +424,20 @@ export const SponsorChallengeManager = () => {
                         <SelectItem value="competition">Competition</SelectItem>
                         <SelectItem value="bounty">Bounty</SelectItem>
                         <SelectItem value="research">Research</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="difficulty_level">Difficulty Level</Label>
+                    <Select value={formData.difficulty_level} onValueChange={(value) => setFormData({...formData, difficulty_level: value as any})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="beginner">Beginner</SelectItem>
+                        <SelectItem value="intermediate">Intermediate</SelectItem>
+                        <SelectItem value="advanced">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
