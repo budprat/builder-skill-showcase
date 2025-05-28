@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,17 +102,39 @@ const Challenges = () => {
     }
   };
 
-  const filteredChallenges = challenges.filter(challenge => {
-    const matchesSearch = challenge.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         challenge.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         challenge.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDomain = selectedDomain === "all" || challenge.domains?.some(domain => 
-      domain.toLowerCase().includes(selectedDomain.toLowerCase())
-    );
-    const matchesStatus = selectedStatus === "all" || challenge.status === selectedStatus;
+  const filteredChallenges = useMemo(() => {
+    if (!searchTerm && selectedDomain === "all" && selectedStatus === "all") {
+      return challenges;
+    }
 
-    return matchesSearch && matchesDomain && matchesStatus;
-  });
+    const searchLower = searchTerm.toLowerCase();
+    
+    return challenges.filter(challenge => {
+      // Early return for status filter (most selective)
+      if (selectedStatus !== "all" && challenge.status !== selectedStatus) {
+        return false;
+      }
+      
+      // Domain filter (second most selective)
+      if (selectedDomain !== "all") {
+        const matchesDomain = challenge.domains?.some(domain => 
+          domain.toLowerCase().includes(selectedDomain.toLowerCase())
+        );
+        if (!matchesDomain) return false;
+      }
+      
+      // Search filter (least selective, do last)
+      if (searchTerm) {
+        const matchesSearch = 
+          challenge.title.toLowerCase().includes(searchLower) ||
+          challenge.company_name?.toLowerCase().includes(searchLower) ||
+          challenge.description.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      return true;
+    });
+  }, [challenges, searchTerm, selectedDomain, selectedStatus]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

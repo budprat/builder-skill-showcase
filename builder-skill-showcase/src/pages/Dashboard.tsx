@@ -72,7 +72,7 @@ const Dashboard = () => {
   console.log('Loading state:', loading);
   console.log('User email:', user?.email);
   console.log('Is evaluator?:', userRole === 'evaluator');
-  
+
   // Redirect admin users to admin panel
   useEffect(() => {
     if (userRole === 'admin') {
@@ -110,32 +110,30 @@ const Dashboard = () => {
       console.log('User ID:', user?.id);
 
       if (userRole === 'sponsor' && user) {
+        // Optimized query for sponsor challenges with limit for performance
         console.log('Fetching challenges for sponsor:', user.id);
-        
-        // Optimized query: fetch only needed columns for better performance
-        const { data, error } = await supabase
+        const { data: sponsorChallenges, error: sponsorError } = await supabase
           .from('challenges')
           .select(`
             id,
             title,
             description,
             company_name,
-            company_id,
-            domains,
             prize_amount,
             submission_deadline,
             status,
             created_at
           `)
           .eq('company_id', user.id)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(20); // Limit for better performance
 
-        if (error) throw error;
-        
-        console.log('Raw sponsor challenges fetched:', data?.length || 0);
-        
+        if (sponsorError) throw sponsorError;
+
+        console.log('Raw sponsor challenges fetched:', sponsorChallenges?.length || 0);
+
         // Additional client-side filtering to ensure only sponsor's challenges
-        const sponsorChallenges = (data || []).filter(challenge => {
+        const sponsorChallengesFiltered = (sponsorChallenges || []).filter(challenge => {
           const isOwned = challenge.company_id === user.id;
           if (!isOwned) {
             console.warn('Dashboard: Challenge does not belong to current sponsor:', {
@@ -147,9 +145,9 @@ const Dashboard = () => {
           }
           return isOwned;
         });
-        
-        console.log('Filtered sponsor challenges count:', sponsorChallenges.length);
-        setChallenges(sponsorChallenges);
+
+        console.log('Filtered sponsor challenges count:', sponsorChallengesFiltered.length);
+        setChallenges(sponsorChallengesFiltered);
       } else {
         console.log('Fetching active challenges for non-sponsor user');
         // Optimized query: fetch only needed columns for better performance
@@ -682,7 +680,7 @@ const Dashboard = () => {
               </>
             )}
 
-            
+
           </TabsContent>
 
           <TabsContent value="submissions" className="space-y-6">
@@ -775,7 +773,7 @@ const Dashboard = () => {
                   <EvaluatorSubmissionManager />
                 </RoleGuard>
               </TabsContent>
-              
+
               <TabsContent value="score-dashboard" className="space-y-6">
                 <RoleGuard 
                   allowedRoles={['evaluator']} 
