@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -59,14 +58,14 @@ interface UserBadge {
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
-  
-  console.log('=== DASHBOARD COMPONENT RENDER ===');
+
+  console.log('=== DASHBOARD COMPONENT RENDERED ===');
   console.log('User:', user?.id);
   console.log('User Role:', userRole);
-  console.log('Is evaluator?', userRole === 'evaluator');
-  console.log('Is admin?', userRole === 'admin');
-  console.log('Should show evaluator tab?', (userRole === 'evaluator' || userRole === 'admin'));
-  
+  console.log('Loading state:', loading);
+  console.log('User email:', user?.email);
+  console.log('Is evaluator?:', userRole === 'evaluator');
+
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
@@ -122,12 +121,12 @@ const Dashboard = () => {
         .order('submitted_at', { ascending: false });
 
       if (error) throw error;
-      
+
       const formattedSubmissions = data?.map(submission => ({
         ...submission,
         challenge_title: submission.challenges?.title || 'Unknown Challenge'
       })) || [];
-      
+
       setSubmissions(formattedSubmissions);
     } catch (error) {
       console.error('Error fetching submissions:', error);
@@ -159,7 +158,7 @@ const Dashboard = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    
+
     setSubmitting(true);
 
     try {
@@ -257,7 +256,7 @@ const Dashboard = () => {
             {(userRole === 'evaluator' || userRole === 'admin') && (
               <>
                 {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
-                {console.log('Current user role:', userRole)}
+                {console.log('Current user role for evaluator tab:', userRole)}
                 <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
               </>
             )}

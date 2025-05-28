@@ -237,18 +237,20 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
         }
 
         if (authData.user && authData.session) {
-          console.log("User signed in successfully");
-          console.log("User ID:", authData.user.id);
-          console.log("=== AUTH PROCESS COMPLETED ===");
-
           toast({
             title: "Success",
-            description: mode === "signin" ? "Signed in successfully" : "Account created successfully",
+            description: `Welcome back!`,
           });
 
-          // Navigate to dashboard after successful sign-in
-          console.log("=== NAVIGATING TO DASHBOARD ===");
-          navigate("/dashboard");
+          console.log('User signed in successfully');
+          console.log('User ID:', authData.user?.id);
+          console.log('=== AUTH PROCESS COMPLETED ===');
+
+          // Add a small delay to ensure auth state is updated before navigation
+          setTimeout(() => {
+            console.log('=== NAVIGATING TO DASHBOARD ===');
+            navigate('/dashboard');
+          }, 500);
         }
       }
     } catch (error: any) {
