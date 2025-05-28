@@ -59,6 +59,14 @@ interface UserBadge {
 
 const Dashboard = () => {
   const { user, userRole } = useAuth();
+  
+  console.log('=== DASHBOARD COMPONENT RENDER ===');
+  console.log('User:', user?.id);
+  console.log('User Role:', userRole);
+  console.log('Is evaluator?', userRole === 'evaluator');
+  console.log('Is admin?', userRole === 'admin');
+  console.log('Should show evaluator tab?', (userRole === 'evaluator' || userRole === 'admin'));
+  
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
