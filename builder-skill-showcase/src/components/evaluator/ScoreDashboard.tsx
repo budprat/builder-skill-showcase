@@ -41,6 +41,8 @@ const ScoreDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [scores, setScores] = useState<ScoreWithDetails[]>([]);
+  const [filteredScores, setFilteredScores] = useState<ScoreWithDetails[]>([]);
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [analytics, setAnalytics] = useState<ScoreAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState<string>("all");
@@ -52,20 +54,27 @@ const ScoreDashboard = () => {
   useEffect(() => {
     if (user) {
       fetchScores();
+      fetchChallenges();
     }
-  }, [user, selectedTimeRange, selectedChallenge]);
+  }, [user]);
+
+  useEffect(() => {
+    applyFiltersAndSort();
+  }, [selectedTimeRange, selectedChallenge, searchTerm, sortBy, sortOrder]);
 
   const fetchScores = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('scores')
         .select(`
           *,
           submissions (
-            *,
+            id,
+            participant_id,
+            challenge_id,
             challenges (
               id,
               title,
@@ -82,79 +91,10 @@ const ScoreDashboard = () => {
         .eq('evaluator_id', user.id)
         .order('created_at', { ascending: false });
 
-      // Apply time range filter
-      if (selectedTimeRange !== "all") {
-        const now = new Date();
-        let startDate = new Date();
-        
-        switch (selectedTimeRange) {
-          case "week":
-            startDate.setDate(now.getDate() - 7);
-            break;
-          case "month":
-            startDate.setMonth(now.getMonth() - 1);
-            break;
-          case "quarter":
-            startDate.setMonth(now.getMonth() - 3);
-            break;
-        }
-        
-        query = query.gte('created_at', startDate.toISOString());
-      }
-
-      const { data, error } = await query;
-
       if (error) throw error;
 
-      let filteredData = data || [];
-
-      // Apply challenge filter
-      if (selectedChallenge !== "all") {
-        filteredData = filteredData.filter(score => 
-          score.submissions?.challenge_id === selectedChallenge
-        );
-      }
-
-      // Apply search filter
-      if (searchTerm) {
-        filteredData = filteredData.filter(score => 
-          score.submissions?.challenges?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          score.submissions?.profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          score.submissions?.profiles?.username?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-      }
-
-      // Apply sorting
-      filteredData.sort((a, b) => {
-        let aValue: any, bValue: any;
-        
-        switch (sortBy) {
-          case "score":
-            aValue = a.total_score || 0;
-            bValue = b.total_score || 0;
-            break;
-          case "participant":
-            aValue = a.submissions?.profiles?.full_name || a.submissions?.profiles?.username || "";
-            bValue = b.submissions?.profiles?.full_name || b.submissions?.profiles?.username || "";
-            break;
-          case "challenge":
-            aValue = a.submissions?.challenges?.title || "";
-            bValue = b.submissions?.challenges?.title || "";
-            break;
-          default: // date
-            aValue = new Date(a.created_at);
-            bValue = new Date(b.created_at);
-        }
-
-        if (sortOrder === "asc") {
-          return aValue > bValue ? 1 : -1;
-        } else {
-          return aValue < bValue ? 1 : -1;
-        }
-      });
-
-      setScores(filteredData);
-      calculateAnalytics(filteredData);
+      setScores(data || []);
+      applyFiltersAndSort(data || []);
     } catch (error) {
       console.error('Error fetching scores:', error);
       toast({
@@ -165,6 +105,95 @@ const ScoreDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchChallenges = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('id, title, company_name')
+        .order('title');
+
+      if (error) throw error;
+      setChallenges(data || []);
+    } catch (error) {
+      console.error('Error fetching challenges:', error);
+    }
+  };
+
+  const applyFiltersAndSort = (dataToFilter?: ScoreWithDetails[]) => {
+    let filteredData = [...(dataToFilter || scores)];
+
+    // Apply time range filter
+    if (selectedTimeRange !== "all") {
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch (selectedTimeRange) {
+        case "week":
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case "quarter":
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+      }
+      
+      filteredData = filteredData.filter(score => 
+        new Date(score.created_at) >= startDate
+      );
+    }
+
+    // Apply challenge filter
+    if (selectedChallenge !== "all") {
+      filteredData = filteredData.filter(score => 
+        score.submissions?.challenge_id === selectedChallenge
+      );
+    }
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filteredData = filteredData.filter(score => 
+        score.submissions?.challenges?.title?.toLowerCase().includes(searchLower) ||
+        score.submissions?.profiles?.full_name?.toLowerCase().includes(searchLower) ||
+        score.submissions?.profiles?.username?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply sorting
+    filteredData.sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case "score":
+          aValue = a.total_score || 0;
+          bValue = b.total_score || 0;
+          break;
+        case "participant":
+          aValue = a.submissions?.profiles?.full_name || a.submissions?.profiles?.username || "";
+          bValue = b.submissions?.profiles?.full_name || b.submissions?.profiles?.username || "";
+          break;
+        case "challenge":
+          aValue = a.submissions?.challenges?.title || "";
+          bValue = b.submissions?.challenges?.title || "";
+          break;
+        default: // date
+          aValue = new Date(a.created_at);
+          bValue = new Date(b.created_at);
+      }
+
+      if (sortOrder === "asc") {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
+    setFilteredScores(filteredData);
+    calculateAnalytics(filteredData);
   };
 
   const calculateAnalytics = (scoresData: ScoreWithDetails[]) => {
@@ -249,7 +278,7 @@ const ScoreDashboard = () => {
   };
 
   const exportData = () => {
-    const csvData = scores.map(score => ({
+    const csvData = filteredScores.map(score => ({
       'Submission ID': score.submission_id,
       'Participant': score.submissions?.profiles?.full_name || score.submissions?.profiles?.username,
       'Challenge': score.submissions?.challenges?.title,
@@ -325,6 +354,23 @@ const ScoreDashboard = () => {
             </div>
             
             <div>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Challenge</label>
+              <Select value={selectedChallenge} onValueChange={setSelectedChallenge}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Challenges</SelectItem>
+                  {challenges.map((challenge) => (
+                    <SelectItem key={challenge.id} value={challenge.id}>
+                      {challenge.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Time Range</label>
               <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
                 <SelectTrigger className="w-[150px]">
@@ -367,9 +413,15 @@ const ScoreDashboard = () => {
               </Select>
             </div>
 
-            <Button onClick={fetchScores} variant="outline">
+            <Button onClick={() => {
+              setSearchTerm("");
+              setSelectedTimeRange("all");
+              setSelectedChallenge("all");
+              setSortBy("date");
+              setSortOrder("desc");
+            }} variant="outline">
               <Filter className="h-4 w-4 mr-2" />
-              Apply
+              Clear Filters
             </Button>
           </div>
         </CardContent>
@@ -544,7 +596,7 @@ const ScoreDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {scores.map((score) => (
+                {filteredScores.map((score) => (
                   <div key={score.id} className="border rounded-lg p-4 space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -604,7 +656,7 @@ const ScoreDashboard = () => {
                   </div>
                 ))}
 
-                {scores.length === 0 && (
+                {filteredScores.length === 0 && (
                   <div className="text-center py-12">
                     <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                     <p className="text-gray-600 text-lg">No scores found</p>
