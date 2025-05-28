@@ -4,18 +4,17 @@
 -- 1. Strengthen user_roles policies to prevent privilege escalation
 DROP POLICY IF EXISTS "Only system can insert roles" ON user_roles;
 DROP POLICY IF EXISTS "Users can insert their own roles" ON user_roles;
+DROP POLICY IF EXISTS "Only admins can insert roles" ON user_roles;
 
 -- Prevent users from inserting their own roles except during signup
+-- Use a simpler approach that doesn't reference NEW in policy context
 CREATE POLICY "Only admins can insert roles" ON user_roles FOR INSERT WITH CHECK (
   EXISTS (
     SELECT 1 FROM user_roles ur 
     WHERE ur.user_id = auth.uid() AND ur.role = 'admin'
   ) OR 
-  -- Allow during initial signup (no existing roles)
-  NOT EXISTS (
-    SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = NEW.user_id
-  )
+  -- Allow system/trigger to insert roles (when auth.uid() is null during signup)
+  auth.uid() IS NULL
 );
 
 -- 2. Add audit trail table for sensitive operations
