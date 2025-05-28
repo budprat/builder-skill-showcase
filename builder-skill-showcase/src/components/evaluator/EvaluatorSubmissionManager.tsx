@@ -390,6 +390,79 @@ const EvaluatorSubmissionManager = () => {
                           ))}
                         </div>
                       )}
+
+                      {/* AI Score Report */}
+                      {submission.scores && submission.scores.length > 0 && submission.scores[0].llm_scores && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-purple-600" />
+                            AI Score Report
+                          </h4>
+                          
+                          {/* Overall Score Display */}
+                          <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
+                            <div>
+                              <div className="text-sm text-gray-600">Overall AI Score</div>
+                              <div className="text-2xl font-bold text-purple-600">
+                                {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+                              </div>
+                            </div>
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                              {submission.scores[0].status}
+                            </Badge>
+                          </div>
+
+                          {/* Repository Analysis */}
+                          <div className="mb-4 p-3 bg-white rounded border">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="font-medium text-sm">Repository Validation</span>
+                              <span className="font-bold text-lg">{submission.scores[0].pre_screening_score}/5</span>
+                            </div>
+                            <p className="text-xs text-gray-600">
+                              {submission.scores[0].pre_screening_score === 5 
+                                ? "✅ Repository exists and contains README.md" 
+                                : "❌ Repository validation failed - missing repository or README.md"}
+                            </p>
+                          </div>
+
+                          {/* Detailed LLM Scores */}
+                          {submission.scores[0].llm_scores && (
+                            <div className="space-y-3">
+                              <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
+                              {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                <div key={criterion} className="bg-white p-3 rounded border">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-medium text-sm text-gray-900">
+                                      {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                    </span>
+                                    <Badge className="bg-green-100 text-green-800 border-green-200">
+                                      {scoreData.score?.toFixed(1)}/20
+                                    </Badge>
+                                  </div>
+                                  {scoreData.explanation && (
+                                    <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded">
+                                      {scoreData.explanation}
+                                    </p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* AI Feedback */}
+                          {submission.scores[0].feedback && (
+                            <div className="mt-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <FileText className="h-4 w-4 text-amber-600" />
+                                <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                              </div>
+                              <div className="bg-white p-3 rounded border border-amber-100">
+                                <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="ml-4">
