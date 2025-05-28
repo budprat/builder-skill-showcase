@@ -194,16 +194,87 @@ export const SubmissionManager = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Submission Management
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {submissions.map((submission) => (
+    <div className="space-y-6">
+      {/* AI Scores Overview Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            AI Evaluation Scores Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-96 overflow-y-auto border rounded-lg">
+            <div className="space-y-3 p-4">
+              {submissions.filter(submission => submission.scores && submission.scores.length > 0).map((submission) => (
+                <div key={`ai-score-${submission.id}`} className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{submission.challenges?.title}</h4>
+                      <p className="text-sm text-gray-600">
+                        Participant: {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {parseFloat(submission.scores![0].total_score).toFixed(1)}/100
+                      </div>
+                      <Badge className="mt-1" variant="outline">
+                        {submission.scores![0].status}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Score Breakdown */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="bg-white p-2 rounded border">
+                      <div className="text-xs text-gray-600">Repository Check</div>
+                      <div className="font-bold text-sm">{submission.scores![0].pre_screening_score}/5</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="text-xs text-gray-600">Evaluation Date</div>
+                      <div className="font-bold text-sm">{new Date(submission.scores![0].created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+
+                  {/* Criteria Scores Preview */}
+                  {submission.scores![0].llm_scores && (
+                    <div className="mt-3">
+                      <div className="text-xs text-gray-600 mb-2">Criteria Scores:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(submission.scores![0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                          <Badge key={criterion} variant="secondary" className="text-xs">
+                            {criterion.replace(/_/g, ' ')}: {scoreData.score?.toFixed(1)}/20
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {submissions.filter(submission => submission.scores && submission.scores.length > 0).length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Trophy className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                  <p>No AI evaluation scores available yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detailed Submission Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Detailed Submission Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {submissions.map((submission) => (
             <div key={submission.id} className="border rounded-lg p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -462,7 +533,8 @@ export const SubmissionManager = () => {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
