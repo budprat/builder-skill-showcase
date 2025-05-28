@@ -298,17 +298,7 @@ const EvaluatorSubmissionManager = () => {
               Score participant submissions that have been reviewed
             </CardDescription>
           </div>
-          <Button
-            onClick={() => {
-              const dashboardTab = document.querySelector('[value="score-dashboard"]') as HTMLElement;
-              dashboardTab?.click();
-            }}
-            variant="outline"
-            className="border-purple-300 text-purple-700 hover:bg-purple-50"
-          >
-            <BarChart3 className="h-4 w-4 mr-2" />
-            View Score Analytics
-          </Button>
+          
         </div>
       </CardHeader>
       <CardContent>
