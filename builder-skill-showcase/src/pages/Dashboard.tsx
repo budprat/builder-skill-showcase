@@ -105,7 +105,13 @@ const Dashboard = () => {
 
   const fetchChallenges = async () => {
     try {
+      console.log('=== DASHBOARD FETCH CHALLENGES ===');
+      console.log('User role:', userRole);
+      console.log('User ID:', user?.id);
+
       if (userRole === 'sponsor' && user) {
+        console.log('Fetching challenges for sponsor:', user.id);
+        
         // Fetch challenges created by the sponsor only
         const { data, error } = await supabase
           .from('challenges')
@@ -115,13 +121,26 @@ const Dashboard = () => {
 
         if (error) throw error;
         
-        // Additional client-side filtering to ensure only sponsor's challenges
-        const sponsorChallenges = (data || []).filter(challenge => 
-          challenge.company_id === user.id
-        );
+        console.log('Raw sponsor challenges fetched:', data?.length || 0);
         
+        // Additional client-side filtering to ensure only sponsor's challenges
+        const sponsorChallenges = (data || []).filter(challenge => {
+          const isOwned = challenge.company_id === user.id;
+          if (!isOwned) {
+            console.warn('Dashboard: Challenge does not belong to current sponsor:', {
+              challengeId: challenge.id,
+              challengeTitle: challenge.title,
+              challengeCompanyId: challenge.company_id,
+              currentUserId: user.id
+            });
+          }
+          return isOwned;
+        });
+        
+        console.log('Filtered sponsor challenges count:', sponsorChallenges.length);
         setChallenges(sponsorChallenges);
       } else {
+        console.log('Fetching active challenges for non-sponsor user');
         // For other users, fetch active challenges
         const { data, error } = await supabase
           .from('challenges')
@@ -130,6 +149,7 @@ const Dashboard = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
+        console.log('Active challenges fetched:', data?.length || 0);
         setChallenges(data || []);
       }
     } catch (error) {

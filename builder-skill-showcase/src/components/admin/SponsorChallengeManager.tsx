@@ -61,14 +61,65 @@ export const SponsorChallengeManager = () => {
 
   const fetchChallenges = async () => {
     try {
+      console.log('=== SPONSOR CHALLENGE MANAGER FETCH ===');
+      console.log('Current user ID:', user?.id);
+      console.log('User object:', user);
+
+      if (!user?.id) {
+        console.error('No user ID available');
+        setChallenges([]);
+        return;
+      }
+
+      // First, verify the user's role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        throw new Error('Failed to verify user role');
+      }
+
+      console.log('User role verification:', roleData?.role);
+
+      if (roleData?.role !== 'sponsor' && roleData?.role !== 'company') {
+        console.error('User is not a sponsor/company, role:', roleData?.role);
+        setChallenges([]);
+        return;
+      }
+
+      // Fetch challenges with strict filtering
       const { data, error } = await supabase
         .from('challenges')
         .select('*')
-        .eq('company_id', user?.id)
+        .eq('company_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setChallenges(data || []);
+
+      console.log('Raw challenges fetched:', data?.length || 0);
+      
+      // Additional client-side filtering to ensure only sponsor's challenges
+      const sponsorChallenges = (data || []).filter(challenge => {
+        const isOwned = challenge.company_id === user.id;
+        if (!isOwned) {
+          console.warn('Challenge does not belong to current user:', {
+            challengeId: challenge.id,
+            challengeTitle: challenge.title,
+            challengeCompanyId: challenge.company_id,
+            currentUserId: user.id
+          });
+        }
+        return isOwned;
+      });
+
+      console.log('Filtered challenges count:', sponsorChallenges.length);
+      console.log('Challenge IDs for this sponsor:', sponsorChallenges.map(c => c.id));
+
+      setChallenges(sponsorChallenges);
     } catch (error) {
       console.error('Error fetching challenges:', error);
     } finally {
