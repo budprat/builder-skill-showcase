@@ -233,13 +233,21 @@ export const SponsorChallengeManager = () => {
     const deliverables = challenge.deliverables || {};
     const evaluation = challenge.evaluation_rubric || {};
 
+    // Format the submission deadline for datetime-local input
+    let formattedDeadline = "";
+    if (challenge.submission_deadline) {
+      const date = new Date(challenge.submission_deadline);
+      // Format to YYYY-MM-DDTHH:MM for datetime-local input
+      formattedDeadline = date.toISOString().slice(0, 16);
+    }
+
     setFormData({
       title: challenge.title,
       description: challenge.description,
       problem_statement: challenge.problem_statement || "",
       prize_amount: challenge.prize_amount?.toString() || "",
       prize_description: challenge.prize_description || "",
-      submission_deadline: challenge.submission_deadline.split('T')[0],
+      submission_deadline: formattedDeadline,
       status: challenge.status as "active" | "draft" | "judging" | "completed",
       challenge_type: (challenge as any).challenge_type || "standard",
       difficulty_level: (challenge as any).difficulty_level || "intermediate",
@@ -264,22 +272,98 @@ export const SponsorChallengeManager = () => {
     setDeletingId(id);
 
     try {
-      const { error } = await supabase
+      console.log('=== STARTING CHALLENGE DELETION ===');
+      console.log('Challenge ID to delete:', id);
+
+      // Step 1: Check if challenge exists and belongs to user
+      const { data: challengeCheck, error: challengeCheckError } = await supabase
+        .from('challenges')
+        .select('id, title')
+        .eq('id', id)
+        .eq('company_id', user.id)
+        .single();
+
+      if (challengeCheckError) {
+        console.error('Error checking challenge:', challengeCheckError);
+        throw new Error('Challenge not found or access denied');
+      }
+      console.log('Challenge found:', challengeCheck);
+
+      // Step 2: Check for related submissions and scores
+      console.log('Step 2: Checking for related submissions...');
+      const { data: relatedSubmissions, error: submissionCheckError } = await supabase
+        .from('submissions')
+        .select('id')
+        .eq('challenge_id', id);
+
+      if (submissionCheckError) {
+        console.error('Error checking submissions:', submissionCheckError);
+        throw new Error('Failed to check related submissions');
+      }
+      console.log('Found submissions:', relatedSubmissions?.length || 0);
+
+      // Step 3: Delete related scores first
+      if (relatedSubmissions && relatedSubmissions.length > 0) {
+        console.log('Step 3: Deleting related scores...');
+        const submissionIds = relatedSubmissions.map(sub => sub.id);
+        
+        const { error: scoresDeleteError } = await supabase
+          .from('scores')
+          .delete()
+          .in('submission_id', submissionIds);
+
+        if (scoresDeleteError) {
+          console.warn('Error deleting scores:', scoresDeleteError);
+        }
+
+        // Step 4: Delete related submissions
+        console.log('Step 4: Deleting related submissions...');
+        const { error: submissionDeleteError } = await supabase
+          .from('submissions')
+          .delete()
+          .eq('challenge_id', id);
+
+        if (submissionDeleteError) {
+          console.error('Error deleting submissions:', submissionDeleteError);
+          throw new Error('Failed to delete related submissions: ' + submissionDeleteError.message);
+        }
+        console.log('Successfully deleted', relatedSubmissions.length, 'submissions');
+      }
+
+      // Step 5: Delete rules and guidelines
+      console.log('Step 5: Deleting rules and guidelines...');
+      const { error: rulesDeleteError } = await supabase
+        .from('rules_guidelines')
+        .delete()
+        .eq('challenge_id', id);
+
+      if (rulesDeleteError) {
+        console.warn('Error deleting rules:', rulesDeleteError);
+      }
+
+      // Step 6: Delete the challenge
+      console.log('Step 6: Deleting challenge...');
+      const { error: challengeDeleteError } = await supabase
         .from('challenges')
         .delete()
         .eq('id', id)
         .eq('company_id', user.id);
 
-      if (error) throw error;
+      if (challengeDeleteError) {
+        console.error('Error deleting challenge:', challengeDeleteError);
+        throw new Error('Failed to delete challenge: ' + challengeDeleteError.message);
+      }
 
+      console.log('=== CHALLENGE DELETION SUCCESSFUL ===');
       toast({ 
         title: "Success", 
-        description: "Challenge deleted successfully" 
+        description: "Challenge and related data deleted successfully" 
       });
 
       fetchChallenges();
     } catch (error: any) {
-      console.error('Error deleting challenge:', error);
+      console.error('=== CHALLENGE DELETION FAILED ===');
+      console.error('Error details:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to delete challenge",
@@ -369,7 +453,7 @@ export const SponsorChallengeManager = () => {
                     <Label htmlFor="submission_deadline">Submission Deadline</Label>
                     <Input
                       id="submission_deadline"
-                      type="date"
+                      type="datetime-local"
                       value={formData.submission_deadline}
                       onChange={(e) => setFormData({...formData, submission_deadline: e.target.value})}
                       required
@@ -440,6 +524,93 @@ export const SponsorChallengeManager = () => {
                         <SelectItem value="advanced">Advanced</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Required Deliverables</Label>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <Label htmlFor="deliverables_repository">Repository Requirements</Label>
+                      <Input
+                        id="deliverables_repository"
+                        value={formData.deliverables_repository}
+                        onChange={(e) => setFormData({...formData, deliverables_repository: e.target.value})}
+                        placeholder="Complete source code with training scripts"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="deliverables_pitch_deck">Pitch Deck Requirements</Label>
+                      <Input
+                        id="deliverables_pitch_deck"
+                        value={formData.deliverables_pitch_deck}
+                        onChange={(e) => setFormData({...formData, deliverables_pitch_deck: e.target.value})}
+                        placeholder="5-10 slide presentation"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="deliverables_demo_video">Demo Video Requirements</Label>
+                      <Input
+                        id="deliverables_demo_video"
+                        value={formData.deliverables_demo_video}
+                        onChange={(e) => setFormData({...formData, deliverables_demo_video: e.target.value})}
+                        placeholder="3-5 minute demonstration"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-base font-semibold">Evaluation Criteria (percentages)</Label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="evaluation_technical">Technical Implementation (%)</Label>
+                      <Input
+                        id="evaluation_technical"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.evaluation_technical}
+                        onChange={(e) => setFormData({...formData, evaluation_technical: e.target.value})}
+                        placeholder="40"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="evaluation_innovation">Innovation (%)</Label>
+                      <Input
+                        id="evaluation_innovation"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.evaluation_innovation}
+                        onChange={(e) => setFormData({...formData, evaluation_innovation: e.target.value})}
+                        placeholder="25"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="evaluation_presentation">Presentation (%)</Label>
+                      <Input
+                        id="evaluation_presentation"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.evaluation_presentation}
+                        onChange={(e) => setFormData({...formData, evaluation_presentation: e.target.value})}
+                        placeholder="20"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="evaluation_practicality">Practicality (%)</Label>
+                      <Input
+                        id="evaluation_practicality"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={formData.evaluation_practicality}
+                        onChange={(e) => setFormData({...formData, evaluation_practicality: e.target.value})}
+                        placeholder="15"
+                      />
+                    </div>
                   </div>
                 </div>
 
