@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export const Header = () => {
-  const { user, userRole } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -119,7 +119,13 @@ export const Header = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSignOut}
+                onClick={async () => {
+                  try {
+                    await signOut();
+                  } catch (error) {
+                    console.error("Logout error:", error);
+                  }
+                }}
                 className="border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 <LogOut className="h-4 w-4 mr-2" />

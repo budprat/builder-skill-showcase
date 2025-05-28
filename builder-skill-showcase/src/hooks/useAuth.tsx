@@ -127,19 +127,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("=== SIGNING OUT ===");
       setLoading(true);
 
-      const { error } = await supabase.auth.signOut();
+      // Clear local state first
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error("Error signing out:", error);
-        throw error;
+        // Don't throw error, still try to clean up and redirect
+      }
+
+      // Clean up auth state
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      if (typeof sessionStorage !== 'undefined') {
+        Object.keys(sessionStorage).forEach((key) => {
+          if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+            sessionStorage.removeItem(key);
+          }
+        });
       }
 
       console.log("Sign out successful");
-      window.location.href = "/";
+      
+      // Use window.location.replace instead of href for better navigation
+      window.location.replace("/");
     } catch (error) {
       console.error("Sign out error:", error);
-      window.location.href = "/";
-    } finally {
-      setLoading(false);
+      // Still redirect even if there's an error
+      window.location.replace("/");
     }
   };
 
