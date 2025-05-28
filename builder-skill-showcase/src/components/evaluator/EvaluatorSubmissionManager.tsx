@@ -46,13 +46,22 @@ const EvaluatorSubmissionManager = () => {
 
   useEffect(() => {
     console.log('EvaluatorSubmissionManager useEffect triggered, user:', user?.id, 'userRole:', userRole);
-    if (user && userRole === 'evaluator') {
-      console.log('EvaluatorSubmissionManager - User and role confirmed, fetching submissions');
+    console.log('EvaluatorSubmissionManager useEffect - Dependencies:', { user: !!user, userRole });
+    
+    if (user) {
+      console.log('EvaluatorSubmissionManager - User confirmed, fetching submissions');
       fetchSubmissions();
     } else {
-      console.log('EvaluatorSubmissionManager - Missing user or role:', { hasUser: !!user, userRole });
+      console.log('EvaluatorSubmissionManager - No user found');
+      // Set loading to false if we can't fetch
+      setLoading(false);
     }
   }, [user, userRole]);
+
+  // Add a separate useEffect to monitor when userRole changes
+  useEffect(() => {
+    console.log('EvaluatorSubmissionManager - userRole changed to:', userRole);
+  }, [userRole]);
 
   const fetchSubmissions = async () => {
     if (!user) {
