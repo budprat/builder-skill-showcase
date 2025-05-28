@@ -120,7 +120,9 @@ const EvaluatorSubmissionManager = () => {
             practicality,
             feedback,
             status,
-            created_at
+            created_at,
+            llm_scores,
+            pre_screening_score
           )
         `)
         .eq('status', 'reviewed')
@@ -401,7 +403,7 @@ const EvaluatorSubmissionManager = () => {
                       {(() => {
                         const aiScore = submission.scores?.find(score => 
                           score.llm_scores || 
-                          score.pre_screening_score !== null
+                          (score.pre_screening_score !== null && score.pre_screening_score !== undefined)
                         );
                         if (!aiScore) return null;
 
@@ -413,30 +415,30 @@ const EvaluatorSubmissionManager = () => {
                             </h4>
 
                             {/* Check if this is an AI evaluation (has pre_screening_score or llm_scores) */}
-                            {(submission.scores[0].pre_screening_score !== null || submission.scores[0].llm_scores) ? (
+                            {(aiScore.pre_screening_score !== null || aiScore.llm_scores) ? (
                               <>
                                 {/* Overall Score Display */}
                                 <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
                                   <div>
                                     <div className="text-sm text-gray-600">Overall AI Score</div>
                                     <div className="text-2xl font-bold text-purple-600">
-                                      {parseFloat(submission.scores[0].total_score || '0').toFixed(1)}/100
+                                      {parseFloat(aiScore.total_score || '0').toFixed(1)}/100
                                     </div>
                                   </div>
                                   <Badge className="bg-green-100 text-green-800 border-green-200">
-                                    {submission.scores[0].status || 'completed'}
+                                    {aiScore.status || 'completed'}
                                   </Badge>
                                 </div>
 
                                 {/* Repository Analysis */}
-                                {submission.scores[0].pre_screening_score !== undefined && (
+                                {aiScore.pre_screening_score !== undefined && aiScore.pre_screening_score !== null && (
                                   <div className="mb-4 p-3 bg-white rounded border">
                                     <div className="flex justify-between items-center mb-2">
                                       <span className="font-medium text-sm">Repository Validation</span>
-                                      <span className="font-bold text-lg">{submission.scores[0].pre_screening_score || 0}/5</span>
+                                      <span className="font-bold text-lg">{aiScore.pre_screening_score || 0}/5</span>
                                     </div>
                                     <p className="text-xs text-gray-600">
-                                      {(submission.scores[0].pre_screening_score || 0) === 5 
+                                      {(aiScore.pre_screening_score || 0) === 5 
                                         ? "✅ Repository exists and contains README.md" 
                                         : "❌ Repository validation failed - missing repository or README.md"}
                                     </p>
@@ -444,16 +446,16 @@ const EvaluatorSubmissionManager = () => {
                                 )}
 
                                 {/* Detailed LLM Scores */}
-                                {submission.scores[0].llm_scores && (
+                                {aiScore.llm_scores && Object.keys(aiScore.llm_scores).length > 0 && (
                                   <div className="space-y-3 mb-4">
                                     <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
-                                    {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                    {Object.entries(aiScore.llm_scores).map(([criterion, scoreData]: [string, any]) => (
                                       <div key={criterion} className="bg-white p-3 rounded border">
                                         <div className="flex justify-between items-center mb-2">
                                           <span className="font-medium text-sm text-gray-900">
                                             {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                                           </span>
-                                          <Badge className="bg-green-100 text-green-800 border-green-200">
+                                          <Badge className="bg-blue-100 text-blue-800 border-blue-200">
                                             {scoreData.score?.toFixed(1) || '0'}/20
                                           </Badge>
                                         </div>
@@ -468,14 +470,14 @@ const EvaluatorSubmissionManager = () => {
                                 )}
 
                                 {/* AI Feedback */}
-                                {submission.scores[0].feedback && (
+                                {aiScore.feedback && (
                                   <div className="mt-4">
                                     <div className="flex items-center gap-2 mb-2">
                                       <FileText className="h-4 w-4 text-amber-600" />
                                       <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
                                     </div>
                                     <div className="bg-white p-3 rounded border border-amber-100">
-                                      <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                      <p className="text-sm text-gray-700 leading-relaxed">{aiScore.feedback}</p>
                                     </div>
                                   </div>
                                 )}
