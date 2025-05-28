@@ -348,147 +348,141 @@ const EvaluatorSubmissionManager = () => {
                         </Badge>
                       </div>
 
-                      {/* Score Report Display - Only show human evaluator scores */}
-                      {(() => {
-                        const humanScores = submission.scores?.filter(score => 
-                          score.evaluator_id && 
-                          !score.llm_scores && 
-                          score.pre_screening_score === null
-                        ) || [];
-                        
-                        if (humanScores.length === 0) return null;
-                        
-                        return (
-                          <div className="mt-3 p-3 bg-purple-50 rounded border border-purple-200">
-                            <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
-                              <Star className="h-4 w-4" />
-                              Current Evaluation Scores
-                            </h4>
-                            {humanScores.map((score: any) => (
-                              <div key={score.id} className="mb-3 last:mb-0">
-                                <div className="flex items-center justify-between mb-2">
-                                  <span className="text-sm text-purple-700">
-                                    Evaluator: {score.evaluator_id === user?.id ? 'You' : score.evaluator_id?.substring(0, 8) + '...'}
-                                  </span>
-                                  <span className="text-lg font-bold text-purple-600">
-                                    {score.total_score}/100
-                                  </span>
+                      {/* Score Report Display */}
+                      {submission.scores && submission.scores.length > 0 && (
+                        <div className="mt-3 p-3 bg-purple-50 rounded border border-purple-200">
+                          <h4 className="font-medium text-purple-900 mb-2 flex items-center gap-2">
+                            <Star className="h-4 w-4" />
+                            Current Evaluation Score
+                          </h4>
+                          {submission.scores.map((score: any) => (
+                            <div key={score.id} className="mb-3 last:mb-0">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-purple-700">
+                                  Evaluator: {score.evaluator_id === user?.id ? 'You' : score.evaluator_id?.substring(0, 8) + '...'}
+                                </span>
+                                <span className="text-lg font-bold text-purple-600">
+                                  {score.total_score}/100
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-4 gap-2 text-xs">
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-blue-600">{score.technical_implementation || 0}/25</div>
+                                  <div className="text-blue-700">Technical</div>
                                 </div>
-                                <div className="grid grid-cols-4 gap-2 text-xs">
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="font-bold text-blue-600">{score.technical_implementation || 0}/25</div>
-                                    <div className="text-blue-700">Technical</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="font-bold text-green-600">{score.innovation || 0}/25</div>
-                                    <div className="text-green-700">Innovation</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="font-bold text-yellow-600">{score.presentation || 0}/25</div>
-                                    <div className="text-yellow-700">Presentation</div>
-                                  </div>
-                                  <div className="text-center p-2 bg-white rounded border">
-                                    <div className="font-bold text-orange-600">{score.practicality || 0}/25</div>
-                                    <div className="text-orange-700">Practicality</div>
-                                  </div>
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-green-600">{score.innovation || 0}/25</div>
+                                  <div className="text-green-700">Innovation</div>
                                 </div>
-                                {score.feedback && (
-                                  <div className="mt-2 p-2 bg-white rounded border text-sm">
-                                    <strong className="text-purple-900">Feedback:</strong>
-                                    <p className="text-gray-700 mt-1">{score.feedback}</p>
-                                  </div>
-                                )}
-                                <div className="mt-1 text-xs text-purple-600">
-                                  Evaluated on: {new Date(score.created_at).toLocaleDateString()}
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-yellow-600">{score.presentation || 0}/25</div>
+                                  <div className="text-yellow-700">Presentation</div>
+                                </div>
+                                <div className="text-center p-2 bg-white rounded border">
+                                  <div className="font-bold text-orange-600">{score.practicality || 0}/25</div>
+                                  <div className="text-orange-700">Practicality</div>
                                 </div>
                               </div>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                              {score.feedback && (
+                                <div className="mt-2 p-2 bg-white rounded border text-sm">
+                                  <strong className="text-purple-900">Feedback:</strong>
+                                  <p className="text-gray-700 mt-1">{score.feedback}</p>
+                                </div>
+                              )}
+                              <div className="mt-1 text-xs text-purple-600">
+                                Evaluated on: {new Date(score.created_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       {/* AI Score Report */}
-                      {(() => {
-                        const aiScore = submission.scores?.find(score => 
-                          score.llm_scores || 
-                          (score.pre_screening_score !== null && score.pre_screening_score !== undefined)
-                        );
-                        if (!aiScore) return null;
-                        
-                        return (
-                          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-                            <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                              <BarChart3 className="h-4 w-4 text-purple-600" />
-                              AI Score Report
-                            </h4>
+                      {submission.scores && submission.scores.length > 0 && (
+                        <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4 text-purple-600" />
+                            AI Score Report
+                          </h4>
 
-                            {/* Overall Score Display */}
-                            <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
-                              <div>
-                                <div className="text-sm text-gray-600">Overall AI Score</div>
-                                <div className="text-2xl font-bold text-purple-600">
-                                  {parseFloat(aiScore.total_score || '0').toFixed(1)}/100
-                                </div>
-                              </div>
-                              <Badge className="bg-green-100 text-green-800 border-green-200">
-                                {aiScore.status || 'completed'}
-                              </Badge>
-                            </div>
-
-                            {/* Repository Analysis */}
-                            {aiScore.pre_screening_score !== undefined && (
-                              <div className="mb-4 p-3 bg-white rounded border">
-                                <div className="flex justify-between items-center mb-2">
-                                  <span className="font-medium text-sm">Repository Validation</span>
-                                  <span className="font-bold text-lg">{aiScore.pre_screening_score || 0}/5</span>
-                                </div>
-                                <p className="text-xs text-gray-600">
-                                  {(aiScore.pre_screening_score || 0) === 5 
-                                    ? "✅ Repository exists and contains README.md" 
-                                    : "❌ Repository validation failed - missing repository or README.md"}
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Detailed LLM Scores */}
-                            {aiScore.llm_scores && (
-                              <div className="space-y-3 mb-4">
-                                <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
-                                {Object.entries(aiScore.llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                  <div key={criterion} className="bg-white p-3 rounded border">
-                                    <div className="flex justify-between items-center mb-2">
-                                      <span className="font-medium text-sm text-gray-900">
-                                        {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                                      </span>
-                                      <Badge className="bg-green-100 text-green-800 border-green-200">
-                                        {scoreData.score?.toFixed(1) || '0'}/20
-                                      </Badge>
-                                    </div>
-                                    {scoreData.explanation && (
-                                      <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded">
-                                        {scoreData.explanation}
-                                      </p>
-                                    )}
+                          {/* Check if this is an AI evaluation (has pre_screening_score or llm_scores) */}
+                          {(submission.scores[0].pre_screening_score !== undefined || submission.scores[0].llm_scores) ? (
+                            <>
+                              {/* Overall Score Display */}
+                              <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
+                                <div>
+                                  <div className="text-sm text-gray-600">Overall AI Score</div>
+                                  <div className="text-2xl font-bold text-purple-600">
+                                    {parseFloat(submission.scores[0].total_score || '0').toFixed(1)}/100
                                   </div>
-                                ))}
+                                </div>
+                                <Badge className="bg-green-100 text-green-800 border-green-200">
+                                  {submission.scores[0].status || 'completed'}
+                                </Badge>
                               </div>
-                            )}
 
-                            {/* AI Feedback */}
-                            {aiScore.feedback && (
-                              <div className="mt-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <FileText className="h-4 w-4 text-amber-600" />
-                                  <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                              {/* Repository Analysis */}
+                              {submission.scores[0].pre_screening_score !== undefined && (
+                                <div className="mb-4 p-3 bg-white rounded border">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <span className="font-medium text-sm">Repository Validation</span>
+                                    <span className="font-bold text-lg">{submission.scores[0].pre_screening_score || 0}/5</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">
+                                    {(submission.scores[0].pre_screening_score || 0) === 5 
+                                      ? "✅ Repository exists and contains README.md" 
+                                      : "❌ Repository validation failed - missing repository or README.md"}
+                                  </p>
                                 </div>
-                                <div className="bg-white p-3 rounded border border-amber-100">
-                                  <p className="text-sm text-gray-700 leading-relaxed">{aiScore.feedback}</p>
+                              )}
+
+                              {/* Detailed LLM Scores */}
+                              {submission.scores[0].llm_scores && (
+                                <div className="space-y-3 mb-4">
+                                  <h5 className="font-medium text-gray-900">Detailed AI Evaluation</h5>
+                                  {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                                    <div key={criterion} className="bg-white p-3 rounded border">
+                                      <div className="flex justify-between items-center mb-2">
+                                        <span className="font-medium text-sm text-gray-900">
+                                          {criterion.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                        </span>
+                                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                                          {scoreData.score?.toFixed(1) || '0'}/20
+                                        </Badge>
+                                      </div>
+                                      {scoreData.explanation && (
+                                        <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded">
+                                          {scoreData.explanation}
+                                        </p>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
+                              )}
+
+                              {/* AI Feedback */}
+                              {submission.scores[0].feedback && (
+                                <div className="mt-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <FileText className="h-4 w-4 text-amber-600" />
+                                    <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                                  </div>
+                                  <div className="bg-white p-3 rounded border border-amber-100">
+                                    <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          ) : (
+                            /* Show when AI scores are not available */
+                            <div className="text-center py-8">
+                              <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                              <p className="text-gray-600 text-sm">No AI evaluation scores available</p>
+                              <p className="text-gray-500 text-xs mt-1">This submission may have been manually evaluated</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="ml-4">
