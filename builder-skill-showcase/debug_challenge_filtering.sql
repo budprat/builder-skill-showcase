@@ -11,7 +11,7 @@ SELECT
   c.created_at,
   ur.user_id as role_user_id,
   ur.role as user_role,
-  p.email as user_email
+  au.email as user_email
 FROM challenges c
 LEFT JOIN user_roles ur ON c.company_id = ur.user_id
 LEFT JOIN auth.users au ON ur.user_id = au.id
@@ -44,11 +44,11 @@ WHERE company_id IS NULL
 SELECT 
   ur.user_id,
   ur.role,
-  p.email,
+  au.email,
   COUNT(c.id) as challenge_count
 FROM user_roles ur
-LEFT JOIN profiles p ON ur.user_id = p.id
+LEFT JOIN auth.users au ON ur.user_id = au.id
 LEFT JOIN challenges c ON ur.user_id = c.company_id
 WHERE ur.role IN ('sponsor', 'company')
-GROUP BY ur.user_id, ur.role, p.email
+GROUP BY ur.user_id, ur.role, au.email
 ORDER BY challenge_count DESC;
