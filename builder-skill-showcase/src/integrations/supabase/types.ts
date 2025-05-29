@@ -262,6 +262,65 @@ export type Database = {
           }
         ]
       }
+      scores: {
+        Row: {
+          id: string
+          submission_id: string
+          evaluator_id: string | null
+          total_score: number | null
+          technical_implementation: number | null
+          innovation: number | null
+          presentation: number | null
+          practicality: number | null
+          pre_screening_score: number | null
+          llm_scores: Json | null
+          feedback: string | null
+          status: string | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          submission_id: string
+          evaluator_id?: string | null
+          total_score?: number | null
+          technical_implementation?: number | null
+          innovation?: number | null
+          presentation?: number | null
+          practicality?: number | null
+          pre_screening_score?: number | null
+          llm_scores?: Json | null
+          feedback?: string | null
+          status?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          submission_id?: string
+          evaluator_id?: string | null
+          total_score?: number | null
+          technical_implementation?: number | null
+          innovation?: number | null
+          presentation?: number | null
+          practicality?: number | null
+          pre_screening_score?: number | null
+          llm_scores?: Json | null
+          feedback?: string | null
+          status?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       submissions: {
         Row: {
           challenge_id: string
