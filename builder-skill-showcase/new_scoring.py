@@ -131,16 +131,34 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
 async def pre_screen_submission(submission: dict) -> dict:
     try:
         g = Github(os.getenv("GITHUB_TOKEN"))
-        repo = g.get_repo(submission["repository_url"].split("github.com/")[1])
-        repo.get_contents("README.md")
-        submission["pre_screening_score"] = 5.0
-        submission["status"] = "prescreened"
-        print(f"Pre-screening PASSED for submission {submission['id']}: Repository exists and has README.md")
+        
+        # Parse repository URL and remove .git extension if present
+        repo_url = submission["repository_url"]
+        if "github.com/" in repo_url:
+            repo_path = repo_url.split("github.com/")[1]
+            # Remove .git extension if present
+            if repo_path.endswith('.git'):
+                repo_path = repo_path[:-4]
+            print(f"Accessing repository: {repo_path}")
+            
+            repo = g.get_repo(repo_path)
+            repo.get_contents("README.md")
+            submission["pre_screening_score"] = 5.0
+            submission["status"] = "prescreened"
+            print(f"Pre-screening PASSED for submission {submission['id']}: Repository exists and has README.md")
+        else:
+            raise Exception(f"Invalid GitHub URL format: {repo_url}")
+            
     except GithubException as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
         print(f"Pre-screening FAILED for submission {submission['id']}: {str(e)}")
         print(f"Failure reason: Unable to access repository or README.md not found at {submission['repository_url']}")
+        
+        # Check if it's a permission issue
+        if e.status == 404:
+            print(f"Repository might be private or doesn't exist. Check if GitHub token has access to: {submission['repository_url']}")
+        
     except Exception as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
