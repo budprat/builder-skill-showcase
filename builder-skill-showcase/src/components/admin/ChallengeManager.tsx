@@ -62,10 +62,44 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
   const fetchChallenges = async () => {
     try {
       console.log('=== FETCHING CHALLENGES ===');
-      const { data, error } = await supabase
-        .from('challenges')
-        .select('*')
-        .order('created_at', { ascending: false });
+      
+      // Get current user and their role
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Must be logged in to view challenges');
+      }
+
+      // Check user role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        throw new Error('Failed to determine user permissions');
+      }
+
+      const userRole = roleData?.role;
+      console.log('User role for challenge fetch:', userRole);
+
+      let query = supabase.from('challenges').select('*');
+
+      // Apply role-based filtering
+      if (userRole === 'sponsor' || userRole === 'company') {
+        // Sponsors and companies should only see their own challenges
+        query = query.eq('company_id', user.id);
+        console.log('Filtering challenges for sponsor/company:', user.id);
+      } else if (userRole === 'admin') {
+        // Admins can see all challenges
+        console.log('Admin user - showing all challenges');
+      } else {
+        // Other roles (participants, evaluators) should not be using this component
+        throw new Error('You do not have permission to manage challenges');
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       console.log('Fetched challenges count:', data?.length || 0);
@@ -88,7 +122,7 @@ export const ChallengeManager = ({ onStatsUpdate }: ChallengeManagerProps) => {
       console.error('Error fetching challenges:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch challenges",
+        description: error.message || "Failed to fetch challenges",
         variant: "destructive",
       });
     } finally {

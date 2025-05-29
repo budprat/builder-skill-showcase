@@ -61,14 +61,85 @@ export const SponsorChallengeManager = () => {
 
   const fetchChallenges = async () => {
     try {
+      console.log('=== SPONSOR CHALLENGE MANAGER FETCH ===');
+      console.log('Current user ID:', user?.id);
+      console.log('User object:', user);
+
+      if (!user?.id) {
+        console.error('No user ID available');
+        setChallenges([]);
+        return;
+      }
+
+      // First, verify the user's role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+
+      if (roleError) {
+        console.error('Error fetching user role:', roleError);
+        throw new Error('Failed to verify user role');
+      }
+
+      console.log('User role verification:', roleData?.role);
+
+      if (roleData?.role !== 'sponsor' && roleData?.role !== 'company') {
+        console.error('User is not a sponsor/company, role:', roleData?.role);
+        setChallenges([]);
+        return;
+      }
+
+      // Optimized query: fetch only needed columns for better performance
       const { data, error } = await supabase
         .from('challenges')
-        .select('*')
-        .eq('company_id', user?.id)
+        .select(`
+          id,
+          title,
+          description,
+          problem_statement,
+          company_name,
+          company_id,
+          domains,
+          prize_amount,
+          prize_description,
+          submission_deadline,
+          status,
+          created_at,
+          updated_at,
+          image_url,
+          image_urls,
+          challenge_type,
+          difficulty_level,
+          deliverables,
+          evaluation_rubric
+        `)
+        .eq('company_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setChallenges(data || []);
+
+      console.log('Raw challenges fetched:', data?.length || 0);
+      
+      // Additional client-side filtering to ensure only sponsor's challenges
+      const sponsorChallenges = (data || []).filter(challenge => {
+        const isOwned = challenge.company_id === user.id;
+        if (!isOwned) {
+          console.warn('Challenge does not belong to current user:', {
+            challengeId: challenge.id,
+            challengeTitle: challenge.title,
+            challengeCompanyId: challenge.company_id,
+            currentUserId: user.id
+          });
+        }
+        return isOwned;
+      });
+
+      console.log('Filtered challenges count:', sponsorChallenges.length);
+      console.log('Challenge IDs for this sponsor:', sponsorChallenges.map(c => c.id));
+
+      setChallenges(sponsorChallenges);
     } catch (error) {
       console.error('Error fetching challenges:', error);
     } finally {
@@ -858,59 +929,82 @@ export const SponsorChallengeManager = () => {
                         <div className="mt-4">
                           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                             <Star className="h-4 w-4" />
-                            Evaluation Scores
+                            Evaluation Score Report
                           </h4>
                           <div className="space-y-3">
                             {submission.scores.map((score: any) => (
-                              <div key={score.id} className="bg-white p-4 rounded border border-gray-200">
+                              <div key={score.id} className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border border-purple-200">
                                 <div className="flex items-center justify-between mb-3">
-                                  <span className="text-sm font-medium text-gray-900">
-                                    Evaluator: {score.evaluator_id?.substring(0, 8)}...
-                                  </span>
-                                  <span className="text-xl font-bold text-purple-600">
-                                    {score.total_score}/100
-                                  </span>
+                                  <div>
+                                    <span className="text-sm font-medium text-gray-900">
+                                      Evaluator: {score.evaluator_id?.substring(0, 8)}...
+                                    </span>
+                                    <div className="text-xs text-gray-600 mt-1">
+                                      Evaluated: {new Date(score.created_at).toLocaleDateString()}
+                                    </div>
+                                  </div>
+                                  <div className="text-center">
+                                    <span className="text-2xl font-bold text-purple-600">
+                                      {score.total_score}/100
+                                    </span>
+                                    <div className="text-xs text-purple-700">Total Score</div>
+                                  </div>
                                 </div>
-
+                                
+                                {/* Detailed Score Breakdown */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-blue-600">
-                                      {score.technical_implementation || 0}
+                                  <div className="text-center p-3 bg-white rounded-lg border border-blue-200">
+                                    <div className="text-lg font-bold text-blue-600">
+                                      {score.technical_implementation || 0}/25
                                     </div>
-                                    <div className="text-xs text-gray-500">Technical</div>
+                                    <div className="text-xs text-blue-700 font-medium">Technical Implementation</div>
                                   </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-green-600">
-                                      {score.innovation || 0}
+                                  <div className="text-center p-3 bg-white rounded-lg border border-green-200">
+                                    <div className="text-lg font-bold text-green-600">
+                                      {score.innovation || 0}/25
                                     </div>
-                                    <div className="text-xs text-gray-500">Innovation</div>
+                                    <div className="text-xs text-green-700 font-medium">Innovation</div>
                                   </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-purple-600">
-                                      {score.presentation || 0}
+                                  <div className="text-center p-3 bg-white rounded-lg border border-yellow-200">
+                                    <div className="text-lg font-bold text-yellow-600">
+                                      {score.presentation || 0}/25
                                     </div>
-                                    <div className="text-xs text-gray-500">Presentation</div>
+                                    <div className="text-xs text-yellow-700 font-medium">Presentation</div>
                                   </div>
-                                  <div className="text-center">
-                                    <div className="text-lg font-semibold text-orange-600">
-                                      {score.practicality || 0}
+                                  <div className="text-center p-3 bg-white rounded-lg border border-orange-200">
+                                    <div className="text-lg font-bold text-orange-600">
+                                      {score.practicality || 0}/25
                                     </div>
-                                    <div className="text-xs text-gray-500">Practicality</div>
+                                    <div className="text-xs text-orange-700 font-medium">Practicality</div>
                                   </div>
                                 </div>
 
+                                {/* Feedback Section */}
                                 {score.feedback && (
-                                  <div className="mt-3 p-3 bg-gray-50 rounded">
-                                    <strong className="text-gray-900">Evaluator Feedback:</strong>
-                                    <p className="text-gray-700 mt-1">{score.feedback}</p>
+                                  <div className="mt-3 p-3 bg-white rounded-lg border border-gray-200">
+                                    <strong className="text-gray-900 text-sm">Evaluator Feedback:</strong>
+                                    <p className="text-gray-700 text-sm mt-1 leading-relaxed">{score.feedback}</p>
                                   </div>
                                 )}
 
-                                <p className="text-xs text-gray-500 mt-2">
-                                  Evaluated: {new Date(score.created_at).toLocaleDateString()}
-                                </p>
+                                {/* Status Badge */}
+                                <div className="mt-3 flex justify-end">
+                                  <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                                    {score.status || 'Completed'}
+                                  </Badge>
+                                </div>
                               </div>
                             ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Show if no scores yet */}
+                      {(!submission.scores || submission.scores.length === 0) && (
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                          <div className="text-gray-600 text-sm">
+                            <FileText className="h-5 w-5 mx-auto text-gray-400 mb-2" />
+                            No evaluation scores yet
                           </div>
                         </div>
                       )}

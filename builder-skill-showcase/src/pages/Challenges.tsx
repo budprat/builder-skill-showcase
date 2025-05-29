@@ -55,14 +55,37 @@ const Challenges = () => {
   ];
 
   useEffect(() => {
-    fetchChallenges();
-  }, []);
+    if (user !== undefined) {
+      fetchChallenges();
+    }
+  }, [user]);
 
   const fetchChallenges = async () => {
     try {
+      console.log('=== CHALLENGES PAGE FETCH ===');
+      console.log('Current user:', user?.id);
+      
+      console.log('Fetching all active challenges for Challenges page');
+      
+      // Challenges page should show ALL active challenges regardless of user role
+      // Optimized query - fetch only needed columns for better performance
       const { data, error } = await supabase
         .from('challenges')
-        .select('*')
+        .select(`
+          id,
+          title,
+          description,
+          company_name,
+          domains,
+          prize_amount,
+          prize_description,
+          submission_deadline,
+          status,
+          created_at,
+          image_url,
+          image_urls
+        `)
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
       if (error) throw error;

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FileText, Eye, Star, MessageSquare } from "lucide-react";
+import { FileText, Eye, Star, MessageSquare, Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
@@ -82,14 +82,14 @@ export const SubmissionManager = () => {
 
       // Check and award badges based on score
       if (parseFloat(finalScore) >= 90) {
-        await checkAndAwardBadges(selectedSubmission.profiles.id, 'high_score', {
-          challengeId: selectedSubmission.challenges.id,
+        await checkAndAwardBadges(selectedSubmission.participant_id, 'high_score', {
+          challengeId: selectedSubmission.challenge_id,
           score: finalScore
         });
       }
 
-      await checkAndAwardBadges(selectedSubmission.profiles.id, 'challenge_completion', {
-        challengeId: selectedSubmission.challenges.id
+      await checkAndAwardBadges(selectedSubmission.participant_id, 'challenge_completion', {
+        challengeId: selectedSubmission.challenge_id
       });
 
       setIsScoreDialogOpen(false);
@@ -111,7 +111,7 @@ export const SubmissionManager = () => {
       const { data: badgeData, error: badgeError } = await supabase
         .from('badges')
         .select('*')
-        .eq('type', badgeType)
+        .eq('badge_type', badgeType)
         .single(); // Assuming badge types are unique
 
       if (badgeError) {
@@ -149,7 +149,7 @@ export const SubmissionManager = () => {
           {
             user_id: userId,
             badge_id: badgeData.id,
-            awarded_at: new Date().toISOString(),
+            earned_at: new Date().toISOString(),
             context: context,
           },
         ]);
@@ -194,16 +194,87 @@ export const SubmissionManager = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Submission Management
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {submissions.map((submission) => (
+    <div className="space-y-6">
+      {/* AI Scores Overview Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5" />
+            AI Evaluation Scores Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-96 overflow-y-auto border rounded-lg">
+            <div className="space-y-3 p-4">
+              {submissions.filter(submission => submission.scores && submission.scores.length > 0).map((submission) => (
+                <div key={`ai-score-${submission.id}`} className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{submission.challenges?.title}</h4>
+                      <p className="text-sm text-gray-600">
+                        Participant: {submission.profiles?.full_name || submission.profiles?.username || 'Unknown'}
+                      </p>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">
+                        {parseFloat(submission.scores![0].total_score).toFixed(1)}/100
+                      </div>
+                      <Badge className="mt-1 bg-green-100 text-green-800 border-green-200">
+                        {submission.scores![0].status}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Score Breakdown */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    <div className="bg-white p-2 rounded border">
+                      <div className="text-xs text-gray-600">Repository Check</div>
+                      <div className="font-bold text-sm">{submission.scores![0].pre_screening_score}/5</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="text-xs text-gray-600">Evaluation Date</div>
+                      <div className="font-bold text-sm">{new Date(submission.scores![0].created_at).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+
+                  {/* Criteria Scores Preview */}
+                  {submission.scores![0].llm_scores && (
+                    <div className="mt-3">
+                      <div className="text-xs text-gray-600 mb-2">Criteria Scores:</div>
+                      <div className="flex flex-wrap gap-2">
+                        {Object.entries(submission.scores![0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                          <Badge key={criterion} className="text-xs bg-green-100 text-green-800 border-green-200">
+                            {criterion.replace(/_/g, ' ')}: {scoreData.score?.toFixed(1)}/20
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {submissions.filter(submission => submission.scores && submission.scores.length > 0).length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <Trophy className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                  <p>No AI evaluation scores available yet</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detailed Submission Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Detailed Submission Management
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {submissions.map((submission) => (
             <div key={submission.id} className="border rounded-lg p-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -229,9 +300,91 @@ export const SubmissionManager = () => {
                       </>
                     )}
                     {submission.final_score && (
-                      <span>Final Score: {submission.final_score}/100</span>
+                      <span className="font-bold text-purple-600">Final Score: {submission.final_score}/100</span>
                     )}
                   </div>
+
+                  {/* Comprehensive Score Report */}
+                  {submission.scores && submission.scores.length > 0 && (
+                    <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-purple-600" />
+                        Complete Score Report
+                      </h4>
+                      
+                      {/* Overall Score Display */}
+                      <div className="flex items-center justify-between mb-4 p-3 bg-white rounded-lg border">
+                        <div>
+                          <div className="text-sm text-gray-600">Overall Score</div>
+                          <div className="text-2xl font-bold text-purple-600">
+                            {parseFloat(submission.scores[0].total_score).toFixed(1)}/100
+                          </div>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                          {submission.scores[0].status}
+                        </Badge>
+                      </div>
+
+                      {/* Score Breakdown */}
+                      {submission.scores[0].llm_scores && (
+                        <div className="mb-4">
+                          <h5 className="font-medium text-gray-900 mb-2">Detailed Criteria Scores</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
+                              <div key={criterion} className="p-3 bg-white rounded border">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-medium text-sm capitalize">{criterion.replace(/_/g, ' ')}</span>
+                                  <span className="font-bold text-lg text-blue-600">{scoreData.score?.toFixed(1)}/20</span>
+                                </div>
+                                <p className="text-xs text-gray-600 leading-relaxed">{scoreData.explanation}</p>
+                              </div>
+                            ))}
+                            
+                            {/* LLM Feedback Card */}
+                            {submission.scores[0].feedback && (
+                              <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded border border-amber-200 md:col-span-2 lg:col-span-3">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MessageSquare className="h-4 w-4 text-amber-600" />
+                                  <span className="font-medium text-sm text-amber-800">AI Generated Feedback</span>
+                                </div>
+                                <div className="bg-white p-3 rounded border border-amber-100">
+                                  <p className="text-sm text-gray-700 leading-relaxed">{submission.scores[0].feedback}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Repository Analysis */}
+                      <div className="mb-4 p-3 bg-white rounded border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-sm">Repository Validation</span>
+                          <span className="font-bold text-lg">{submission.scores[0].pre_screening_score}/5</span>
+                        </div>
+                        <p className="text-xs text-gray-600">
+                          {submission.scores[0].pre_screening_score === 5 
+                            ? "✅ Repository exists and contains README.md" 
+                            : "❌ Repository validation failed - missing repository or README.md"}
+                        </p>
+                      </div>
+
+                      {/* Human Evaluation (if exists) */}
+                      {submission.final_score && (
+                        <div className="p-3 bg-green-50 rounded border border-green-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="font-medium text-sm text-green-800">Final Human Score</span>
+                            <span className="font-bold text-lg text-green-600">{submission.final_score}/100</span>
+                          </div>
+                          {submission.human_feedback && typeof submission.human_feedback === 'object' && (submission.human_feedback as any).feedback && (
+                            <p className="text-xs text-green-700 mt-2">
+                              <strong>Feedback:</strong> {(submission.human_feedback as any).feedback}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <Button
@@ -259,69 +412,6 @@ export const SubmissionManager = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  {submission.scores && submission.scores.length > 0 && (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View AI Score
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle>AI Generated Score & Feedback</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold mb-2">Overall Score</h4>
-                            <p className="text-2xl font-bold">{parseFloat(submission.scores[0].total_score).toFixed(1)}/100</p>
-                          </div>
-
-                          <div>
-                            <h4 className="font-semibold mb-2">GitHub Repository Analysis</h4>
-                            <div className="border p-3 rounded bg-muted/50">
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="font-medium">Repository Validation</span>
-                                <span className="font-bold">{submission.scores[0].pre_screening_score}/5</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                {submission.scores[0].pre_screening_score === 5 
-                                  ? "✅ Repository exists and contains README.md" 
-                                  : "❌ Repository validation failed - missing repository or README.md"}
-                              </p>
-                            </div>
-                          </div>
-
-                          {submission.scores[0].llm_scores && (
-                            <div>
-                              <h4 className="font-semibold mb-2">Detailed Rubric Scores</h4>
-                              <div className="space-y-2">
-                                {Object.entries(submission.scores[0].llm_scores).map(([criterion, scoreData]: [string, any]) => (
-                                  <div key={criterion} className="border p-2 rounded">
-                                    <div className="flex justify-between items-center mb-1">
-                                      <span className="font-medium">{criterion}</span>
-                                      <span className="font-bold">{scoreData.score?.toFixed(1)}/20</span>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">{scoreData.explanation}</p>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {submission.scores[0].feedback && (
-                            <div>
-                              <h4 className="font-semibold mb-2">AI Feedback</h4>
-                              <div className="bg-muted p-3 rounded text-sm">
-                                {submission.scores[0].feedback}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  )}
-
                   <Dialog open={isScoreDialogOpen} onOpenChange={setIsScoreDialogOpen}>
                     <DialogTrigger asChild>
                       <Button
@@ -393,7 +483,8 @@ export const SubmissionManager = () => {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
