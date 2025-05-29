@@ -30,9 +30,10 @@ HAVING COUNT(*) > 1;
 -- Show remaining scores
 SELECT 
   s.submission_id,
-  sub.challenges.title as challenge_title,
+  c.title as challenge_title,
   s.total_score,
   s.created_at
 FROM scores s
 LEFT JOIN submissions sub ON s.submission_id = sub.id
+LEFT JOIN challenges c ON sub.challenge_id = c.id
 ORDER BY s.created_at DESC;
