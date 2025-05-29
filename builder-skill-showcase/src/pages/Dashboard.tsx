@@ -319,7 +319,7 @@ const Dashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className={`grid w-full ${
             userRole === 'evaluator' ? 'grid-cols-4' : 
-            userRole === 'sponsor' ? 'grid-cols-4' : 
+            userRole === 'sponsor' ? 'grid-cols-2' : 
             'grid-cols-3'
           }`}>
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -339,8 +339,6 @@ const Dashboard = () => {
             {userRole === 'sponsor' && (
               <>
                 <TabsTrigger value="sponsor">Manage</TabsTrigger>
-                <TabsTrigger value="submissions">Submissions</TabsTrigger>
-                <TabsTrigger value="badges">Badges</TabsTrigger>
               </>
             )}
           </TabsList>
@@ -746,21 +744,6 @@ const Dashboard = () => {
                 >
                   <SponsorChallengeManager />
                 </RoleGuard>
-              </TabsContent>
-
-              <TabsContent value="submissions" className="space-y-6">
-                <RoleGuard 
-                  allowedRoles={['sponsor']} 
-                  fallbackMessage="Only sponsors can view challenge submissions."
-                >
-                  <SubmissionManager />
-                </RoleGuard>
-              </TabsContent>
-
-              <TabsContent value="badges" className="space-y-6">
-                {user && (
-                  <BadgeCollection userId={user.id} showTitle={false} compact={false} />
-                )}
               </TabsContent>
             </>
           )}
