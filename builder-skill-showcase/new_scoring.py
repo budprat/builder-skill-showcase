@@ -130,12 +130,19 @@ def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
 
 async def pre_screen_submission(submission: dict) -> dict:
     try:
+        print(f"Pre-screening submission: {submission.get('id', 'unknown')}")
+        print(f"Repository URL: {submission.get('repository_url', 'not found')}")
+        
         g = Github(os.getenv("GITHUB_TOKEN"))
         
+        # Get repository URL and validate it's a string
+        repository_url = submission.get("repository_url")
+        if not repository_url or not isinstance(repository_url, str):
+            raise Exception(f"Invalid repository URL: {repository_url}")
+        
         # Parse repository URL and remove .git extension if present
-        repo_url = submission["repository_url"]
-        if "github.com/" in repo_url:
-            repo_path = repo_url.split("github.com/")[1]
+        if "github.com/" in repository_url:
+            repo_path = repository_url.split("github.com/")[1]
             # Remove .git extension if present
             if repo_path.endswith('.git'):
                 repo_path = repo_path[:-4]
@@ -147,22 +154,23 @@ async def pre_screen_submission(submission: dict) -> dict:
             submission["status"] = "prescreened"
             print(f"Pre-screening PASSED for submission {submission['id']}: Repository exists and has README.md")
         else:
-            raise Exception(f"Invalid GitHub URL format: {repo_url}")
+            raise Exception(f"Invalid GitHub URL format: {repository_url}")
             
     except GithubException as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
         print(f"Pre-screening FAILED for submission {submission['id']}: {str(e)}")
-        print(f"Failure reason: Unable to access repository or README.md not found at {submission['repository_url']}")
+        print(f"Failure reason: Unable to access repository or README.md not found at {submission.get('repository_url', 'unknown')}")
         
         # Check if it's a permission issue
         if e.status == 404:
-            print(f"Repository might be private or doesn't exist. Check if GitHub token has access to: {submission['repository_url']}")
+            print(f"Repository might be private or doesn't exist. Check if GitHub token has access to: {submission.get('repository_url', 'unknown')}")
         
     except Exception as e:
         submission["pre_screening_score"] = 0.0
         submission["status"] = "prescreening_failed"
         print(f"Pre-screening FAILED for submission {submission['id']}: Unexpected error - {str(e)}")
+        print(f"Submission data keys: {list(submission.keys()) if isinstance(submission, dict) else 'not a dict'}")
     return submission
 
 async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
