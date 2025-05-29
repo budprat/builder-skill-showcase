@@ -1,14 +1,22 @@
 
 -- Fix RLS policies for proper role assignment during signup
 
--- Drop existing policies that might be blocking role assignment
-DROP POLICY IF EXISTS "Users can view their own roles" ON user_roles;
-DROP POLICY IF EXISTS "Users can insert their own roles" ON user_roles;
-DROP POLICY IF EXISTS "Admins can manage all roles" ON user_roles;
-DROP POLICY IF EXISTS "Users can manage their own roles" ON user_roles;
-DROP POLICY IF EXISTS "Allow role assignment during signup" ON user_roles;
+-- Step 1: Drop the existing table and recreate with proper structure
+DROP TABLE IF EXISTS user_roles CASCADE;
 
--- Create comprehensive RLS policies for user_roles table
+-- Step 2: Recreate the table with proper serial column
+CREATE TABLE user_roles (
+  id SERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role app_role NOT NULL DEFAULT 'participant',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT user_roles_user_id_role_key UNIQUE (user_id, role)
+);
+
+-- Step 3: Enable RLS on user_roles table
+ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Step 4: Create comprehensive RLS policies for user_roles table
 -- Policy 1: Allow users to view their own roles
 CREATE POLICY "Users can view their own roles" ON user_roles
     FOR SELECT USING (auth.uid() = user_id);
@@ -35,14 +43,11 @@ CREATE POLICY "Admins can manage all roles" ON user_roles
 CREATE POLICY "Allow system role assignment" ON user_roles
     FOR INSERT WITH CHECK (true);
 
--- Enable RLS on user_roles table
-ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
-
--- Grant necessary permissions to authenticated users
+-- Step 5: Grant necessary permissions to authenticated users
 GRANT SELECT, INSERT, UPDATE ON user_roles TO authenticated;
-GRANT USAGE ON SEQUENCE user_roles_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE user_roles_id_seq TO authenticated;
 
--- Verify the app_role enum includes all necessary roles
+-- Step 6: Verify the app_role enum includes all necessary roles
 DO $$
 BEGIN
     -- Check if evaluator role exists in enum
@@ -68,7 +73,11 @@ BEGIN
     END IF;
 END $$;
 
--- Test the policies by creating a test function
+-- Step 7: Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_role ON user_roles(role);
+
+-- Step 8: Test the policies by creating a test function
 CREATE OR REPLACE FUNCTION test_role_assignment()
 RETURNS TEXT AS $$
 DECLARE
@@ -98,8 +107,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Run the test
+-- Step 9: Run the test
 SELECT test_role_assignment();
 
--- Drop the test function
+-- Step 10: Drop the test function
 DROP FUNCTION test_role_assignment();
+
+-- Step 11: Show current table structure
+SELECT 
+    'Table created successfully' as status,
+    column_name, 
+    data_type, 
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'user_roles' 
+AND table_schema = 'public'
+ORDER BY ordinal_position;
