@@ -32,13 +32,7 @@ FOR INSERT WITH CHECK (
       AND ur.role IN ('sponsor', 'company', 'admin')
     ) OR
     -- Fallback: check JWT metadata for role
-    (auth.jwt() ->> 'role')::text IN ('sponsor', 'company', 'admin') OR
-    -- Additional fallback: check user_metadata in auth.users
-    EXISTS (
-      SELECT 1 FROM auth.users u
-      WHERE u.id = auth.uid()
-      AND (u.raw_user_meta_data ->> 'role')::text IN ('sponsor', 'company', 'admin')
-    )
+    (auth.jwt() ->> 'role')::text IN ('sponsor', 'company', 'admin')
   )
 );
 
@@ -75,28 +69,20 @@ FROM pg_policies
 WHERE tablename = 'challenges'
 ORDER BY policyname;
 
--- Also ensure the user has a role in user_roles table for consistency
--- This will help with future queries that depend on the user_roles table
-INSERT INTO user_roles (user_id, role, created_at)
-SELECT 
-  u.id,
-  (u.raw_user_meta_data ->> 'role')::app_role,
-  NOW()
-FROM auth.users u
-WHERE u.raw_user_meta_data ->> 'role' IS NOT NULL
-  AND (u.raw_user_meta_data ->> 'role')::text IN ('sponsor', 'company', 'admin', 'evaluator', 'participant')
-  AND NOT EXISTS (
-    SELECT 1 FROM user_roles ur 
-    WHERE ur.user_id = u.id 
-    AND ur.role = (u.raw_user_meta_data ->> 'role')::app_role
-  )
-ON CONFLICT (user_id, role) DO NOTHING;
+-- Grant necessary permissions for challenges table
+GRANT SELECT, INSERT, UPDATE, DELETE ON challenges TO authenticated;
 
--- Verify user roles were assigned
+-- Show current policies to verify they were created correctly
 SELECT 
-  u.email,
-  u.raw_user_meta_data ->> 'role' as metadata_role,
-  ur.role as assigned_role
-FROM auth.users u
-LEFT JOIN user_roles ur ON u.id = ur.user_id
-WHERE u.raw_user_meta_data ->> 'role' IS NOT NULL;
+  policyname,
+  cmd,
+  permissive,
+  CASE 
+    WHEN cmd = 'SELECT' THEN 'View'
+    WHEN cmd = 'INSERT' THEN 'Create' 
+    WHEN cmd = 'UPDATE' THEN 'Update'
+    WHEN cmd = 'DELETE' THEN 'Delete'
+  END as action
+FROM pg_policies 
+WHERE tablename = 'challenges'
+ORDER BY policyname;
