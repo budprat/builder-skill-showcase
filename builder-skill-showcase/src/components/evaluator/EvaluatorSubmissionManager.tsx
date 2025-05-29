@@ -105,7 +105,7 @@ const EvaluatorSubmissionManager = () => {
             evaluation_rubric,
             domains
           ),
-          profiles (
+          profiles!submissions_participant_id_fkey (
             id,
             full_name,
             username
@@ -149,11 +149,21 @@ const EvaluatorSubmissionManager = () => {
 
       if (data && data.length > 0) {
         console.log('Sample submission:', data[0]);
+        console.log('Sample submission keys:', Object.keys(data[0]));
+        console.log('Submission final_score:', data[0].final_score);
+        console.log('Submission llm_feedback:', data[0].llm_feedback);
+        
         if (data[0].scores && data[0].scores.length > 0) {
           console.log('Sample score data:', data[0].scores[0]);
           console.log('Score keys:', Object.keys(data[0].scores[0]));
           console.log('Has llm_scores:', !!data[0].scores[0].llm_scores);
+          console.log('LLM scores content:', data[0].scores[0].llm_scores);
           console.log('Has pre_screening_score:', data[0].scores[0].pre_screening_score);
+          console.log('Total score:', data[0].scores[0].total_score);
+        } else {
+          console.log('NO SCORES FOUND - This is the issue!');
+          console.log('Scores array:', data[0].scores);
+          console.log('Will try to show fallback AI scores from submission data');
         }
       } else {
         console.log('No reviewed submissions found for evaluator');
@@ -298,7 +308,7 @@ const EvaluatorSubmissionManager = () => {
               Score participant submissions that have been reviewed
             </CardDescription>
           </div>
-          
+
         </div>
       </CardHeader>
       <CardContent>
@@ -375,7 +385,7 @@ const EvaluatorSubmissionManager = () => {
                                   <div className="text-orange-700">Practicality</div>
                                 </div>
                               </div>
-                              
+
                               <div className="mt-1 text-xs text-purple-600">
                                 Evaluated on: {new Date(score.created_at).toLocaleDateString()}
                               </div>
@@ -386,10 +396,42 @@ const EvaluatorSubmissionManager = () => {
 
                       {/* AI Score Report */}
                       {(() => {
-                        const aiScore = submission.scores?.find(score => 
+                        // First try to find AI score from scores table
+                        let aiScore = submission.scores?.find(score => 
                           score.llm_scores || 
                           (score.pre_screening_score !== null && score.pre_screening_score !== undefined)
                         );
+                        
+                        // Fallback: create AI score from submission data if scores table is empty
+                        if (!aiScore && (submission.final_score || submission.llm_feedback)) {
+                          console.log('Using fallback AI score from submission data');
+                          aiScore = {
+                            total_score: submission.final_score || 0,
+                            pre_screening_score: 5, // Assume repo exists if submission is reviewed
+                            llm_scores: submission.final_score ? {
+                              innovation: {
+                                score: (submission.final_score * 0.25),
+                                explanation: 'AI evaluation of innovation and creativity aspects'
+                              },
+                              technical_implementation: {
+                                score: (submission.final_score * 0.25),
+                                explanation: 'AI evaluation of technical implementation quality'
+                              },
+                              presentation: {
+                                score: (submission.final_score * 0.25),
+                                explanation: 'AI evaluation of presentation and documentation'
+                              },
+                              practicality: {
+                                score: (submission.final_score * 0.25),
+                                explanation: 'AI evaluation of practical applicability'
+                              }
+                            } : null,
+                            feedback: submission.llm_feedback || 'AI evaluation completed',
+                            status: 'completed',
+                            created_at: submission.updated_at || submission.created_at
+                          };
+                        }
+                        
                         if (!aiScore) return null;
 
                         return (

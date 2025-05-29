@@ -54,7 +54,7 @@ interface Badge {
 interface UserBadge {
   id: string;
   badge_id: string;
-  awarded_at: string;
+  earned_at: string;
   badges: Badge;
 }
 
@@ -188,8 +188,8 @@ const Dashboard = () => {
           *,
           challenges(title)
         `)
-        .eq('user_id', user.id)
-        .order('submitted_at', { ascending: false });
+        .eq('participant_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
 
@@ -215,7 +215,7 @@ const Dashboard = () => {
           badges(*)
         `)
         .eq('user_id', user.id)
-        .order('awarded_at', { ascending: false });
+        .order('earned_at', { ascending: false });
 
       if (error) throw error;
       setUserBadges(data || []);
