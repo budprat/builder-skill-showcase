@@ -19,6 +19,7 @@ import { SponsorChallengeManager } from "@/components/admin/SponsorChallengeMana
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import EvaluatorSubmissionManager from "@/components/evaluator/EvaluatorSubmissionManager";
 import ScoreDashboard from "@/components/evaluator/ScoreDashboard";
+import SubmissionManager from "@/components/participant/SubmissionManager";
 
 interface Challenge {
   id: string;
@@ -72,7 +73,7 @@ const Dashboard = () => {
   console.log('Loading state:', loading);
   console.log('User email:', user?.email);
   console.log('Is evaluator?:', userRole === 'evaluator');
-  
+
   // Redirect admin users to admin panel
   useEffect(() => {
     if (userRole === 'admin') {
@@ -111,7 +112,7 @@ const Dashboard = () => {
 
       if (userRole === 'sponsor' && user) {
         console.log('Fetching challenges for sponsor:', user.id);
-        
+
         // Optimized query: fetch only needed columns for better performance
         const { data, error } = await supabase
           .from('challenges')
@@ -131,9 +132,9 @@ const Dashboard = () => {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        
+
         console.log('Raw sponsor challenges fetched:', data?.length || 0);
-        
+
         // Additional client-side filtering to ensure only sponsor's challenges
         const sponsorChallenges = (data || []).filter(challenge => {
           const isOwned = challenge.company_id === user.id;
@@ -147,7 +148,7 @@ const Dashboard = () => {
           }
           return isOwned;
         });
-        
+
         console.log('Filtered sponsor challenges count:', sponsorChallenges.length);
         setChallenges(sponsorChallenges);
       } else {
@@ -316,26 +317,11 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            {(userRole === 'participant' || !userRole) && (
-              <>
+          <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="submissions">My Submissions</TabsTrigger>
                 <TabsTrigger value="badges">Badges</TabsTrigger>
-              </>
-            )}
-            {userRole === 'evaluator' && (
-              <>
-                {console.log('=== EVALUATOR TAB TRIGGER RENDERED ===')}
-                {console.log('Current user role for evaluator tab:', userRole)}
-                <TabsTrigger value="evaluator">Evaluate Submissions</TabsTrigger>
-                <TabsTrigger value="score-dashboard">Score Analytics</TabsTrigger>
-              </>
-            )}
-            {userRole === 'sponsor' && (
-              <TabsTrigger value="sponsor">Manage Challenges</TabsTrigger>
-            )}
-          </TabsList>
+              </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Participant Dashboard */}
@@ -682,81 +668,14 @@ const Dashboard = () => {
               </>
             )}
 
-            
+
           </TabsContent>
 
-          <TabsContent value="submissions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Submissions</CardTitle>
-                <CardDescription>Track all your challenge submissions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {submissions.map((submission) => (
-                    <div key={submission.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{submission.challenge_title}</h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Submitted: {new Date(submission.submitted_at).toLocaleDateString()}
-                          </p>
-                          <div className="flex items-center gap-4 mt-2">
-                            {submission.repository_url && (
-                              <a
-                                href={submission.repository_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                              >
-                                <Github className="h-4 w-4" />
-                                Repository
-                              </a>
-                            )}
-                            {submission.demo_video_url && (
-                              <a
-                                href={submission.demo_video_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                              >
-                                <Play className="h-4 w-4" />
-                                Demo
-                              </a>
-                            )}
-                            {submission.pitch_deck_url && (
-                              <a
-                                href={submission.pitch_deck_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
-                              >
-                                <FileText className="h-4 w-4" />
-                                Pitch Deck
-                              </a>
-                            )}
-                          </div>
-                          {submission.score && (
-                            <p className="text-sm text-green-600 mt-2">Score: {submission.score}/100</p>
-                          )}
-                        </div>
-                        <Badge className={getStatusColor(submission.status)}>
-                          {submission.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  {submissions.length === 0 && (
-                    <p className="text-center text-gray-500 py-8">
-                      No submissions yet. Start by participating in a challenge!
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <TabsContent value="submissions">
+                <SubmissionManager />
+              </TabsContent>
 
-          <TabsContent value="badges" className="space-y-6">
+              <TabsContent value="badges" className="space-y-6">
             {user && (
               <BadgeCollection userId={user.id} showTitle={false} compact={false} />
             )}
@@ -775,7 +694,7 @@ const Dashboard = () => {
                   <EvaluatorSubmissionManager />
                 </RoleGuard>
               </TabsContent>
-              
+
               <TabsContent value="score-dashboard" className="space-y-6">
                 <RoleGuard 
                   allowedRoles={['evaluator']} 
