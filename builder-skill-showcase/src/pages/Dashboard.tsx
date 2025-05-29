@@ -318,7 +318,7 @@ const Dashboard = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className={`grid w-full ${
-            userRole === 'evaluator' ? 'grid-cols-4' : 
+            userRole === 'evaluator' ? 'grid-cols-3' : 
             userRole === 'sponsor' ? 'grid-cols-2' : 
             'grid-cols-3'
           }`}>
@@ -333,7 +333,6 @@ const Dashboard = () => {
               <>
                 <TabsTrigger value="evaluator">Evaluate</TabsTrigger>
                 <TabsTrigger value="score-dashboard">Analytics</TabsTrigger>
-                <TabsTrigger value="badges">Badges</TabsTrigger>
               </>
             )}
             {userRole === 'sponsor' && (
@@ -724,12 +723,6 @@ const Dashboard = () => {
                 >
                   <ScoreDashboard />
                 </RoleGuard>
-              </TabsContent>
-
-              <TabsContent value="badges" className="space-y-6">
-                {user && (
-                  <BadgeCollection userId={user.id} showTitle={false} compact={false} />
-                )}
               </TabsContent>
             </>
           )}
