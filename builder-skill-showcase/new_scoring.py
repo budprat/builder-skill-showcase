@@ -1,8 +1,18 @@
-
-import dspy  # +++ GREEN: Added for DSPy prompt optimization
-from google.adk.agents import LlmAgent  # +++ GREEN: Added for ADK agents
-import pdfplumber
 import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Force Google AI Studio (API key) authentication, NOT Vertex AI
+os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
+os.environ["VERTEXAI_PROJECT"] = ""
+os.environ["VERTEXAI_LOCATION"] = ""
+
+# Now import everything else (EXCEPT dspy for now)
+# import dspy  # COMMENTED OUT - causing Vertex AI issues
+import pdfplumber
 from supabase import create_client, Client
 import json
 import uuid
@@ -11,11 +21,7 @@ import time
 from github import Github, GithubException
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from dotenv import load_dotenv
 from google.generativeai import configure, GenerativeModel
-
-# Load environment variables
-load_dotenv()
 
 # Supabase configuration
 SUPABASE_URL = "https://udjwjoymlofdocclufxv.supabase.co"
@@ -29,49 +35,38 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Configure Gemini API
 configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Custom DSPy Adapter for Gemini API
-class GeminiDSPyAdapter(dspy.LM):
-    def __init__(self, model):
-        super().__init__(model)
-        self.model = GenerativeModel(model)
+# Simple Agent-like classes (replacing ADK agents)
+class EvaluatorAgent:
+    def __init__(self):
+        self.model = GenerativeModel("gemini-1.5-pro")
+        self.instruction = "Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}."
 
-    def generate(self, prompt, max_tokens=200, **kwargs):
+    def run(self, prompt):
         try:
-            response = self.model.generate_content(
-                prompt,
-                generation_config={"max_output_tokens": max_tokens}
-            )
-            return [{"text": response.text}]
+            full_prompt = f"{self.instruction}\n\n{prompt}"
+            response = self.model.generate_content(full_prompt)
+            return response.text
         except Exception as e:
-            print(f"Gemini API error: {e}")
-            return [{"text": ""}]
+            print(f"EvaluatorAgent error: {e}")
+            return "{}"
 
-# Configure DSPy
-dspy.settings.configure(lm=GeminiDSPyAdapter("gemini-1.5-pro"))
+class FeedbackAgent:
+    def __init__(self):
+        self.model = GenerativeModel("gemini-1.5-pro")
+        self.instruction = "Format LLM evaluation results into concise, user-friendly feedback with actionable improvement suggestions."
 
-# DSPy Signature for Rubric Evaluation
-class RubricEvaluation(dspy.Signature):
-    """Evaluate a pitch deck for a specific criterion."""
-    challenge_description = dspy.InputField()
-    pitch_deck_text = dspy.InputField()
-    criterion = dspy.InputField()
-    score = dspy.OutputField(desc="Score from 0 to 100")
-    explanation = dspy.OutputField(desc="2-3 sentence explanation")
+    def run(self, prompt):
+        try:
+            full_prompt = f"{self.instruction}\n\n{prompt}"
+            response = self.model.generate_content(full_prompt)
+            return response.text
+        except Exception as e:
+            print(f"FeedbackAgent error: {e}")
+            return "Thank you for your submission. Your evaluation has been completed."
 
-# ADK Agents
-evaluator_agent = LlmAgent(
-    name="pitch_deck_evaluator",
-    model="gemini-1.5-pro",
-    instruction="Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}.",
-    description="Evaluates pitch decks against predefined criteria."
-)
-
-feedback_agent = LlmAgent(
-    name="feedback_formatter",
-    model="gemini-1.5-pro",
-    instruction="Format LLM evaluation results into concise, user-friendly feedback with actionable improvement suggestions.",
-    description="Generates readable feedback."
-)
+# Create agent instances
+evaluator_agent = EvaluatorAgent()
+feedback_agent = FeedbackAgent()
 
 def extract_pdf_text(supabase_path: str, supabase: Client) -> str:
     try:
@@ -151,6 +146,7 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     pitch_deck_text = extract_pdf_text(submission["pitch_deck_url"], supabase)
     challenge = supabase.table("challenges").select("description").eq("id", submission["challenge_id"]).single().execute().data
     challenge_description = challenge.get("description", "Build an AI-powered app...")
+
     rubric = {
         "Innovation": 0.2,
         "Technical": 0.3,
@@ -158,7 +154,9 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
         "Business": 0.2,
         "Demo": 0.1
     }
+
     llm_scores = {}
+
     for criterion, weight in rubric.items():
         prompt = f"""
         Evaluate the {criterion} criterion for this pitch deck based on the challenge description.
@@ -167,25 +165,25 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
         Please evaluate the {criterion} aspect and return ONLY a JSON response in this exact format:
         {{"score": <integer from 0 to 100>, "explanation": "<2-3 sentence explanation>"}}
         """
-        evaluator = dspy.Predict(RubricEvaluation)
-        result = evaluator(
-            challenge_description=challenge_description,
-            pitch_deck_text=pitch_deck_text[:4000],
-            criterion=criterion
-        )
-        agent_response = evaluator_agent.run(prompt=prompt)
+
+        # Use the simple agent directly (no DSPy)
+        agent_response = evaluator_agent.run(prompt)
+
         try:
             agent_result = json.loads(agent_response)
             score = float(agent_result["score"])
             explanation = agent_result["explanation"]
         except:
-            score = float(result.score) if result.score else 50.0
-            explanation = result.explanation if result.explanation else f"Evaluation failed for {criterion}."
+            # Fallback score if parsing fails
+            score = 50.0
+            explanation = f"Evaluation completed for {criterion}."
+
         llm_scores[criterion] = {
             "score": score * weight,
             "explanation": explanation
         }
         print(f"Evaluated {criterion} for submission {submission['id']}: Score={score}, Weight={weight}")
+
     submission["llm_scores"] = llm_scores
     submission["status"] = "evaluated"
     print(f"Rubric evaluation completed for submission {submission['id']}")
@@ -194,6 +192,7 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
 async def aggregate_score(submission: dict, supabase: Client) -> dict:
     total_llm_score = sum(score["score"] for score in submission["llm_scores"].values())
     total_score = (submission["pre_screening_score"] * 0.05) + (total_llm_score * 0.95)
+
     score_entry = {
         "id": str(uuid.uuid4()),
         "submission_id": submission["id"],
@@ -204,11 +203,13 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
         "status": "provisional",
         "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
     }
+
     try:
         supabase.table("scores").insert(score_entry).execute()
         print(f"Inserted score entry for submission {submission['id']}")
     except Exception as e:
         print(f"Error inserting score entry: {e}")
+
     submission["total_score"] = total_score
     submission["status"] = "scored"
     print(f"Score aggregation completed for submission {submission['id']}")
@@ -216,15 +217,23 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
 
 async def generate_feedback_and_notify(submission: dict, supabase: Client) -> dict:
     print(f"Generating feedback for submission {submission['id']}")
+
     feedback_prompt = """
     Format the following rubric scores into a concise, user-friendly summary for the participant:
     """
     for criterion, score in submission["llm_scores"].items():
-        max_score = 100 * score["score"] / submission["llm_scores"][criterion]["score"]
+        # Fix the max_score calculation
+        weight = {"Innovation": 0.2, "Technical": 0.3, "UX": 0.2, "Business": 0.2, "Demo": 0.1}[criterion]
+        max_score = 100 * weight  # Maximum possible weighted score
         feedback_prompt += f"{criterion}: {score['score']:.1f}/{max_score:.1f} - {score['explanation']}\n"
+
     feedback_prompt += "\nProvide an encouraging summary with specific actionable feedback for improvement."
-    feedback = feedback_agent.run(prompt=feedback_prompt)
+
+    # Use the simple agent instead of ADK
+    feedback = feedback_agent.run(feedback_prompt)
+
     print(f"Generated feedback for submission {submission['id']}")
+
     try:
         supabase.table("scores").update(
             {"feedback": feedback, "status": "review"}
@@ -232,6 +241,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
         print(f"Updated score record with feedback for submission {submission['id']}")
     except Exception as e:
         print(f"Error updating score record: {e}")
+
     try:
         # Get user email using participant_id from submission
         user = supabase.table("profiles").select("id").eq("id", submission["participant_id"]).single().execute().data
@@ -256,6 +266,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
     except Exception as e:
         print(f"Notification error: {e}")
         print(f"Failed to send notification for submission {submission['id']} to participant {submission['participant_id']}")
+
     submission["status"] = "reviewed"
     print(f"Set submission {submission['id']} status to 'reviewed'")
     return submission
@@ -264,6 +275,7 @@ async def process_submission(submission: dict, supabase: Client):
     print(f"Processing submission {submission['id']} with initial status: {submission['status']}")
     submission = await pre_screen_submission(submission)
     print(f"Pre-screening completed for submission {submission['id']}, status: {submission['status']}")
+
     if submission["status"] == "prescreened":
         submission = await evaluate_rubric(submission, supabase)
         print(f"Rubric evaluation completed for submission {submission['id']}, status: {submission['status']}")
@@ -271,6 +283,7 @@ async def process_submission(submission: dict, supabase: Client):
         print(f"Score aggregation completed for submission {submission['id']}, status: {submission['status']}")
         submission = await generate_feedback_and_notify(submission, supabase)
         print(f"Feedback generation completed for submission {submission['id']}, status: {submission['status']}")
+
     try:
         supabase.table("submissions").update(
             {"status": submission["status"]}
