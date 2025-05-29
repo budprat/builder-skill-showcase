@@ -229,7 +229,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
     print(f"Generated feedback for submission {submission['id']}")
     try:
         supabase.table("scores").update(
-            {"feedback": feedback, "status": "notified"}
+            {"feedback": feedback, "status": "review"}
         ).eq("submission_id", submission["id"]).execute()
         print(f"Updated score record with feedback for submission {submission['id']}")
     except Exception as e:
