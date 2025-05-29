@@ -105,7 +105,7 @@ const EvaluatorSubmissionManager = () => {
             evaluation_rubric,
             domains
           ),
-          profiles (
+          profiles!submissions_participant_id_fkey (
             id,
             full_name,
             username
