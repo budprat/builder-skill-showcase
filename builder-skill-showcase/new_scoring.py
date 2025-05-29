@@ -4,14 +4,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Force Google AI Studio (API key) authentication, NOT Vertex AI
-os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
-os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "False"
-os.environ["VERTEXAI_PROJECT"] = ""
-os.environ["VERTEXAI_LOCATION"] = ""
-
-# Now import everything else (EXCEPT dspy for now)
-# import dspy  # COMMENTED OUT - causing Vertex AI issues
+# Import all required libraries
 import pdfplumber
 from supabase import create_client, Client
 import json
@@ -35,34 +28,66 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Configure Gemini API
 configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-# Simple Agent-like classes (replacing ADK agents)
+# Enhanced Agent classes with structured prompting
 class EvaluatorAgent:
     def __init__(self):
         self.model = GenerativeModel("gemini-1.5-pro")
-        self.instruction = "Evaluate pitch decks for an AI competition using the provided rubric. Return scores and explanations in JSON: {'score': int, 'explanation': str}."
+        self.instruction = """You are an expert AI competition judge evaluating pitch decks. 
+        Evaluate the given criterion and return ONLY a valid JSON response with:
+        - "score": an integer from 0 to 100
+        - "explanation": a 2-3 sentence explanation
+
+        Be fair but critical. Consider:
+        - Innovation (0-100): How novel and creative is the approach?
+        - Technical (0-100): How technically sound and feasible is the implementation?
+        - UX (0-100): How user-friendly and well-designed is the experience?
+        - Business (0-100): How viable is the business model and market fit?
+        - Demo (0-100): How well does the demo showcase the product?
+        """
 
     def run(self, prompt):
         try:
             full_prompt = f"{self.instruction}\n\n{prompt}"
-            response = self.model.generate_content(full_prompt)
+            response = self.model.generate_content(
+                full_prompt,
+                generation_config={
+                    "temperature": 0.3,  # Lower temperature for more consistent scoring
+                    "max_output_tokens": 200
+                }
+            )
             return response.text
         except Exception as e:
             print(f"EvaluatorAgent error: {e}")
-            return "{}"
+            return '{"score": 50, "explanation": "Unable to evaluate due to an error."}'
 
 class FeedbackAgent:
     def __init__(self):
         self.model = GenerativeModel("gemini-1.5-pro")
-        self.instruction = "Format LLM evaluation results into concise, user-friendly feedback with actionable improvement suggestions."
+        self.instruction = """You are a helpful AI competition feedback provider.
+        Format the evaluation results into encouraging, constructive feedback.
+
+        Guidelines:
+        - Start with positive aspects
+        - Provide specific, actionable improvements
+        - Be encouraging and supportive
+        - Keep it concise but comprehensive
+        - End with motivating words
+        """
 
     def run(self, prompt):
         try:
             full_prompt = f"{self.instruction}\n\n{prompt}"
-            response = self.model.generate_content(full_prompt)
+            response = self.model.generate_content(
+                full_prompt,
+                generation_config={
+                    "temperature": 0.7,
+                    "max_output_tokens": 500
+                }
+            )
             return response.text
         except Exception as e:
             print(f"FeedbackAgent error: {e}")
-            return "Thank you for your submission. Your evaluation has been completed."
+            return "Thank you for your submission. Your project shows promise and we encourage you to continue developing it!"
 
 # Create agent instances
 evaluator_agent = EvaluatorAgent()
@@ -144,6 +169,21 @@ async def pre_screen_submission(submission: dict) -> dict:
 
 async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     pitch_deck_text = extract_pdf_text(submission["pitch_deck_url"], supabase)
+
+    # Check if PDF extraction failed
+    if pitch_deck_text.startswith("PDF file not found") or pitch_deck_text.startswith("Error extracting PDF"):
+        print(f"PDF extraction failed for submission {submission['id']}")
+        # Set default scores
+        submission["llm_scores"] = {
+            "Innovation": {"score": 0.0, "explanation": "Unable to evaluate - PDF extraction failed"},
+            "Technical": {"score": 0.0, "explanation": "Unable to evaluate - PDF extraction failed"},
+            "UX": {"score": 0.0, "explanation": "Unable to evaluate - PDF extraction failed"},
+            "Business": {"score": 0.0, "explanation": "Unable to evaluate - PDF extraction failed"},
+            "Demo": {"score": 0.0, "explanation": "Unable to evaluate - PDF extraction failed"}
+        }
+        submission["status"] = "evaluation_failed"
+        return submission
+
     challenge = supabase.table("challenges").select("description").eq("id", submission["challenge_id"]).single().execute().data
     challenge_description = challenge.get("description", "Build an AI-powered app...")
 
@@ -160,21 +200,37 @@ async def evaluate_rubric(submission: dict, supabase: Client) -> dict:
     for criterion, weight in rubric.items():
         prompt = f"""
         Evaluate the {criterion} criterion for this pitch deck based on the challenge description.
+
         Challenge: {challenge_description}
-        Pitch Deck Content: {pitch_deck_text[:4000]}
-        Please evaluate the {criterion} aspect and return ONLY a JSON response in this exact format:
+
+        Pitch Deck Content:
+        {pitch_deck_text[:4000]}
+
+        Criterion to evaluate: {criterion}
+
+        Return ONLY a JSON response in this exact format (no other text):
         {{"score": <integer from 0 to 100>, "explanation": "<2-3 sentence explanation>"}}
         """
 
-        # Use the simple agent directly (no DSPy)
+        # Use the evaluator agent
         agent_response = evaluator_agent.run(prompt)
 
         try:
-            agent_result = json.loads(agent_response)
-            score = float(agent_result["score"])
-            explanation = agent_result["explanation"]
-        except:
-            # Fallback score if parsing fails
+            # Clean the response to extract JSON
+            agent_response = agent_response.strip()
+            # Find JSON in the response
+            json_start = agent_response.find('{')
+            json_end = agent_response.rfind('}') + 1
+            if json_start >= 0 and json_end > json_start:
+                json_str = agent_response[json_start:json_end]
+                agent_result = json.loads(json_str)
+                score = float(agent_result.get("score", 50))
+                explanation = agent_result.get("explanation", f"Evaluation completed for {criterion}.")
+            else:
+                raise ValueError("No JSON found in response")
+        except Exception as e:
+            print(f"Error parsing agent response for {criterion}: {e}")
+            print(f"Agent response was: {agent_response}")
             score = 50.0
             explanation = f"Evaluation completed for {criterion}."
 
@@ -219,17 +275,24 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
     print(f"Generating feedback for submission {submission['id']}")
 
     feedback_prompt = """
-    Format the following rubric scores into a concise, user-friendly summary for the participant:
+    Format the following rubric scores into a concise, user-friendly summary for the participant.
+
+    Scores breakdown:
     """
-    for criterion, score in submission["llm_scores"].items():
-        # Fix the max_score calculation
+
+    for criterion, score_data in submission["llm_scores"].items():
         weight = {"Innovation": 0.2, "Technical": 0.3, "UX": 0.2, "Business": 0.2, "Demo": 0.1}[criterion]
         max_score = 100 * weight  # Maximum possible weighted score
-        feedback_prompt += f"{criterion}: {score['score']:.1f}/{max_score:.1f} - {score['explanation']}\n"
+        feedback_prompt += f"\n{criterion}: {score_data['score']:.1f}/{max_score:.1f} - {score_data['explanation']}"
 
-    feedback_prompt += "\nProvide an encouraging summary with specific actionable feedback for improvement."
+    feedback_prompt += f"""
 
-    # Use the simple agent instead of ADK
+    Total Score: {submission['total_score']:.1f}/100
+
+    Provide an encouraging summary with specific actionable feedback for improvement.
+    """
+
+    # Use the feedback agent
     feedback = feedback_agent.run(feedback_prompt)
 
     print(f"Generated feedback for submission {submission['id']}")
@@ -254,7 +317,7 @@ async def generate_feedback_and_notify(submission: dict, supabase: Client) -> di
                     from_email="no-reply@elitebuilders.com",
                     to_emails=user_email,
                     subject="Provisional Score Available",
-                    html_content=f"Your score is {submission['total_score']:.2f}/100.<br>Feedback:<br>{feedback}"
+                    html_content=f"Your score is {submission['total_score']:.2f}/100.<br><br>Feedback:<br>{feedback.replace(chr(10), '<br>')}"
                 )
                 sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
                 #sg.send(message)
