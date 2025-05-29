@@ -317,11 +317,33 @@ const Dashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsList className={`grid w-full ${
+            userRole === 'evaluator' ? 'grid-cols-4' : 
+            userRole === 'sponsor' ? 'grid-cols-4' : 
+            'grid-cols-3'
+          }`}>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            {(userRole === 'participant' || !userRole) && (
+              <>
                 <TabsTrigger value="submissions">My Submissions</TabsTrigger>
                 <TabsTrigger value="badges">Badges</TabsTrigger>
-              </TabsList>
+              </>
+            )}
+            {userRole === 'evaluator' && (
+              <>
+                <TabsTrigger value="evaluator">Evaluate</TabsTrigger>
+                <TabsTrigger value="score-dashboard">Analytics</TabsTrigger>
+                <TabsTrigger value="badges">Badges</TabsTrigger>
+              </>
+            )}
+            {userRole === 'sponsor' && (
+              <>
+                <TabsTrigger value="sponsor">Manage</TabsTrigger>
+                <TabsTrigger value="submissions">Submissions</TabsTrigger>
+                <TabsTrigger value="badges">Badges</TabsTrigger>
+              </>
+            )}
+          </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             {/* Participant Dashboard */}
@@ -671,26 +693,28 @@ const Dashboard = () => {
 
           </TabsContent>
 
-          <TabsContent value="submissions">
+          {/* Participant and default tabs */}
+          {(userRole === 'participant' || !userRole) && (
+            <>
+              <TabsContent value="submissions">
                 <SubmissionManager />
               </TabsContent>
-
               <TabsContent value="badges" className="space-y-6">
-            {user && (
-              <BadgeCollection userId={user.id} showTitle={false} compact={false} />
-            )}
-          </TabsContent>
+                {user && (
+                  <BadgeCollection userId={user.id} showTitle={false} compact={false} />
+                )}
+              </TabsContent>
+            </>
+          )}
 
+          {/* Evaluator tabs */}
           {userRole === 'evaluator' && (
             <>
               <TabsContent value="evaluator" className="space-y-6">
-                {console.log('=== EVALUATOR TAB CONTENT RENDERED ===')}
-                {console.log('User role for evaluator tab:', userRole)}
                 <RoleGuard 
                   allowedRoles={['evaluator']} 
                   fallbackMessage="Only evaluators can evaluate submissions."
                 >
-                  {console.log('=== INSIDE ROLE GUARD FOR EVALUATOR ===')}
                   <EvaluatorSubmissionManager />
                 </RoleGuard>
               </TabsContent>
@@ -703,18 +727,42 @@ const Dashboard = () => {
                   <ScoreDashboard />
                 </RoleGuard>
               </TabsContent>
+
+              <TabsContent value="badges" className="space-y-6">
+                {user && (
+                  <BadgeCollection userId={user.id} showTitle={false} compact={false} />
+                )}
+              </TabsContent>
             </>
           )}
 
+          {/* Sponsor tabs */}
           {userRole === 'sponsor' && (
-            <TabsContent value="sponsor" className="space-y-6">
-              <RoleGuard 
-                allowedRoles={['sponsor']} 
-                fallbackMessage="Only sponsors can manage challenges."
-              >
-                <SponsorChallengeManager />
-              </RoleGuard>
-            </TabsContent>
+            <>
+              <TabsContent value="sponsor" className="space-y-6">
+                <RoleGuard 
+                  allowedRoles={['sponsor']} 
+                  fallbackMessage="Only sponsors can manage challenges."
+                >
+                  <SponsorChallengeManager />
+                </RoleGuard>
+              </TabsContent>
+
+              <TabsContent value="submissions" className="space-y-6">
+                <RoleGuard 
+                  allowedRoles={['sponsor']} 
+                  fallbackMessage="Only sponsors can view challenge submissions."
+                >
+                  <SubmissionManager />
+                </RoleGuard>
+              </TabsContent>
+
+              <TabsContent value="badges" className="space-y-6">
+                {user && (
+                  <BadgeCollection userId={user.id} showTitle={false} compact={false} />
+                )}
+              </TabsContent>
+            </>
           )}
         </Tabs>
       </div>
