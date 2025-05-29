@@ -6,7 +6,8 @@ channel = "stable-24_05"
 packages = ["nix-output-monitor", "postgresql_12"]
 
 [deployment]
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "cd builder-skill-showcase && npm run dev"]
+deploymentTarget = "cloudrun"
 
 [workflows]
 runButton = "Run"
