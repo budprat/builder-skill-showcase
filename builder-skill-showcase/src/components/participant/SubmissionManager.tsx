@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -184,6 +183,10 @@ const SubmissionManager = () => {
     return submission.status === 'submitted' || submission.status === 'draft';
   };
 
+  const canDelete = (submission: SubmissionWithChallenge) => {
+    return submission.status === 'reviewed';
+  }
+
   const isExpired = (deadline: string) => {
     return new Date(deadline) < new Date();
   };
@@ -271,12 +274,14 @@ const SubmissionManager = () => {
                         </Button>
                       </div>
 
-                      {!canModify && (
+                      {!canEditOrDelete && (
                         <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
                           <AlertCircle className="h-4 w-4" />
                           <span>
-                            {submission.status === 'reviewed' || submission.status === 'completed' 
-                              ? 'This submission is being evaluated and cannot be modified'
+                            {submission.status === 'reviewed' 
+                              ? 'This submission has been evaluated and cannot be edited, but can be deleted'
+                              : submission.status === 'completed' 
+                              ? 'This submission is completed and cannot be modified'
                               : 'This submission cannot be modified'
                             }
                           </span>
@@ -291,46 +296,55 @@ const SubmissionManager = () => {
                       )}
                     </div>
 
-                    {canModify && !challengeExpired && (
+                    {!challengeExpired && (canEditOrDelete || canDelete(submission)) && (
                       <div className="ml-4 flex gap-2">
-                        <Button
-                          onClick={() => openEditDialog(submission)}
-                          variant="outline"
-                          size="sm"
-                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        {canEditOrDelete && (
+                          <Button
+                            onClick={() => openEditDialog(submission)}
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={deleting === submission.id}
-                              className="border-red-300 text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Submission</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this submission? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(submission.id)}
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                        {canDelete(submission) && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={deleting === submission.id}
+                                className="border-red-300 text-red-700 hover:bg-red-50"
                               >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Submission</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this submission? This action cannot be undone.
+                                  {submission.status === 'reviewed' && (
+                                    <div className="mt-2 text-amber-600 font-medium">
+                                      Note: This submission has already been evaluated. Deleting it will remove the evaluation results.
+                                    </div>
+                                  )}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(submission.id)}
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
                       </div>
                     )}
                   </div>
