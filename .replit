@@ -23,7 +23,7 @@ args = "cd builder-skill-showcase && npm run dev"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd builder-skill-showcase && python scoring.py"
+args = "cd builder-skill-showcase && python new_scoring.py"
 
 [[ports]]
 localPort = 8080
