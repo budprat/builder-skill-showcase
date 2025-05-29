@@ -91,24 +91,65 @@ export const AuthForm = ({ mode, onToggleMode }: AuthFormProps) => {
       if (mode === "signup") {
         console.log("=== STARTING SIGNUP PROCESS ===");
 
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({
-          email: data.email,
-          password: data.password,
-          options: {
-            data: {
-              full_name: data.fullName,
-              role: data.role,
+        // Retry logic for network issues
+        let retries = 3;
+        let authData, signUpError;
+
+        while (retries > 0) {
+          try {
+            const response = await supabase.auth.signUp({
+              email: data.email,
+              password: data.password,
+              options: {
+                data: {
+                  full_name: data.fullName,
+                  role: data.role,
+                }
+              }
+            });
+
+            authData = response.data;
+            signUpError = response.error;
+            
+            console.log("Signup response:", { authData, signUpError });
+
+            // If successful or error is not network-related, break the retry loop
+            if (!signUpError || (signUpError.name !== 'AuthRetryableFetchError' && !signUpError.message.includes('fetch'))) {
+              break;
+            }
+
+            console.log(`Network error occurred, retrying... (${retries - 1} attempts left)`);
+            retries--;
+            
+            if (retries > 0) {
+              await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+            }
+          } catch (error: any) {
+            console.error("Signup attempt failed:", error);
+            signUpError = error;
+            retries--;
+            
+            if (retries > 0) {
+              await new Promise(resolve => setTimeout(resolve, 2000));
             }
           }
-        });
-
-        console.log("Signup response:", { authData, signUpError });
+        }
 
         if (signUpError) {
           console.error("Signup error:", signUpError);
 
+          // Handle specific error types
+          if (signUpError.name === 'AuthRetryableFetchError' || signUpError.message?.includes('fetch')) {
+            toast({
+              title: "Connection Error",
+              description: "Unable to connect to the server. Please check your internet connection and try again.",
+              variant: "destructive",
+            });
+            return;
+          }
+
           // If user already exists, provide a more helpful message
-          if (signUpError.message.includes("User already registered")) {
+          if (signUpError.message?.includes("User already registered")) {
             toast({
               title: "Account exists",
               description: "An account with this email already exists. Please sign in instead or use a different email.",
