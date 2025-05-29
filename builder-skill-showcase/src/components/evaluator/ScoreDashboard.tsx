@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +127,7 @@ const ScoreDashboard = () => {
     if (selectedTimeRange !== "all") {
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (selectedTimeRange) {
         case "week":
           startDate.setDate(now.getDate() - 7);
@@ -140,7 +139,7 @@ const ScoreDashboard = () => {
           startDate.setMonth(now.getMonth() - 3);
           break;
       }
-      
+
       filteredData = filteredData.filter(score => 
         new Date(score.created_at) >= startDate
       );
@@ -166,7 +165,7 @@ const ScoreDashboard = () => {
     // Apply sorting
     filteredData.sort((a, b) => {
       let aValue: any, bValue: any;
-      
+
       switch (sortBy) {
         case "score":
           aValue = a.total_score || 0;
@@ -352,7 +351,7 @@ const ScoreDashboard = () => {
                 />
               </div>
             </div>
-            
+
             <div>
               <label className="text-sm font-medium text-gray-700 mb-2 block">Challenge</label>
               <Select value={selectedChallenge} onValueChange={setSelectedChallenge}>

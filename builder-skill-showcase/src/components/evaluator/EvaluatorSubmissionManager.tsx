@@ -298,7 +298,7 @@ const EvaluatorSubmissionManager = () => {
               Score participant submissions that have been reviewed
             </CardDescription>
           </div>
-          
+
         </div>
       </CardHeader>
       <CardContent>
@@ -375,7 +375,7 @@ const EvaluatorSubmissionManager = () => {
                                   <div className="text-orange-700">Practicality</div>
                                 </div>
                               </div>
-                              
+
                               <div className="mt-1 text-xs text-purple-600">
                                 Evaluated on: {new Date(score.created_at).toLocaleDateString()}
                               </div>

@@ -54,7 +54,7 @@ interface Badge {
 interface UserBadge {
   id: string;
   badge_id: string;
-  awarded_at: string;
+  earned_at: string;
   badges: Badge;
 }
 
