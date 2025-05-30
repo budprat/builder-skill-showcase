@@ -249,22 +249,38 @@ async def aggregate_score(submission: dict, supabase: Client) -> dict:
     total_llm_score = sum(score["score"] for score in submission["llm_scores"].values())
     total_score = (submission["pre_screening_score"] * 0.05) + (total_llm_score * 0.95)
 
-    score_entry = {
-        "id": str(uuid.uuid4()),
-        "submission_id": submission["id"],
-        "pre_screening_score": submission["pre_screening_score"],
-        "llm_scores": submission["llm_scores"],
-        "total_score": str(total_score),  # Store as string per schema
-        "feedback": "",
-        "status": "provisional",
-        "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
-    }
-
+    # Check if a score already exists for this submission
     try:
-        supabase.table("scores").insert(score_entry).execute()
-        print(f"Inserted score entry for submission {submission['id']}")
+        existing_score = supabase.table("scores").select("id").eq("submission_id", submission["id"]).execute()
+        
+        if existing_score.data and len(existing_score.data) > 0:
+            # Update existing score instead of creating a new one
+            score_update = {
+                "pre_screening_score": submission["pre_screening_score"],
+                "llm_scores": submission["llm_scores"],
+                "total_score": str(total_score),
+                "status": "provisional",
+                "updated_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            supabase.table("scores").update(score_update).eq("submission_id", submission["id"]).execute()
+            print(f"Updated existing score entry for submission {submission['id']}")
+        else:
+            # Create new score entry
+            score_entry = {
+                "id": str(uuid.uuid4()),
+                "submission_id": submission["id"],
+                "pre_screening_score": submission["pre_screening_score"],
+                "llm_scores": submission["llm_scores"],
+                "total_score": str(total_score),  # Store as string per schema
+                "feedback": "",
+                "status": "provisional",
+                "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            supabase.table("scores").insert(score_entry).execute()
+            print(f"Inserted new score entry for submission {submission['id']}")
+            
     except Exception as e:
-        print(f"Error inserting score entry: {e}")
+        print(f"Error handling score entry: {e}")
 
     submission["total_score"] = total_score
     submission["status"] = "scored"

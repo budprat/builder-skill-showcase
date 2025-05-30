@@ -1,22 +1,17 @@
-# Welcome to your Lovable project
+
+# Builder Skill Showcase Platform
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/b2ca41b5-09f1-45f8-a86f-6a0ec545624d
+A platform for AI builders to compete in challenges and showcase their skills.
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/b2ca41b5-09f1-45f8-a86f-6a0ec545624d) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+If you want to work locally using your own IDE, you can clone this repo and push changes.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -62,12 +57,14 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/b2ca41b5-09f1-45f8-a86f-6a0ec545624d) and click on Share -> Publish.
+This project can be deployed on any platform that supports Node.js applications. Popular options include:
 
-## Can I connect a custom domain to my Lovable project?
+- Replit
+- Vercel
+- Netlify
+- Railway
+- Heroku
 
-Yes, you can!
+## Can I connect a custom domain?
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Yes, most deployment platforms support custom domain connections. Check your deployment platform's documentation for specific instructions.

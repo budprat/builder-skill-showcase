@@ -186,7 +186,11 @@ const SubmissionManager = () => {
 
   const canDelete = (submission: SubmissionWithChallenge) => {
     return submission.status === 'reviewed';
-  }
+  };
+
+  const canShowDeleteButton = (submission: SubmissionWithChallenge) => {
+    return canEditOrDelete(submission) || canDelete(submission);
+  };
 
   const isExpired = (deadline: string) => {
     return new Date(deadline) < new Date();
@@ -275,17 +279,22 @@ const SubmissionManager = () => {
                         </Button>
                       </div>
 
-                      {!canEditOrDelete && (
+                      {!canEditOrDelete(submission) && !canDelete(submission) && (
                         <div className="mt-3 flex items-center gap-2 text-sm text-amber-600">
                           <AlertCircle className="h-4 w-4" />
                           <span>
-                            {submission.status === 'reviewed' 
-                              ? 'This submission has been evaluated and cannot be edited, but can be deleted'
-                              : submission.status === 'completed' 
+                            {submission.status === 'completed' 
                               ? 'This submission is completed and cannot be modified'
                               : 'This submission cannot be modified'
                             }
                           </span>
+                        </div>
+                      )}
+                      
+                      {canDelete(submission) && !canEditOrDelete(submission) && (
+                        <div className="mt-3 flex items-center gap-2 text-sm text-blue-600">
+                          <AlertCircle className="h-4 w-4" />
+                          <span>This submission has been evaluated and cannot be edited, but can be deleted</span>
                         </div>
                       )}
 
@@ -297,9 +306,9 @@ const SubmissionManager = () => {
                       )}
                     </div>
 
-                    {!challengeExpired && (canEditOrDelete || canDelete(submission)) && (
+                    {!challengeExpired && canShowDeleteButton(submission) && (
                       <div className="ml-4 flex gap-2">
-                        {canEditOrDelete && (
+                        {canEditOrDelete(submission) && (
                           <Button
                             onClick={() => openEditDialog(submission)}
                             variant="outline"
@@ -310,7 +319,7 @@ const SubmissionManager = () => {
                           </Button>
                         )}
 
-                        {canDelete(submission) && (
+                        {(canEditOrDelete(submission) || canDelete(submission)) && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button
