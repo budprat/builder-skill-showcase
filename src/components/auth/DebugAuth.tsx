@@ -11,8 +11,8 @@ export const DebugAuth = () => {
     console.log("=== CREATING TEST ACCOUNT ===");
     setIsLoading(true);
     try {
-      const testEmail = "test@example.com";
-      const testPassword = "testpassword123";
+      const testEmail = import.meta.env.VITE_TEST_EMAIL || "test@example.com";
+      const testPassword = import.meta.env.VITE_TEST_PASSWORD || "your-test-password-here";
       
       console.log("Creating test account with:", testEmail);
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -51,8 +51,8 @@ export const DebugAuth = () => {
       console.log("Session test:", { sessionData, sessionError });
       
       // Test sign in with the test account
-      const testEmail = "test@example.com";
-      const testPassword = "testpassword123";
+      const testEmail = import.meta.env.VITE_TEST_EMAIL || "test@example.com";
+      const testPassword = import.meta.env.VITE_TEST_PASSWORD || "your-test-password-here";
       
       console.log("Testing sign in with:", testEmail);
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({

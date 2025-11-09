@@ -2,6 +2,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 interface AuthContextType {
   user: User | null;
@@ -31,16 +32,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log("=== AUTH PROVIDER INIT ===");
-    
+    logger.auth("Auth provider initialized");
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("=== AUTH STATE CHANGE ===");
-        console.log("Event:", event);
-        console.log("Session exists:", !!session);
-        console.log("User exists:", !!session?.user);
-        
+        logger.auth("Auth state changed", {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+        });
+
         // Update state
         setSession(session);
         setUser(session?.user ?? null);
@@ -51,20 +53,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Get initial session
     const getInitialSession = async () => {
       try {
-        console.log("=== GETTING INITIAL SESSION ===");
+        logger.auth("Getting initial session");
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log("Initial session exists:", !!session);
-        console.log("Initial user exists:", !!session?.user);
-        
+
         if (error) {
-          console.error("Error getting initial session:", error);
+          logger.error("Error getting initial session", error);
+        } else {
+          logger.auth("Initial session retrieved", {
+            hasSession: !!session,
+            hasUser: !!session?.user,
+          });
         }
-        
+
         setSession(session);
         setUser(session?.user ?? null);
       } catch (error) {
-        console.error("Error in getInitialSession:", error);
+        logger.error("Error in getInitialSession", error);
       } finally {
         setLoading(false);
       }
@@ -73,38 +77,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     getInitialSession();
 
     return () => {
-      console.log("Cleaning up auth subscription");
+      logger.auth("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
     try {
-      console.log("=== SIGNING OUT ===");
+      logger.auth("Sign out initiated");
       setLoading(true);
-      
+
       const { error } = await supabase.auth.signOut();
       if (error) {
-        console.error("Error signing out:", error);
+        logger.error("Error signing out", error);
         throw error;
       }
-      
-      console.log("Sign out successful");
+
+      logger.auth("Sign out successful");
+      // Hard redirect to clear all state
       window.location.href = "/";
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error", error);
+      // Redirect anyway to clear state
       window.location.href = "/";
     } finally {
       setLoading(false);
     }
   };
 
-  console.log("=== AUTH PROVIDER RENDER ===");
-  console.log("Current state:", { 
-    hasUser: !!user, 
-    hasSession: !!session, 
+  logger.debug("Auth provider render", {
+    hasUser: !!user,
+    hasSession: !!session,
     loading,
-    userId: user?.id 
+    userId: user?.id
   });
 
   return (
